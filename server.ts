@@ -79,6 +79,12 @@ export interface User {
   bankAccount?: string;
   bankName?: string;
   bankOwner?: string;
+  pendingTDBet?: {
+    amount: number;
+    currentMultiplier: number;
+    lastRoll: number[];
+    time: number;
+  };
 }
 
 export interface GiftCode {
@@ -960,6 +966,10 @@ export function parseBetText(inputText: string): { category: string; type: strin
     }
   }
 
+  if (words[0] === "td") {
+    return { category: "TD", type: "td", amountStr: words[1] };
+  }
+
   return null;
 }
 
@@ -1094,6 +1104,187 @@ export function toBoldDigits(value: string | number): string {
   };
   return String(value ?? "").replace(/\d/g, (digit) => digitMap[digit] || digit);
 }
+
+// --- GAME TREN DUOI (TD) LOGIC ---
+
+export function getTDMultiplier(currentSum: number, prediction: "up" | "down"): number {
+  let winProb = 0;
+  const counts: { [key: number]: number } = { 2:1, 3:2, 4:3, 5:4, 6:5, 7:6, 8:5, 9:4, 10:3, 11:2, 12:1 };
+  
+  if (prediction === "up") {
+    for (let i = currentSum + 1; i <= 12; i++) {
+      winProb += counts[i] / 36;
+    }
+  } else {
+    for (let i = 2; i < currentSum; i++) {
+      winProb += counts[i] / 36;
+    }
+  }
+
+  if (winProb <= 0) return 10.0;
+  const rawMul = 0.95 / winProb; 
+  return Math.max(1.01, parseFloat(rawMul.toFixed(2)));
+}
+
+export function getTDRelatedMultipliers(currentSum: number) {
+  return {
+    up: getTDMultiplier(currentSum, "up"),
+    down: getTDMultiplier(currentSum, "down")
+  };
+}
+
+export function getTDReplyMarkup(currentSum: number, multiplier: number = 1.0) {
+  const muls = getTDRelatedMultipliers(currentSum);
+  return {
+    inline_keyboard: [
+      [
+        { text: `⬇️ Dưới x${muls.down}`, callback_data: `td_down` },
+        { text: `⬆️ Trên x${muls.up}`, callback_data: `td_up` }
+      ],
+      [{ text: `💵 Nhận tiền x${multiplier.toFixed(2)}`, callback_data: `td_claim` }]
+    ]
+  };
+}
+
+export async function handleTDCommand(userId: string, amount: number, chatId: string | number) {
+  const users = readJson(userJsonFile);
+  const user = users.find((u: any) => String(u.id) === String(userId));
+  if (!user) return;
+
+  const balance = getUserBalance(user);
+  if (balance < amount) {
+    bot1.sendMessage(chatId, `⚠️ Số dư không đủ để cược ${amount.toLocaleString("vi-VN")} xu!`).catch(() => {});
+    return;
+  }
+
+  const roll1 = [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
+  const sum1 = roll1[0] + roll1[1];
+  
+  setUserBalance(user, balance - amount);
+  user.cuoc = (user.cuoc || 0) + amount;
+  user.cuocHomNay = (user.cuocHomNay || 0) + amount;
+  user.cuocTuanNay = (user.cuocTuanNay || 0) + amount;
+  applyVipPointFromBet(user, amount);
+
+  user.pendingTDBet = {
+    amount: amount,
+    currentMultiplier: 1.0,
+    lastRoll: roll1,
+    time: Date.now()
+  };
+  writeJson(userJsonFile, users);
+
+  await bot1.sendDice(chatId);
+  await new Promise(r => setTimeout(r, 1500));
+  await bot1.sendDice(chatId);
+  await new Promise(r => setTimeout(r, 1500));
+
+  const msg = `🎲 <b>Xúc xắc Trên Dưới</b>\n` +
+    `Lượt tung: ${roll1[0]} + ${roll1[1]} = <b>${sum1}</b>\n` +
+    `💰 Mức cược: <b>${amount.toLocaleString("vi-VN")} xu</b>\n\n` +
+    `👉 Dự đoán lượt tung tiếp theo cao hơn hay thấp hơn <b>${sum1}</b>?`;
+
+  bot1.sendMessage(chatId, msg, {
+    parse_mode: "HTML",
+    reply_markup: getTDReplyMarkup(sum1, 1.0)
+  });
+}
+
+export async function handleTDAction(userId: string, action: string, chatId: string | number, messageId: number) {
+  const users = readJson(userJsonFile);
+  const user = users.find((u: any) => String(u.id) === String(userId));
+  if (!user || !user.pendingTDBet) return;
+
+  const game = user.pendingTDBet;
+  const lastSum = game.lastRoll[0] + game.lastRoll[1];
+
+  if (action === "td_claim") {
+    const winAmount = Math.floor(game.amount * game.currentMultiplier);
+    const balance = getUserBalance(user);
+    setUserBalance(user, balance + winAmount);
+    user.thang = (user.thang || 0) + winAmount;
+    
+    const resultMsg = `┏ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n` +
+      `┣➤ Nội dung cược: <b>TD</b>\n` +
+      `┣➤ Số tiền cược: <b>${game.amount.toLocaleString("vi-VN")} xu</b>\n` +
+      `┣➤ Tỉ lệ thắng: <b>x${game.currentMultiplier.toFixed(2)}</b>\n` +
+      `┣➤ Số tiền nhận: <b>${winAmount.toLocaleString("vi-VN")} xu</b>\n` +
+      `┣➤ Số dư mới: <b>${getUserBalance(user).toLocaleString("vi-VN")} xu</b>\n` +
+      `┗ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━`;
+    
+    bot1.editMessageText(resultMsg, {
+      chat_id: chatId,
+      message_id: messageId,
+      parse_mode: "HTML"
+    }).catch(() => {});
+    
+    delete user.pendingTDBet;
+    writeJson(userJsonFile, users);
+    return;
+  }
+
+  const prediction = action === "td_up" ? "up" : "down";
+  const muls = getTDRelatedMultipliers(lastSum);
+  const chosenMul = prediction === "up" ? muls.up : muls.down;
+
+  const roll2 = [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
+  const sum2 = roll2[0] + roll2[1];
+  
+  let isWin = false;
+  let isDraw = false;
+  
+  if (prediction === "up" && sum2 > lastSum) isWin = true;
+  else if (prediction === "down" && sum2 < lastSum) isWin = true;
+  else if (sum2 === lastSum) isDraw = true;
+
+  if (isWin) {
+    game.currentMultiplier *= chosenMul;
+    game.lastRoll = roll2;
+    game.time = Date.now();
+    writeJson(userJsonFile, users);
+
+    const msg = `${roll2[0]} + ${roll2[1]} = ${sum2}\n` +
+      `✅ <b>Thắng x${chosenMul} (+${Math.floor(game.amount * (game.currentMultiplier - game.currentMultiplier/chosenMul)).toLocaleString("vi-VN")})</b>`;
+    
+    bot1.editMessageText(msg, {
+      chat_id: chatId,
+      message_id: messageId,
+      parse_mode: "HTML",
+      reply_markup: getTDReplyMarkup(sum2, game.currentMultiplier)
+    }).catch(() => {});
+  } else if (isDraw) {
+    const refund = Math.floor(game.amount * game.currentMultiplier * 0.5);
+    const balance = getUserBalance(user);
+    setUserBalance(user, balance + refund);
+    
+    const msg = `${roll2[0]} + ${roll2[1]} = ${sum2}\n` +
+      `⚪️ <b>Hòa! Bạn nhận lại 50% tiền cược (${refund.toLocaleString("vi-VN")} xu)</b>\n` +
+      `Số dư: <b>${getUserBalance(user).toLocaleString("vi-VN")} xu</b>`;
+    
+    bot1.editMessageText(msg, {
+      chat_id: chatId,
+      message_id: messageId,
+      parse_mode: "HTML"
+    }).catch(() => {});
+    
+    delete user.pendingTDBet;
+    writeJson(userJsonFile, users);
+  } else {
+    const msg = `${roll2[0]} + ${roll2[1]} = ${sum2}\n` +
+      `❌ <b>Bạn đã thua cược!</b>\n` +
+      `Số dư: <b>${getUserBalance(user).toLocaleString("vi-VN")} xu</b>`;
+    
+    bot1.editMessageText(msg, {
+      chat_id: chatId,
+      message_id: messageId,
+      parse_mode: "HTML"
+    }).catch(() => {});
+    
+    delete user.pendingTDBet;
+    writeJson(userJsonFile, users);
+  }
+}
+
 
 export function getVipExchangeRate(user: any): number {
   return Math.max(0, Number(getVipTierInfo(user)?.exchangeRate || 0));
@@ -1872,7 +2063,10 @@ export function getGameCatalogReplyMarkup() {
         { text: "🎲 Solo Xúc Xắc", callback_data: "game_catalog_solo" },
         { text: "🎯 Xúc Xắc Telegram", callback_data: "game_catalog_telegram" }
       ],
-      [{ text: "🍀 Lô Đề Telegram", callback_data: "game_catalog_lode" }]
+      [
+        { text: "🍀 Lô Đề Telegram", callback_data: "game_catalog_lode" },
+        { text: "⬆️ Trên Dưới ⬇️", callback_data: "game_catalog_td" }
+      ]
     ]
   };
 }
@@ -3335,13 +3529,16 @@ export function registerAllBotCommands() {
       const today = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD");
       
       let totalNap = 0, totalRut = 0, totalHH = 0, totalBal = 0;
-      let napToday = 0, rutToday = 0;
+      let napToday = 0, rutToday = 0, rutNoviceNoDeposit = 0;
 
       users.forEach((u: any) => {
         totalNap += u.nap || 0;
         totalRut += u.rut || 0;
         totalHH += u.hh || 0;
         totalBal += (u.sd !== undefined ? u.sd : (u.money || 0));
+
+        // Kiểm tra nếu là tân thủ chưa từng nạp tiền
+        const isNeverDeposited = (u.nap || 0) === 0;
 
         // Thống kê nạp/rút hôm nay từ lịch sử (nếu có)
         // Logic này tự động reset sau 00h00 vì nó lọc theo biến 'today' (ngày hiện tại)
@@ -3354,8 +3551,14 @@ export function registerAllBotCommands() {
         }
         if (u.withdrawHistory) {
           u.withdrawHistory.forEach((h: any) => {
-            if (h.time && h.time.startsWith(today) && (h.status === "Thành công" || h.status === "Đang xử lý")) {
-              rutToday += h.amount || 0;
+            if (h.status === "Thành công" || h.status === "Đang xử lý") {
+              if (h.time && h.time.startsWith(today)) {
+                rutToday += h.amount || 0;
+              }
+              // Tính tổng lệnh rút của tân thủ chưa nạp tiền (tính tất cả lịch sử hoặc theo nhu cầu)
+              if (isNeverDeposited) {
+                rutNoviceNoDeposit += h.amount || 0;
+              }
             }
           });
         }
@@ -3363,6 +3566,7 @@ export function registerAllBotCommands() {
 
       const pot = readJson("hu.json").pot || 10000;
       const profit = totalNap - totalRut - totalHH;
+      const profitSign = profit >= 0 ? "+" : "";
 
       const statsText = `💻 <b>THỐNG KÊ HỆ THỐNG</b>\n` +
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
@@ -3372,11 +3576,12 @@ export function registerAllBotCommands() {
         `📤 Tổng rút: <b>${totalRut.toLocaleString("vi-VN")} xu</b>\n` +
         `💸 Chi Hoa hồng: <b>${totalHH.toLocaleString("vi-VN")} xu</b>\n` +
         `🏺 Quỹ hũ rồng: <b>${pot.toLocaleString("vi-VN")} xu</b>\n` +
-        `📊 Lãi/Lỗ: <b>${profit.toLocaleString("vi-VN")} xu</b>\n` +
+        `📊 Lãi/Lỗ: <b>${profitSign}${profit.toLocaleString("vi-VN")} xu</b>\n` +
         `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
         `📅 <b>THỐNG KÊ HÔM NAY (${today}):</b>\n` +
-        `📥 Nạp hôm nay: <b>${napToday.toLocaleString("vi-VN")} xu</b>\n` +
-        `📤 Rút hôm nay: <b>${rutToday.toLocaleString("vi-VN")} xu</b>`;
+        `📥 Nạp hôm nay: <b>${Math.floor(napToday).toLocaleString("vi-VN")} xu</b>\n` +
+        `📤 Rút hôm nay: <b>${Math.floor(rutToday).toLocaleString("vi-VN")} xu</b>\n` +
+        `💸 Chi Lệnh Rút Tân thủ chưa nạp tiền: <b>${Math.floor(rutNoviceNoDeposit).toLocaleString("vi-VN")} xu</b>`;
 
       bot.sendMessage(msg.chat.id, statsText, { parse_mode: "HTML" });
     } catch (e) {
