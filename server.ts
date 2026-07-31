@@ -68,6 +68,7 @@ export interface User {
   withdrawHistory?: any[];
   activeBetGame?: "ROOM_DEFAULT" | "TELEGRAM_XX" | "LODE_TELEGRAM";
   vipPoints?: number;
+  vipPointsTotal?: number;
   vipPointCooldown?: number;
   referrerId?: string;
   // Event check-in (YYYY-MM-DD, timezone Asia/Ho_Chi_Minh)
@@ -380,7 +381,7 @@ export function formatUserCheckMessage(u: any): string {
     `👤 Tên: <b>${u.name || "N/A"}</b>\n` +
     `💵 Số dư: <b>${balance.toLocaleString("vi-VN")} xu</b>\n` +
     `👑 VIP: <b>${getVipLevel(u)} ${vipInfo.badge} (${vipInfo.name})</b>\n` +
-    `🚀 Điểm VIP: <b>${vipInfo.points.toLocaleString("vi-VN")}/${vipInfo.nextThresholdPoints.toLocaleString("vi-VN")}</b>\n` +
+    `🚀 Điểm VIP: <b>${vipInfo.levelPoints.toLocaleString("vi-VN")}/${vipInfo.nextThresholdPoints.toLocaleString("vi-VN")}</b>\n` +
     `🖐️ Điểm VIP có thể đổi: <b>${redeemablePoints.toLocaleString("vi-VN")}</b>\n` +
     `🎯 Doanh số cược: <b>${(u.cuoc || 0).toLocaleString("vi-VN")} xu</b>\n` +
     `📥 Tổng nạp: <b>${(u.nap || 0).toLocaleString("vi-VN")} xu</b>\n` +
@@ -992,7 +993,7 @@ export function isXiuSideType(type: string): boolean {
 }
 
 export const VIP_TIERS = [
-  { level: 0, badge: "🥉", name: "Đồng", thresholdPoints: 0, exchangeRate: 0 },
+  { level: 0, badge: "🥉", name: "Đồng", thresholdPoints: 0, exchangeRate: 100 },
   { level: 1, badge: "🥈", name: "Bạc", thresholdPoints: 10, exchangeRate: 100 },
   { level: 2, badge: "🥇", name: "Vàng", thresholdPoints: 50, exchangeRate: 200 },
   { level: 3, badge: "⭐", name: "Bạch Kim", thresholdPoints: 100, exchangeRate: 300 },
@@ -1014,14 +1015,22 @@ export function getVipRedeemablePoints(user: any): number {
 
 export function getVipTierInfo(user: any) {
   const points = getVipPoints(user);
+  // Khởi tạo vipPointsTotal nếu chưa có
+  if (user.vipPointsTotal === undefined) {
+    user.vipPointsTotal = points;
+  }
+  // Sử dụng vipPointsTotal để tính cấp VIP
+  const levelPoints = Math.max(points, user.vipPointsTotal);
+  
   let tier = VIP_TIERS[0];
   for (const item of VIP_TIERS) {
-    if (points >= item.thresholdPoints) tier = item;
+    if (levelPoints >= item.thresholdPoints) tier = item;
   }
   const nextTier = VIP_TIERS.find((item) => item.level === tier.level + 1) || null;
   return {
     ...tier,
-    points,
+    points, // Điểm hiện có để đổi
+    levelPoints, // Điểm dùng để tính cấp VIP
     nextTier,
     nextThresholdPoints: nextTier?.thresholdPoints || tier.thresholdPoints,
   };
@@ -1093,8 +1102,8 @@ export function getVipExchangeRate(user: any): number {
 export function formatVipGuideMessage(user: any): string {
   const info = getVipTierInfo(user);
   const nextLevelText = info.nextTier
-    ? `${info.points.toLocaleString("vi-VN")}/${info.nextThresholdPoints.toLocaleString("vi-VN")} up VIP ${info.nextTier.level}`
-    : `${info.points.toLocaleString("vi-VN")} điểm | Đã đạt VIP tối đa`;
+    ? `${info.levelPoints.toLocaleString("vi-VN")}/${info.nextThresholdPoints.toLocaleString("vi-VN")} up VIP ${info.nextTier.level}`
+    : `${info.levelPoints.toLocaleString("vi-VN")} điểm | Đã đạt VIP tối đa`;
   const redeemablePoints = getVipRedeemablePoints(user);
   const currentRate = getVipExchangeRate(user);
   const vipLines = VIP_TIERS
@@ -1128,6 +1137,7 @@ export function formatVipGuideMessage(user: any): string {
 
 export function applyVipPointFromBet(user: any, betValue: number): boolean {
   user.vipPoints = Math.max(0, Number(user.vipPoints || 0));
+  user.vipPointsTotal = Math.max(user.vipPoints, Number(user.vipPointsTotal || 0));
   user.vipBetAccumulated = Math.max(0, Number(user.vipBetAccumulated || 0));
 
   const validBet = Math.max(0, Number(betValue || 0));
@@ -1138,6 +1148,7 @@ export function applyVipPointFromBet(user: any, betValue: number): boolean {
   if (gained <= 0) return false;
 
   user.vipPoints += gained;
+  user.vipPointsTotal += gained;
   user.vipBetAccumulated = user.vipBetAccumulated % 300000;
   return true;
 }
@@ -5837,8 +5848,8 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
         return;
       }
 
-      if (vipInfo.level <= 0 || rate <= 0) {
-        bot1.sendMessage(chat, `⚠️ <b>Bạn chưa đủ cấp VIP để đổi điểm.</b>\nHiện tại cần đạt tối thiểu <b>VIP 1</b>.`, { parse_mode: "HTML" });
+      if (rate <= 0) {
+        bot1.sendMessage(chat, `⚠️ <b>Hệ thống đang bảo trì tính năng đổi điểm.</b>`, { parse_mode: "HTML" });
         return;
       }
 
