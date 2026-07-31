@@ -3726,8 +3726,8 @@ export function registerAllBotCommands() {
       else sendResilientReply(chatId, msgText, { parse_mode: "HTML", ...(msgId ? { reply_to_message_id: msgId } : {}) });
     };
 
-    if (state.gamePhase !== "BETTING") {
-      sendError(`⚠️ <b>Rất tiếc! Hệ thống đang đóng sổ xúc xắc. Cược không hợp lệ!</b>`);
+    if (state.gamePhase !== "BETTING" || !state.phienAnnounced) {
+      sendError(`⚠️ <b>Phiên cược chưa mở!</b> ❌`);
       return;
     }
 
@@ -3766,6 +3766,13 @@ export function registerAllBotCommands() {
       }
 
       const balance = user.sd !== undefined ? user.sd : (user.money || 0);
+      
+      // Kiểm tra số dư trước khi tính toán mức cược
+      if (balance < 1000) {
+        sendError("⚠️ <b>Số Dư Của Bạn Không Đủ</b> ❌");
+        return;
+      }
+
       let betValue = parseBetAmount(amountStr, balance, combined, SESSION_LIMIT);
 
       // Với lệnh max/all, nếu số dư cao hơn 5.000.000 thì bot tự lấy 5.000.000.
@@ -3778,7 +3785,7 @@ export function registerAllBotCommands() {
           betValue = 10000 - combined;
         }
         if (betValue <= 0) {
-           sendError(`⚠️ <b>Tân Thủ</b> chỉ được cược tối đa <b>10.000 xu</b> mỗi phiên! Số tiền cược của bạn đã được điều chỉnh hoặc không thể đặt thêm.`);
+           sendError(`⚠️ <b>Tân Thủ</b> chỉ được cược tối đa <b>10.000 xu</b> mỗi phiên! Số tiền cược của bạn không thể đặt thêm.`);
            return;
         }
       }
@@ -3797,7 +3804,7 @@ export function registerAllBotCommands() {
           return;
         }
       } else if (isNaN(betValue) || betValue < 1000) {
-        sendError("⚠️ <b>Số Dư Không Đủ!</b> ❌");
+        sendError("⚠️ <b>Số Dư Của Bạn Không Đủ</b> ❌");
         return;
       }
       if (balance < betValue) {
