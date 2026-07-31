@@ -1,0 +1,34 @@
+[
+  {
+    "gift": "93859804",
+    "value": 1111,
+    "creatorId": "AUTO_HOURLY_ROOM",
+    "createTime": "2026-06-15 06:17:10",
+    "useTime": null,
+    "userIdUsed": null
+  },
+  {
+    "gift": "07866144",
+    "value": 1111,
+    "creatorId": "AUTO_HOURLY_ROOM",
+    "createTime": "2026-06-15 07:01:32",
+    "useTime": "07:41:34 15/6/2026",
+    "userIdUsed": "5942480373"
+  },
+  {
+    "gift": "58321979",
+    "value": 1111,
+    "creatorId": "AUTO_HOURLY_ROOM",
+    "createTime": "2026-06-15 08:23:02",
+    "useTime": "08:25:33 15/6/2026",
+    "userIdUsed": "8691091149"
+  },
+  {
+    "gift": "06095069",
+    "value": 1111,
+    "creatorId": "AUTO_HOURLY_ROOM",
+    "createTime": "2026-06-15 08:43:26",
+    "useTime": "09:03:00 15/6/2026",
+    "userIdUsed": "8691091149"
+  }
+]

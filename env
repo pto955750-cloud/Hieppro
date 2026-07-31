@@ -1,0 +1,23 @@
+# GEMINI_API_KEY: Required for Gemini AI API calls.
+# AI Studio automatically injects this at runtime from user secrets.
+# Users configure this via the Secrets panel in the AI Studio UI.
+GEMINI_API_KEY="MY_GEMINI_API_KEY"
+
+# APP_URL: The URL where this applet is hosted.
+# AI Studio automatically injects this at runtime with the Cloud Run service URL.
+# Used for self-referential links, OAuth callbacks, and API endpoints.
+APP_URL="MY_APP_URL"
+
+# BOT TOKENS: Configured for the distinct bots handling the room functionality.
+BOT_TOKEN_1="8925099337:AAG9Qnfmn16qOaGzd_zifUPtSQIFedMJxuY"
+BOT_TOKEN_2="8791648429:AAEnvaEE5SN35np7q_iMC9uTfC7sEuJu8-M"
+BOT_TOKEN_3="8814013514:AAHLziGV5TcIwZUYiPhIxaNc6SygaQiIvq0"
+BOT_TOKEN_4="8575655957:AAEJVpRzOYMDQFDm5gwma83a3OKx9NI2UbY"
+BOT_TOKEN_5="8385475918:AAGDXUOGVOQqRidBsdQdKQWSa3rdAhR-8BI"
+
+# GROUPS AND CHATS: Telegram Chat/Channel identifiers
+GAME_GROUP="-1003928586317"
+ADMIN_GROUP="-1003933306407"
+
+# ADMIN ID: Comma separated list of individual admin user IDs
+ADMIN_ID="5846170183"

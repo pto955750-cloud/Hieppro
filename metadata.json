@@ -1,0 +1,6 @@
+{
+  "name": "Lucky Bank Admin Console",
+  "description": "Real-time telemetry, fraud prevention, and admin controller console for the Dragon Room Telegram game bot.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

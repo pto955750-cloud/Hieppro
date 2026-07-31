@@ -1,0 +1,46 @@
+{
+  "minBet": 10000,
+  "maxBet": 5000000,
+  "rateChanLe": 1.92,
+  "rateTaiXiu": 1.92,
+  "rateX3": 3.5,
+  "systemActive": true,
+  "enableAutoBalance": true,
+  "ratioLightSideWinChance": 75,
+  "milestoneStep": 10,
+  "milestoneGiftAmount": 20000,
+  "milestoneGiftLimit": 5,
+  "messageMilestones": [
+    {
+      "count": 100,
+      "code": "1111",
+      "amount": 1111,
+      "limit": 1
+    },
+    {
+      "count": 300,
+      "code": "5555",
+      "amount": 5555,
+      "limit": 1
+    },
+    {
+      "count": 500,
+      "code": "7777",
+      "amount": 7777,
+      "limit": 1
+    },
+    {
+      "count": 1000,
+      "code": "9999",
+      "amount": 9999,
+      "limit": 1
+    },
+    {
+      "count": 1500,
+      "code": "15000",
+      "amount": 15000,
+      "limit": 1
+    }
+  ],
+  "lastResetYMD": "2026-06-15"
+}

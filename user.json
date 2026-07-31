@@ -1,0 +1,1326 @@
+[
+  {
+    "id": "8691091149",
+    "name": "Dragonxxxz",
+    "sd": 7110,
+    "cuoc": 28000,
+    "thang": 12110,
+    "thua": 22000,
+    "nap": 20000,
+    "rut": 0,
+    "dkrut": 0,
+    "hh": 33758,
+    "lastBetResetDate": "2026/06/15",
+    "lastBetWeekId": "2026-25",
+    "cuocHomNay": 27000,
+    "cuocTuanNay": 27000,
+    "currentWinStreak": 0,
+    "currentLossStreak": 4,
+    "bestWinStreakToday": 2,
+    "bestLossStreakToday": 4,
+    "lastStreakPhien": 1136,
+    "lastStreakResetDate": "2026/06/15",
+    "vipPoints": 0,
+    "vipPointCooldown": 0,
+    "activeBetGame": "ROOM_DEFAULT",
+    "betHistory": [
+      {
+        "phien": 1100,
+        "time": "2026-06-14 19:29:14",
+        "dice": "1-4-4",
+        "total": 9,
+        "result": "XỈU LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -1000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1120,
+        "time": "2026-06-15 06:29:19",
+        "dice": "1-3-5",
+        "total": 9,
+        "result": "XỈU LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 10000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -10000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1124,
+        "time": "2026-06-15 09:04:20",
+        "dice": "2-3-2",
+        "total": 7,
+        "result": "XỈU LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          },
+          {
+            "category": "DICE",
+            "betType": "D1",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -2000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1125,
+        "time": "2026-06-15 09:06:48",
+        "dice": "3-6-2",
+        "total": 11,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 2000,
+            "isWin": true,
+            "payout": 3840
+          },
+          {
+            "category": "DICE",
+            "betType": "D1",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": 840,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1126,
+        "time": "2026-06-15 09:08:16",
+        "dice": "3-3-4",
+        "total": 10,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "TL",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          },
+          {
+            "category": "DICE",
+            "betType": "D4",
+            "amount": 1000,
+            "isWin": true,
+            "payout": 1930
+          },
+          {
+            "category": "SUM",
+            "betType": "SB11",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -1070,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1127,
+        "time": "2026-06-15 09:09:44",
+        "dice": "6-6-5",
+        "total": 17,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "XỈU",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -1000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 2,
+          "qualified": "Đang thua 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1128,
+        "time": "2026-06-15 09:22:44",
+        "dice": "1-6-4",
+        "total": 11,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 1000,
+            "isWin": true,
+            "payout": 1920
+          }
+        ],
+        "net": 920,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1129,
+        "time": "2026-06-15 09:25:12",
+        "dice": "3-3-5",
+        "total": 11,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "TL",
+            "amount": 1000,
+            "isWin": true,
+            "payout": 2500
+          },
+          {
+            "category": "DICE",
+            "betType": "D1",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": 500,
+        "streak": {
+          "currentWin": 2,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1132,
+        "time": "2026-06-15 09:33:36",
+        "dice": "6-3-6",
+        "total": 15,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 1000,
+            "isWin": true,
+            "payout": 1920
+          }
+        ],
+        "net": 920,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1133,
+        "time": "2026-06-15 09:35:04",
+        "dice": "4-2-2",
+        "total": 8,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -1000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1134,
+        "time": "2026-06-15 09:45:13",
+        "dice": "2-3-1",
+        "total": 6,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -1000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 2,
+          "qualified": "Đang thua 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1135,
+        "time": "2026-06-15 09:46:41",
+        "dice": "1-3-6",
+        "total": 10,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -1000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 3,
+          "qualified": "Đang thua 3 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1136,
+        "time": "2026-06-15 10:14:01",
+        "dice": "5-2-2",
+        "total": 9,
+        "result": "XỈU LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -1000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 4,
+          "qualified": "Dây thua 4 phiên"
+        }
+      }
+    ],
+    "msgCount": 5,
+    "claimedCodes": [],
+    "claimedRewards": {},
+    "depositHistory": [
+      {
+        "time": "2026-06-15 09:05:49",
+        "amount": "10.000",
+        "status": "Thành công"
+      },
+      {
+        "time": "2026-06-15 09:05:37",
+        "createdAt": "2026-06-15 09:05:37",
+        "amount": "10.000",
+        "status": "Chờ kiểm tra",
+        "transferContent": "MUA 8691091149",
+        "expiresAt": "2026-06-15 09:15:37",
+        "requestId": "090537503",
+        "adminNotified": true
+      },
+      {
+        "time": "2026-06-15 08:21:47",
+        "createdAt": "2026-06-15 08:21:47",
+        "amount": "10.000",
+        "status": "Chờ kiểm tra",
+        "transferContent": "Don VLXD 8691091149 082147991",
+        "expiresAt": "2026-06-15 08:31:47",
+        "requestId": "082147991",
+        "adminNotified": true
+      },
+      {
+        "time": "2026-06-15 06:27:01",
+        "amount": "10.000",
+        "status": "Thành công"
+      },
+      {
+        "time": "2026-06-15 06:26:13",
+        "createdAt": "2026-06-15 06:26:13",
+        "amount": "10.000",
+        "status": "Chờ kiểm tra",
+        "transferContent": "Mua VLXD 8691091149 062613654",
+        "expiresAt": "2026-06-15 06:36:13",
+        "requestId": "062613654",
+        "adminNotified": true
+      },
+      {
+        "time": "2026-06-15 06:08:53",
+        "amount": "10.000",
+        "status": "Chờ chuyển khoản",
+        "transferContent": "NAP 8691091149 060853732",
+        "expiresAt": "2026-06-15 06:18:53",
+        "requestId": "060853732",
+        "adminNotified": false
+      },
+      {
+        "time": "2026-06-15 05:55:47",
+        "amount": "10.000",
+        "status": "Chờ kiểm tra",
+        "transferContent": "NAP 8691091149 055547310",
+        "expiresAt": "2026-06-15 06:05:47",
+        "requestId": "055547310",
+        "adminNotified": true
+      }
+    ],
+    "vongCuoc": 0,
+    "lastMsg": 1781490247560
+  },
+  {
+    "id": "5942480373",
+    "name": "anhpro29",
+    "sd": 0,
+    "cuoc": 47849,
+    "thang": 43516,
+    "thua": 26808,
+    "nap": 0,
+    "rut": 0,
+    "dkrut": 0,
+    "hh": 0,
+    "lastBetResetDate": "2026/06/15",
+    "lastBetWeekId": "2026-25",
+    "cuocHomNay": 44627,
+    "cuocTuanNay": 44627,
+    "currentWinStreak": 0,
+    "currentLossStreak": 1,
+    "bestWinStreakToday": 2,
+    "bestLossStreakToday": 1,
+    "lastStreakPhien": 1123,
+    "lastStreakResetDate": "2026/06/15",
+    "vipPoints": 0,
+    "vipPointCooldown": 0,
+    "referrerId": "8691091149",
+    "claimedRewards": {},
+    "claimedCodes": [],
+    "msgCount": 3,
+    "betHistory": [
+      {
+        "phien": 1101,
+        "time": "2026-06-14 19:50:43",
+        "dice": "3-1-4",
+        "total": 8,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 1000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -1000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1102,
+        "time": "2026-06-14 20:58:13",
+        "dice": "5-4-2",
+        "total": 11,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 2222,
+            "isWin": true,
+            "payout": 4266
+          }
+        ],
+        "net": 2044,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1121,
+        "time": "2026-06-15 07:42:48",
+        "dice": "5-3-3",
+        "total": 11,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "TL",
+            "amount": 5377,
+            "isWin": true,
+            "payout": 13442
+          }
+        ],
+        "net": 8065,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1122,
+        "time": "2026-06-15 07:44:17",
+        "dice": "1-6-6",
+        "total": 13,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 13442,
+            "isWin": true,
+            "payout": 25808
+          }
+        ],
+        "net": 12366,
+        "streak": {
+          "currentWin": 2,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1123,
+        "time": "2026-06-15 07:55:18",
+        "dice": "4-1-4",
+        "total": 9,
+        "result": "XỈU LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 25808,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -25808,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      }
+    ],
+    "vongCuoc": 0,
+    "lastMsg": 1781489015137
+  },
+  {
+    "id": "5846170183",
+    "name": "ThyAnh",
+    "sd": 1970200,
+    "cuoc": 6069000,
+    "thang": 6069200,
+    "thua": 3349000,
+    "nap": 5000000,
+    "rut": 3000000,
+    "dkrut": 0,
+    "hh": 0,
+    "lastBetResetDate": "2026/06/15",
+    "lastBetWeekId": "2026-25",
+    "cuocHomNay": 1993000,
+    "cuocTuanNay": 1993000,
+    "currentWinStreak": 0,
+    "currentLossStreak": 2,
+    "bestWinStreakToday": 2,
+    "bestLossStreakToday": 2,
+    "lastStreakPhien": 1139,
+    "lastStreakResetDate": "2026/06/15",
+    "vipPoints": 3,
+    "vipPointCooldown": 1,
+    "referrerId": "8691091149",
+    "depositHistory": [
+      {
+        "time": "2026-06-14 22:34:44",
+        "amount": "3.000.000",
+        "status": "Thành công"
+      },
+      {
+        "time": "2026-06-14 22:13:48",
+        "amount": "2.000.000",
+        "status": "Thành công"
+      },
+      {
+        "time": "2026-06-14 22:10:30",
+        "amount": "2.000.000",
+        "status": "Chờ kiểm tra"
+      }
+    ],
+    "vongCuoc": 0,
+    "betHistory": [
+      {
+        "phien": 1113,
+        "time": "2026-06-14 22:29:28",
+        "dice": "4-5-3",
+        "total": 12,
+        "result": "TÀI CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 300000,
+            "isWin": true,
+            "payout": 576000
+          }
+        ],
+        "net": 276000,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1114,
+        "time": "2026-06-14 22:30:57",
+        "dice": "2-5-3",
+        "total": 10,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "TL",
+            "amount": 500000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -500000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1115,
+        "time": "2026-06-14 22:32:26",
+        "dice": "6-2-6",
+        "total": 14,
+        "result": "TÀI CHẮN",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "TL",
+            "amount": 776000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -776000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 2,
+          "qualified": "Đang thua 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1116,
+        "time": "2026-06-14 22:33:54",
+        "dice": "6-1-6",
+        "total": 13,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "XL",
+            "amount": 1000000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -1000000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 3,
+          "qualified": "Đang thua 3 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1117,
+        "time": "2026-06-14 22:36:23",
+        "dice": "1-1-4",
+        "total": 6,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "XC",
+            "amount": 1000000,
+            "isWin": true,
+            "payout": 2500000
+          }
+        ],
+        "net": 1500000,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1118,
+        "time": "2026-06-14 22:39:51",
+        "dice": "4-4-2",
+        "total": 10,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "CL",
+            "betType": "LẺ",
+            "amount": 500000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -500000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1130,
+        "time": "2026-06-15 09:26:41",
+        "dice": "6-3-5",
+        "total": 14,
+        "result": "TÀI CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 500000,
+            "isWin": true,
+            "payout": 960000
+          }
+        ],
+        "net": 460000,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1131,
+        "time": "2026-06-15 09:30:05",
+        "dice": "3-6-2",
+        "total": 11,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 460000,
+            "isWin": true,
+            "payout": 883200
+          },
+          {
+            "category": "XIÊN",
+            "betType": "TL",
+            "amount": 460000,
+            "isWin": true,
+            "payout": 1150000
+          }
+        ],
+        "net": 1113200,
+        "streak": {
+          "currentWin": 2,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1138,
+        "time": "2026-06-15 10:17:00",
+        "dice": "4-2-5",
+        "total": 11,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "TC",
+            "amount": 173000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -173000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1139,
+        "time": "2026-06-15 10:18:29",
+        "dice": "3-4-4",
+        "total": 11,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "TC",
+            "amount": 400000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -400000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 2,
+          "qualified": "Đang thua 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      }
+    ],
+    "msgCount": 0,
+    "claimedCodes": [],
+    "claimedRewards": {},
+    "withdrawHistory": [
+      {
+        "time": "2026-06-15 10:17:57",
+        "amount": 3000000,
+        "fee": 30000,
+        "receiveAmount": 3000000,
+        "bankNo": "0123456789",
+        "bankName": "MBBANK",
+        "bankUser": "BUI_PHAM_ANH_THY",
+        "status": "Thành công",
+        "adminMessageId": 697
+      }
+    ]
+  },
+  {
+    "id": "1087968824",
+    "name": "GroupAnonymousBot",
+    "role": "member",
+    "sd": 0,
+    "betWin": 0,
+    "betLose": 0,
+    "msgCount": 3,
+    "claimedCodes": [],
+    "claimedRewards": {},
+    "cuocHomNay": 0,
+    "lastBetResetDate": "2026/06/15",
+    "currentWinStreak": 0,
+    "currentLossStreak": 0,
+    "bestWinStreakToday": 0,
+    "bestLossStreakToday": 0,
+    "lastStreakPhien": 0,
+    "lastStreakResetDate": "2026/06/15",
+    "lastMsg": 1781493570068
+  },
+  {
+    "id": "7886949581",
+    "name": "bonbon_2905",
+    "sd": 0,
+    "cuoc": 518080,
+    "thang": 358080,
+    "thua": 346080,
+    "nap": 160000,
+    "rut": 0,
+    "dkrut": 0,
+    "hh": 0,
+    "lastBetResetDate": "2026/06/15",
+    "lastBetWeekId": "2026-25",
+    "cuocHomNay": 10000,
+    "cuocTuanNay": 10000,
+    "currentWinStreak": 0,
+    "currentLossStreak": 1,
+    "bestWinStreakToday": 0,
+    "bestLossStreakToday": 1,
+    "lastStreakPhien": 1137,
+    "lastStreakResetDate": "2026/06/15",
+    "vipPoints": 1,
+    "vipPointCooldown": 2,
+    "depositHistory": [
+      {
+        "time": "2026-06-15 10:13:51",
+        "amount": "10.000",
+        "status": "Thành công"
+      },
+      {
+        "time": "2026-06-14 22:34:34",
+        "amount": "30.000",
+        "status": "Thành công"
+      },
+      {
+        "time": "2026-06-14 22:23:13",
+        "amount": "20.000",
+        "status": "Thành công"
+      },
+      {
+        "time": "2026-06-14 22:07:17",
+        "amount": "100.000",
+        "status": "Thành công"
+      },
+      {
+        "time": "2026-06-14 22:04:53",
+        "amount": "100.000",
+        "status": "Chờ kiểm tra"
+      }
+    ],
+    "vongCuoc": 0,
+    "claimedRewards": {},
+    "claimedCodes": [],
+    "msgCount": 3,
+    "betHistory": [
+      {
+        "phien": 1103,
+        "time": "2026-06-14 22:08:42",
+        "dice": "2-6-6",
+        "total": 14,
+        "result": "TÀI CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "XỈU",
+            "amount": 30000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -30000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1104,
+        "time": "2026-06-14 22:10:11",
+        "dice": "1-5-5",
+        "total": 11,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "XỈU",
+            "amount": 20000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -20000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 2,
+          "qualified": "Đang thua 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1105,
+        "time": "2026-06-14 22:13:41",
+        "dice": "2-1-3",
+        "total": 6,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "XỈU",
+            "amount": 20000,
+            "isWin": true,
+            "payout": 38400
+          }
+        ],
+        "net": 18400,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1106,
+        "time": "2026-06-14 22:16:10",
+        "dice": "5-2-6",
+        "total": 13,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "TL",
+            "amount": 18000,
+            "isWin": true,
+            "payout": 45000
+          }
+        ],
+        "net": 27000,
+        "streak": {
+          "currentWin": 2,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1107,
+        "time": "2026-06-14 22:17:39",
+        "dice": "4-3-6",
+        "total": 13,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "XC",
+            "amount": 45000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -45000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1108,
+        "time": "2026-06-14 22:19:07",
+        "dice": "2-6-3",
+        "total": 11,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "XC",
+            "amount": 20000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -20000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 2,
+          "qualified": "Đang thua 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1109,
+        "time": "2026-06-14 22:22:35",
+        "dice": "3-6-4",
+        "total": 13,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "XỈU",
+            "amount": 30400,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -30400,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 3,
+          "qualified": "Đang thua 3 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1110,
+        "time": "2026-06-14 22:25:03",
+        "dice": "5-6-5",
+        "total": 16,
+        "result": "TÀI CHẮN",
+        "bets": [
+          {
+            "category": "CL",
+            "betType": "CHẮN",
+            "amount": 20000,
+            "isWin": true,
+            "payout": 38400
+          }
+        ],
+        "net": 18400,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1111,
+        "time": "2026-06-14 22:26:31",
+        "dice": "4-2-3",
+        "total": 9,
+        "result": "XỈU LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "XỈU",
+            "amount": 18000,
+            "isWin": true,
+            "payout": 34560
+          }
+        ],
+        "net": 16560,
+        "streak": {
+          "currentWin": 2,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1112,
+        "time": "2026-06-14 22:28:00",
+        "dice": "3-5-1",
+        "total": 9,
+        "result": "XỈU LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "XỈU",
+            "amount": 27000,
+            "isWin": true,
+            "payout": 51840
+          }
+        ],
+        "net": 24840,
+        "streak": {
+          "currentWin": 3,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 3 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1113,
+        "time": "2026-06-14 22:29:28",
+        "dice": "4-5-3",
+        "total": 12,
+        "result": "TÀI CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 29000,
+            "isWin": true,
+            "payout": 55680
+          }
+        ],
+        "net": 26680,
+        "streak": {
+          "currentWin": 4,
+          "currentLoss": 0,
+          "qualified": "Dây thắng 4 phiên"
+        }
+      },
+      {
+        "phien": 1114,
+        "time": "2026-06-14 22:30:57",
+        "dice": "2-5-3",
+        "total": 10,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "TÀI",
+            "amount": 56000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -56000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1115,
+        "time": "2026-06-14 22:32:26",
+        "dice": "6-2-6",
+        "total": 14,
+        "result": "TÀI CHẮN",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "TL",
+            "amount": 30000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -30000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 2,
+          "qualified": "Đang thua 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1116,
+        "time": "2026-06-14 22:33:54",
+        "dice": "6-1-6",
+        "total": 13,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "XỈU",
+            "amount": 20480,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -20480,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 3,
+          "qualified": "Đang thua 3 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1117,
+        "time": "2026-06-14 22:36:23",
+        "dice": "1-1-4",
+        "total": 6,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "XC",
+            "amount": 30000,
+            "isWin": true,
+            "payout": 75000
+          }
+        ],
+        "net": 45000,
+        "streak": {
+          "currentWin": 1,
+          "currentLoss": 0,
+          "qualified": "Đang thắng 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1118,
+        "time": "2026-06-14 22:39:51",
+        "dice": "4-4-2",
+        "total": 10,
+        "result": "XỈU CHẮN",
+        "bets": [
+          {
+            "category": "TX",
+            "betType": "XỈU",
+            "amount": 10000,
+            "isWin": true,
+            "payout": 19200
+          },
+          {
+            "category": "XIÊN",
+            "betType": "TL",
+            "amount": 25000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -15800,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1119,
+        "time": "2026-06-14 22:41:19",
+        "dice": "6-5-1",
+        "total": 12,
+        "result": "TÀI CHẮN",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "TL",
+            "amount": 59200,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -59200,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 2,
+          "qualified": "Đang thua 2 phiên (từ 4 phiên mới tính BXH)"
+        }
+      },
+      {
+        "phien": 1137,
+        "time": "2026-06-15 10:15:31",
+        "dice": "5-5-3",
+        "total": 13,
+        "result": "TÀI LẺ",
+        "bets": [
+          {
+            "category": "XIÊN",
+            "betType": "XC",
+            "amount": 10000,
+            "isWin": false,
+            "payout": 0
+          }
+        ],
+        "net": -10000,
+        "streak": {
+          "currentWin": 0,
+          "currentLoss": 1,
+          "qualified": "Đang thua 1 phiên (từ 4 phiên mới tính BXH)"
+        }
+      }
+    ],
+    "lastMsg": 1781493607595
+  }
+]
