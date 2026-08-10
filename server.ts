@@ -4780,7 +4780,14 @@ export function registerAllBotCommands() {
 
     const parsed = parseBetText(txt);
     if (parsed) {
-      if (isTelegramXXBetType(parsed.type)) {
+      if (parsed.type === "td") {
+        const amount = parseInt(parsed.amountStr, 10);
+        if (isNaN(amount) || amount < 1000) {
+          bot1.sendMessage(chat, `⚠️ Cược <b>Trên Dưới</b> tối thiểu từ <b>1.000 xu</b>!`, { parse_mode: "HTML" });
+          return;
+        }
+        handleTDCommand(String(chat), amount, chat);
+      } else if (isTelegramXXBetType(parsed.type)) {
         const userId = String(chat);
         const username = msg.from?.first_name || "Ẩn danh";
         const amount = parseInt(parsed.amountStr, 10);
@@ -5068,6 +5075,20 @@ export function registerAllBotCommands() {
           { parse_mode: "HTML" }
         );
         bot1.answerCallbackQuery(q.id, { text: "Đã mở Lô Đề Telegram" }).catch(() => {});
+        return;
+      } else if (act === "game_catalog_td") {
+        const guide = `⬆️ <b>XÚC XẮC TRÊN DƯỚI</b> ⬇️\n\n` +
+          `1️⃣ Người chơi nhập <code>TD [số tiền]</code>. Sau khi ghi nhận bot sẽ tung 2 🎲 lượt đầu tiên, người chơi sẽ dự đoán ⬆️ (cao hơn) hoặc ⬇️ (nhỏ hơn) 2 🎲 vừa tung.\n\n` +
+          `2️⃣ Bot sẽ tiếp tục tung 2 🎲 và so sánh với dự đoán đã chọn, nếu trùng khớp sẽ thắng cược.\n` +
+          `❌ <b>Hòa mất 50% tiền cược.</b>\n\n` +
+          `👉 Gõ <code>td 2000</code> để bắt đầu chơi ngay!`;
+        bot1.sendMessage(chat, guide, { parse_mode: "HTML" });
+        bot1.answerCallbackQuery(q.id, { text: "Đã mở Xúc Xắc Trên Dưới" }).catch(() => {});
+        return;
+      } else if (act.startsWith("td_")) {
+        const action = act;
+        await handleTDAction(String(chat), action, chat, q.message!.message_id);
+        bot1.answerCallbackQuery(q.id).catch(() => {});
         return;
       } else if (act === "duatop_du_day") {
         const todayStr = moment().tz("Asia/Ho_Chi_Minh").format("YYYY/MM/DD");
