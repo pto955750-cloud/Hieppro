@@ -1157,7 +1157,10 @@ export async function handleTDCommand(userId: string, amount: number, chatId: st
     return;
   }
 
-  const roll1 = [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
+  // Tung xúc xắc Telegram thực tế
+  const d1 = await bot1.sendDice(chatId);
+  const d2 = await bot1.sendDice(chatId);
+  const roll1 = [d1.dice?.value || 1, d2.dice?.value || 1];
   const sum1 = roll1[0] + roll1[1];
   
   setUserBalance(user, balance - amount);
@@ -1174,13 +1177,7 @@ export async function handleTDCommand(userId: string, amount: number, chatId: st
   };
   writeJson(userJsonFile, users);
 
-  await bot1.sendDice(chatId);
-  await new Promise(r => setTimeout(r, 1500));
-  await bot1.sendDice(chatId);
-  await new Promise(r => setTimeout(r, 1500));
-
-  const msg = `🎲 <b>Xúc xắc Trên Dưới</b>\n` +
-    `Lượt tung: ${roll1[0]} + ${roll1[1]} = <b>${sum1}</b>\n` +
+  const msg = `${roll1[0]} + ${roll1[1]} = ${sum1}\n` +
     `💰 Mức cược: <b>${amount.toLocaleString("vi-VN")} xu</b>\n\n` +
     `👉 Dự đoán lượt tung tiếp theo cao hơn hay thấp hơn <b>${sum1}</b>?`;
 
@@ -1227,7 +1224,10 @@ export async function handleTDAction(userId: string, action: string, chatId: str
   const muls = getTDRelatedMultipliers(lastSum);
   const chosenMul = prediction === "up" ? muls.up : muls.down;
 
-  const roll2 = [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
+  // Tung xúc xắc mới
+  const d1 = await bot1.sendDice(chatId);
+  const d2 = await bot1.sendDice(chatId);
+  const roll2 = [d1.dice?.value || 1, d2.dice?.value || 1];
   const sum2 = roll2[0] + roll2[1];
   
   let isWin = false;
@@ -1238,13 +1238,15 @@ export async function handleTDAction(userId: string, action: string, chatId: str
   else if (sum2 === lastSum) isDraw = true;
 
   if (isWin) {
+    const oldMul = game.currentMultiplier;
     game.currentMultiplier *= chosenMul;
     game.lastRoll = roll2;
     game.time = Date.now();
     writeJson(userJsonFile, users);
 
+    const winDiff = Math.floor(game.amount * (game.currentMultiplier - oldMul));
     const msg = `${roll2[0]} + ${roll2[1]} = ${sum2}\n` +
-      `✅ <b>Thắng x${chosenMul} (+${Math.floor(game.amount * (game.currentMultiplier - game.currentMultiplier/chosenMul)).toLocaleString("vi-VN")})</b>`;
+      `✅ <b>Thắng x${chosenMul} (+${winDiff.toLocaleString("vi-VN")})</b>`;
     
     bot1.editMessageText(msg, {
       chat_id: chatId,
@@ -4297,8 +4299,15 @@ export function registerAllBotCommands() {
     if (isAnonymous) bot.deleteMessage(chat, msg.message_id).catch(() => {});
 
     const parsed = parseBetText(text);
-    if (parsed && isTelegramXXBetType(parsed.type)) {
-      sendResilientReply(chat, `⚠️ Các lệnh <code>XXC</code>, <code>XXL</code>, <code>XXX</code>, <code>XXT</code> chỉ dùng trong chat riêng với bot chính.`, { parse_mode: "HTML" });
+    if (parsed && (isTelegramXXBetType(parsed.type) || parsed.type === "td")) {
+      if (parsed.type === "td") {
+        // Nếu trong group thì nhắc nhở, nếu trong chat riêng thì để bot1.on("message") xử lý
+        if (String(chat) === String(groupt)) {
+          sendResilientReply(chat, `⚠️ Lệnh <code>TD</code> (Trên Dưới) chỉ dùng trong chat riêng với bot chính.`, { parse_mode: "HTML" });
+        }
+      } else {
+        sendResilientReply(chat, `⚠️ Các lệnh <code>XXC</code>, <code>XXL</code>, <code>XXX</code>, <code>XXT</code> chỉ dùng trong chat riêng với bot chính.`, { parse_mode: "HTML" });
+      }
       return;
     }
     if (parsed) {
@@ -4786,7 +4795,7 @@ export function registerAllBotCommands() {
           bot1.sendMessage(chat, `⚠️ Cược <b>Trên Dưới</b> tối thiểu từ <b>1.000 xu</b>!`, { parse_mode: "HTML" });
           return;
         }
-        handleTDCommand(String(chat), amount, chat);
+        await handleTDCommand(String(chat), amount, chat);
       } else if (isTelegramXXBetType(parsed.type)) {
         const userId = String(chat);
         const username = msg.from?.first_name || "Ẩn danh";
