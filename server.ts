@@ -463,11 +463,14 @@ export function addDepositToUser(user: any, amount: number): { baseResetOccurred
   const isAlreadyUnlocked = totalNapBefore >= 20000;
   let baseResetOccurred = false;
 
+  // Bỏ logic xóa số dư về 0 khi nạp tiền theo yêu cầu của người dùng
+  /*
   if (!isAlreadyUnlocked) {
     user.sd = 0;
     if (user.money !== undefined) user.money = 0;
     baseResetOccurred = true;
   }
+  */
 
   const promoRate = isExtraPromoActive.value ? 0.15 : 0.03;
   const promoAmount = Math.floor(amount * promoRate);
@@ -778,7 +781,8 @@ export function getMainMenuReplyMarkup() {
     keyboard: [
       [{ text: "📚 Danh Sách Game" }, { text: "👤 Ví Cá Nhân" }],
       [{ text: "🎖 Đua Tôp" }, { text: "🏮 Đại Lý Hoa Hồng" }],
-      [{ text: "🎪 EVENT" }, { text: "🆘 Hỗ Trợ" }],
+      [{ text: "🎪 EVENT" }, { text: "⬆️ Trên Dưới ⬇️" }],
+      [{ text: "🆘 Hỗ Trợ" }],
     ],
     resize_keyboard: true,
   };
@@ -3933,6 +3937,8 @@ export function registerAllBotCommands() {
       else sendResilientReply(chatId, msgText, { parse_mode: "HTML", ...(msgId ? { reply_to_message_id: msgId } : {}) });
     };
 
+    if (category === "TD" || type === "td") return;
+
     if (state.gamePhase !== "BETTING" || !state.phienAnnounced) {
       sendError(`⚠️ <b>Phiên cược chưa mở!</b> ❌`);
       return;
@@ -4212,7 +4218,7 @@ export function registerAllBotCommands() {
       const privateBetReceipt =
         `🥉 Đặt thành công phiên XX #${state.phien}\n` +
         `${shortBetCode} ${betAmountText}\n` +
-        `SD hiện tại: ${finalBalance.toLocaleString("vi-VN")} xu`;
+        `💰 Số Dư Hiện Tại: ${finalBalance.toLocaleString("vi-VN")} xu`;
 
       if (isAnonymous) {
         bot1.sendMessage(userId, privateAnonymousSummary, { parse_mode: "HTML" }).catch(() => {});
@@ -4629,6 +4635,16 @@ export function registerAllBotCommands() {
       return;
     }
 
+    if (txt === "⬆️ Trên Dưới ⬇️" || txt === "Trên Dưới") {
+      const guide = `⬆️ <b>XÚC XẮC TRÊN DƯỚI</b> ⬇️\n\n` +
+        `1️⃣ Người chơi nhập <code>TD [số tiền]</code>. Sau khi ghi nhận bot sẽ tung 2 🎲 lượt đầu tiên, người chơi sẽ dự đoán ⬆️ (cao hơn) hoặc ⬇️ (nhỏ hơn) 2 🎲 vừa tung.\n\n` +
+        `2️⃣ Bot sẽ tiếp tục tung 2 🎲 và so sánh với dự đoán đã chọn, nếu trùng khớp sẽ thắng cược.\n` +
+        `❌ <b>Hòa mất 50% tiền cược.</b>\n\n` +
+        `👉 Gõ <code>td 2000</code> để bắt đầu chơi ngay!`;
+      bot1.sendMessage(chat, guide, { parse_mode: "HTML" });
+      return;
+    }
+
     if (txt === "📚 Danh Sách Game" || txt === "🎲 Đặt Cược Phòng") {
       const users = readJson(userJsonFile);
       const user = users.find((u: any) => String(u.id) === String(chat));
@@ -4789,14 +4805,16 @@ export function registerAllBotCommands() {
 
     const parsed = parseBetText(txt);
     if (parsed) {
-      if (parsed.type === "td") {
+      const pType = String(parsed.type || "").toLowerCase();
+      if (pType === "td") {
         const amount = parseInt(parsed.amountStr, 10);
         if (isNaN(amount) || amount < 1000) {
           bot1.sendMessage(chat, `⚠️ Cược <b>Trên Dưới</b> tối thiểu từ <b>1.000 xu</b>!`, { parse_mode: "HTML" });
           return;
         }
         await handleTDCommand(String(chat), amount, chat);
-      } else if (isTelegramXXBetType(parsed.type)) {
+        return; // Quan trọng: return để không rơi xuống handleBet
+      } else if (isTelegramXXBetType(pType)) {
         const userId = String(chat);
         const username = msg.from?.first_name || "Ẩn danh";
         const amount = parseInt(parsed.amountStr, 10);
