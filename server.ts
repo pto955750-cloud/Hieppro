@@ -79,6 +79,8 @@ export interface User {
   bankAccount?: string;
   bankName?: string;
   bankOwner?: string;
+  hoanCuocClaimedDate?: string;
+  hoanCuocHomQua?: number;
   pendingTDBet?: {
     amount: number;
     currentMultiplier: number;
@@ -781,7 +783,7 @@ export function getMainMenuReplyMarkup() {
     keyboard: [
       [{ text: "📚 Danh Sách Game" }, { text: "👤 Ví Cá Nhân" }],
       [{ text: "🎖 Đua Tôp" }, { text: "🏮 Đại Lý Hoa Hồng" }],
-      [{ text: "🎪 EVENT" }, { text: "⬆️ Trên Dưới ⬇️" }],
+      [{ text: "🎪 EVENT" }, { text: "🧧 Lì Xì" }],
       [{ text: "🆘 Hỗ Trợ" }],
     ],
     resize_keyboard: true,
@@ -1213,11 +1215,9 @@ export async function handleTDAction(userId: string, action: string, chatId: str
       `┣➤ Số dư mới: <b>${getUserBalance(user).toLocaleString("vi-VN")} xu</b>\n` +
       `┗ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━`;
     
-    bot1.editMessageText(resultMsg, {
-      chat_id: chatId,
-      message_id: messageId,
-      parse_mode: "HTML"
-    }).catch(() => {});
+    // Khi nhận tiền, xóa nút bấm ở tin nhắn cũ và gửi bảng kết quả mới
+    bot1.editMessageReplyMarkup({ inline_keyboard: [] }, { chat_id: chatId, message_id: messageId }).catch(() => {});
+    bot1.sendMessage(chatId, resultMsg, { parse_mode: "HTML" }).catch(() => {});
     
     delete user.pendingTDBet;
     writeJson(userJsonFile, users);
@@ -1228,12 +1228,18 @@ export async function handleTDAction(userId: string, action: string, chatId: str
   const muls = getTDRelatedMultipliers(lastSum);
   const chosenMul = prediction === "up" ? muls.up : muls.down;
 
+  // Xóa nút bấm ở tin nhắn cũ để người dùng không bấm lại được
+  bot1.editMessageReplyMarkup({ inline_keyboard: [] }, { chat_id: chatId, message_id: messageId }).catch(() => {});
+
   // Tung xúc xắc mới
   const d1 = await bot1.sendDice(chatId);
   const d2 = await bot1.sendDice(chatId);
   const roll2 = [d1.dice?.value || 1, d2.dice?.value || 1];
   const sum2 = roll2[0] + roll2[1];
   
+  // Đợi xúc xắc quay xong (khoảng 3.5 giây)
+  await new Promise(r => setTimeout(r, 3500));
+
   let isWin = false;
   let isDraw = false;
   
@@ -1252,9 +1258,8 @@ export async function handleTDAction(userId: string, action: string, chatId: str
     const msg = `${roll2[0]} + ${roll2[1]} = ${sum2}\n` +
       `✅ <b>Thắng x${chosenMul} (+${winDiff.toLocaleString("vi-VN")})</b>`;
     
-    bot1.editMessageText(msg, {
-      chat_id: chatId,
-      message_id: messageId,
+    // Gửi tin nhắn kết quả mới ở dưới xúc xắc
+    bot1.sendMessage(chatId, msg, {
       parse_mode: "HTML",
       reply_markup: getTDReplyMarkup(sum2, game.currentMultiplier)
     }).catch(() => {});
@@ -1267,11 +1272,7 @@ export async function handleTDAction(userId: string, action: string, chatId: str
       `⚪️ <b>Hòa! Bạn nhận lại 50% tiền cược (${refund.toLocaleString("vi-VN")} xu)</b>\n` +
       `Số dư: <b>${getUserBalance(user).toLocaleString("vi-VN")} xu</b>`;
     
-    bot1.editMessageText(msg, {
-      chat_id: chatId,
-      message_id: messageId,
-      parse_mode: "HTML"
-    }).catch(() => {});
+    bot1.sendMessage(chatId, msg, { parse_mode: "HTML" }).catch(() => {});
     
     delete user.pendingTDBet;
     writeJson(userJsonFile, users);
@@ -1280,11 +1281,7 @@ export async function handleTDAction(userId: string, action: string, chatId: str
       `❌ <b>Bạn đã thua cược!</b>\n` +
       `Số dư: <b>${getUserBalance(user).toLocaleString("vi-VN")} xu</b>`;
     
-    bot1.editMessageText(msg, {
-      chat_id: chatId,
-      message_id: messageId,
-      parse_mode: "HTML"
-    }).catch(() => {});
+    bot1.sendMessage(chatId, msg, { parse_mode: "HTML" }).catch(() => {});
     
     delete user.pendingTDBet;
     writeJson(userJsonFile, users);
@@ -3230,10 +3227,35 @@ export function tickGameLoop() {
           writeJson(giftJsonFile, betGiftData);
         }
 
+        // Thông báo Lì Xì Hoàn Cược lúc 00:00 và chuyển sang nhận bù cho ngày mai
+        users.forEach((u: any) => {
+          const today = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD");
+          const totalBetToday = u.cuocHomNay || 0;
+          const refundAmount = Math.floor(totalBetToday * 0.002);
+          const isClaimed = u.hoanCuocClaimedDate === today;
+
+          // Nếu hôm nay chưa nhận, lưu vào mục nhận bù cho ngày mai
+          if (!isClaimed && refundAmount > 0) {
+            u.hoanCuocHomQua = refundAmount;
+            sendResilientReply(
+              u.id,
+              `🧧 <b>THÔNG BÁO HOÀN CƯỢC</b> 🧧\n\n` +
+              `Chào <b>${u.name || "người chơi"}</b>, tiền lì xì hoàn cược hôm nay của bạn là <b>${refundAmount.toLocaleString("vi-VN")} xu</b> đã được chuyển vào mục <b>NHẬN BÙ</b>.\n\n` +
+              `👉 Bạn có thể nhận bù duy nhất trong ngày mai tại mục <b>🧧 Lì Xì</b>. Nếu không nhận sẽ bị mất!`,
+              { parse_mode: "HTML" }
+            );
+          } else {
+            // Nếu đã nhận hoặc không có tiền hoàn, xóa dữ liệu nhận bù cũ (chỉ cho phép nhận bù 1 ngày)
+            u.hoanCuocHomQua = 0;
+          }
+        });
+
         users.forEach((u: any) => {
           u.cuocHomQua = u.cuocHomNay || 0;
           u.cuocHomNay = 0;
           u.lastBetResetDate = todayStr;
+          // Reset trạng thái đã nhận của ngày cũ để ngày mới có thể nhận tiếp
+          u.hoanCuocClaimedDate = ""; 
           resetUserDailyStreaks(u, todayStr);
         });
         writeJson(userJsonFile, users);
@@ -4635,6 +4657,48 @@ export function registerAllBotCommands() {
       return;
     }
 
+    if (txt === "🧧 Lì Xì" || txt === "Lì Xì" || txt === "lixi") {
+      const users = readJson(userJsonFile);
+      const user = users.find((u: any) => String(u.id) === String(chat));
+      if (!user) return;
+
+      const today = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD");
+      const totalBetToday = user.cuocHomNay || 0;
+      const refundToday = Math.floor(totalBetToday * 0.002);
+      const refundYesterday = user.hoanCuocHomQua || 0;
+      const isClaimedToday = user.hoanCuocClaimedDate === today;
+
+      let msgText = `🧧 <b>LÌ XÌ HOÀN CƯỢC MỖI NGÀY</b> 🧧\n\n` +
+        `Chào <b>${user.name}</b>, hệ thống hoàn trả <b>0.2%</b> tổng cược mỗi ngày.\n\n` +
+        `📊 <b>Thống kê hoàn cược:</b>\n` +
+        `• Hoàn cược hôm nay: <b>${refundToday.toLocaleString("vi-VN")} xu</b> ${isClaimedToday ? "✅" : ""}\n` +
+        `• Hoàn cược hôm qua (chưa nhận): <b>${refundYesterday.toLocaleString("vi-VN")} xu</b>\n\n`;
+
+      const buttons = [];
+      if (!isClaimedToday && refundToday > 0) {
+        buttons.push([{ text: "🧧 Nhận Lì Xì Hôm Nay", callback_data: "claim_hoan_cuoc_today" }]);
+      }
+      if (refundYesterday > 0) {
+        buttons.push([{ text: "🎁 Nhận Bù Lì Xì Hôm Qua", callback_data: "claim_hoan_cuoc_yesterday" }]);
+      }
+
+      if (buttons.length > 0) {
+        msgText += `👉 Bấm nút bên dưới để nhận lì xì của bạn!`;
+        bot1.sendMessage(chat, msgText, {
+          parse_mode: "HTML",
+          reply_markup: { inline_keyboard: buttons }
+        });
+      } else {
+        if (isClaimedToday && refundYesterday <= 0) {
+          msgText += `✅ Bạn đã nhận hết lì xì khả dụng. Hãy quay lại vào ngày mai nhé!`;
+        } else {
+          msgText += `⚠️ Bạn chưa có lượt cược nào để nhận lì xì. Hãy tham gia đặt cược ngay!`;
+        }
+        bot1.sendMessage(chat, msgText, { parse_mode: "HTML" });
+      }
+      return;
+    }
+
     if (txt === "⬆️ Trên Dưới ⬇️" || txt === "Trên Dưới") {
       const guide = `⬆️ <b>XÚC XẮC TRÊN DƯỚI</b> ⬇️\n\n` +
         `1️⃣ Người chơi nhập <code>TD [số tiền]</code>. Sau khi ghi nhận bot sẽ tung 2 🎲 lượt đầu tiên, người chơi sẽ dự đoán ⬆️ (cao hơn) hoặc ⬇️ (nhỏ hơn) 2 🎲 vừa tung.\n\n` +
@@ -5104,13 +5168,13 @@ export function registerAllBotCommands() {
         bot1.answerCallbackQuery(q.id, { text: "Đã mở Lô Đề Telegram" }).catch(() => {});
         return;
       } else if (act === "game_catalog_td") {
+        bot1.answerCallbackQuery(q.id).catch(() => {});
         const guide = `⬆️ <b>XÚC XẮC TRÊN DƯỚI</b> ⬇️\n\n` +
           `1️⃣ Người chơi nhập <code>TD [số tiền]</code>. Sau khi ghi nhận bot sẽ tung 2 🎲 lượt đầu tiên, người chơi sẽ dự đoán ⬆️ (cao hơn) hoặc ⬇️ (nhỏ hơn) 2 🎲 vừa tung.\n\n` +
           `2️⃣ Bot sẽ tiếp tục tung 2 🎲 và so sánh với dự đoán đã chọn, nếu trùng khớp sẽ thắng cược.\n` +
           `❌ <b>Hòa mất 50% tiền cược.</b>\n\n` +
           `👉 Gõ <code>td 2000</code> để bắt đầu chơi ngay!`;
         bot1.sendMessage(chat, guide, { parse_mode: "HTML" });
-        bot1.answerCallbackQuery(q.id, { text: "Đã mở Xúc Xắc Trên Dưới" }).catch(() => {});
         return;
       } else if (act.startsWith("td_")) {
         const action = act;
@@ -5218,6 +5282,52 @@ export function registerAllBotCommands() {
         writeJson(userJsonFile, users);
         bot1.sendMessage(chat, `✅ Đã nhận +${value.toLocaleString("vi-VN")} xu hoa hồng!`);
         bot1.answerCallbackQuery(q.id, { text: "Thao tác thành công!" });
+      } else if (act === "claim_hoan_cuoc_today") {
+        const today = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD");
+        if (user.hoanCuocClaimedDate === today) {
+          bot1.answerCallbackQuery(q.id, { text: "Bạn đã nhận lì xì hôm nay rồi!", show_alert: true });
+          return;
+        }
+        const totalBetToday = user.cuocHomNay || 0;
+        const refundAmount = Math.floor(totalBetToday * 0.002);
+        if (refundAmount <= 0) {
+          bot1.answerCallbackQuery(q.id, { text: "Tiền hoàn hôm nay chưa đủ để nhận!", show_alert: true });
+          return;
+        }
+
+        user.sd = (user.sd || 0) + refundAmount;
+        if (user.money !== undefined) user.money = (user.money || 0) + refundAmount;
+        user.hoanCuocClaimedDate = today;
+        writeJson(userJsonFile, users);
+
+        bot1.editMessageText(
+          `🧧 <b>NHẬN LÌ XÌ THÀNH CÔNG</b> 🧧\n\n` +
+          `✅ Bạn đã nhận thành công lì xì hôm nay: <b>+${refundAmount.toLocaleString("vi-VN")} xu</b>\n` +
+          `💰 Số dư hiện tại: <b>${getUserBalance(user).toLocaleString("vi-VN")} xu</b>\n\n` +
+          `Hãy tiếp tục đặt cược để nhận thêm vào ngày mai nhé!`,
+          { chat_id: chat, message_id: q.message!.message_id, parse_mode: "HTML" }
+        ).catch(() => {});
+        bot1.answerCallbackQuery(q.id, { text: "Đã nhận lì xì hôm nay!" });
+      } else if (act === "claim_hoan_cuoc_yesterday") {
+        const refundAmount = user.hoanCuocHomQua || 0;
+        if (refundAmount <= 0) {
+          bot1.answerCallbackQuery(q.id, { text: "Bạn không có tiền hoàn bù của ngày hôm qua!", show_alert: true });
+          return;
+        }
+
+        user.sd = (user.sd || 0) + refundAmount;
+        if (user.money !== undefined) user.money = (user.money || 0) + refundAmount;
+        user.hoanCuocHomQua = 0; // Đã nhận bù xong thì xóa
+        writeJson(userJsonFile, users);
+
+        bot1.editMessageText(
+          `🎁 <b>NHẬN BÙ LÌ XÌ THÀNH CÔNG</b> 🎁\n\n` +
+          `✅ Bạn đã nhận bù lì xì ngày hôm qua: <b>+${refundAmount.toLocaleString("vi-VN")} xu</b>\n` +
+          `💰 Số dư hiện tại: <b>${getUserBalance(user).toLocaleString("vi-VN")} xu</b>\n\n` +
+          `Đừng quên nhận lì xì mỗi ngày để không bị lỡ nhé!`,
+          { chat_id: chat, message_id: q.message!.message_id, parse_mode: "HTML" }
+        ).catch(() => {});
+        bot1.answerCallbackQuery(q.id, { text: "Đã nhận bù lì xì hôm qua!" });
       } else if (act === "deposit") {
         bot1.sendMessage(
           chat,
