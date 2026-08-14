@@ -162,7 +162,7 @@ export const EVENT_REWARD_GIFTCODE_VALUE = 20000;
 export const welcomeStartImagePath = path.join(process.cwd(), "dragon_room_start.png");
 export const gameCatalogImagePath = "danh_sach_tro_choi.jpeg";
 
-export const adminId: number[] = [8691091149];
+export const adminId: number[] = [8691091149, 8936805776];
 if (process.env.ADMIN_ID) {
   process.env.ADMIN_ID.split(",").forEach((id) => {
     const num = parseInt(id.trim(), 10);
@@ -546,10 +546,10 @@ export function getDepositOrderCooldownRemainingSeconds(user: any) {
   return Math.max(0, DEPOSIT_ORDER_COOLDOWN_SECONDS - elapsedSeconds);
 }
 
-export const DEPOSIT_BANK_CODE = "MB";
-export const DEPOSIT_BANK_NAME = "MBBank";
-export const DEPOSIT_ACCOUNT_NO = "02222229092002";
-export const DEPOSIT_ACCOUNT_NAME = "TO KHANH HIEP";
+export const DEPOSIT_BANK_CODE = "MSB";
+export const DEPOSIT_BANK_NAME = "MSB";
+export const DEPOSIT_ACCOUNT_NO = "80000280575";
+export const DEPOSIT_ACCOUNT_NAME = "HA TUAN ANH";
 
 export function buildDepositQrImageUrl(amount: number, content: string) {
   const accountName = encodeURIComponent(DEPOSIT_ACCOUNT_NAME);
@@ -691,7 +691,18 @@ export function isTokenValid(token: string) {
 }
 
 const pollDisabled = process.env.DISABLE_TELEGRAM_POLLING === "true";
-const botOptions = { polling: !pollDisabled };
+const botOptions = pollDisabled
+  ? { polling: false }
+  : {
+      polling: {
+        interval: 80,
+        autoStart: true,
+        params: {
+          timeout: 10,
+          allowed_updates: ["message", "callback_query", "my_chat_member"]
+        }
+      }
+    };
 
 export const bot1 = isTokenValid(tokenBot1) ? new TelegramBot(tokenBot1, botOptions) : new TelegramBot("123:dummy1", { polling: false });
 export const bot2 = isTokenValid(tokenBot2) ? new TelegramBot(tokenBot2, botOptions) : new TelegramBot("123:dummy2", { polling: false });
@@ -4260,32 +4271,30 @@ export function registerAllBotCommands() {
     } catch {}
   };
 
-  const processedGroupMessages = new Set<string>();
+  const processedGroupMessages = new Map<string, number>();
+  const PROCESSED_MESSAGE_TTL_MS = 10 * 60 * 1000;
+
+  const markGroupMessageOnce = (key: string): boolean => {
+    const now = Date.now();
+    for (const [oldKey, timestamp] of processedGroupMessages) {
+      if (now - timestamp > PROCESSED_MESSAGE_TTL_MS) processedGroupMessages.delete(oldKey);
+    }
+    if (processedGroupMessages.has(key)) return false;
+    processedGroupMessages.set(key, now);
+    return true;
+  };
   const groupMessageProcessor = (bot: TelegramBot, msg: TelegramBot.Message) => {
     if (!msg.text) return;
     const chat = msg.chat.id;
     if (String(chat) !== String(groupt)) return;
 
     const msgKey = `${chat}_${msg.message_id}`;
-    if (processedGroupMessages.has(msgKey)) return;
-    processedGroupMessages.add(msgKey);
+    if (!markGroupMessageOnce(msgKey)) return;
 
     let text = msg.text.trim();
 
-    // Quick bet logic: convert "t all", "x max", etc.
-    const quickBetRegex = /^(t|tai|x|xiu|c|chan|l|le|tc|tl|xc|xl|tt|xx|cc|ll)\s+(all|max)$/i;
-    const quickBetMatch = text.match(quickBetRegex);
-    if (quickBetMatch) {
-      const type = quickBetMatch[1].toLowerCase();
-      const users = readJson(userJsonFile);
-      const user = users.find((u: any) => String(u.id) === String(msg.from?.id));
-      if (user) {
-        const balance = getUserBalance(user);
-        if (balance > 0) {
-          text = `${type} ${balance}`;
-        }
-      }
-    }
+    // Giữ nguyên all/max để handleBet tự tính theo số dư,
+    // tổng cược hiện tại và giới hạn phiên.
 
     // Link detection logic
     const urlRegex = /(https?:\/\/[^\s]+|t\.me\/[^\s]+|www\.[^\s]+)/gi;
@@ -4446,7 +4455,10 @@ export function registerAllBotCommands() {
 
 
     if (text.startsWith('/')) return;
-    groupMessageProcessor(b, msg);
+    // Chỉ bot chính xử lý lệnh cược trong nhóm để tránh bot phụ
+    // đánh dấu tin nhắn trước và làm bot1 bỏ qua lệnh.
+    if (b !== bot1) return;
+    groupMessageProcessor(bot1, msg);
   }));
 
   bot1.on("dice", (msg) => {
@@ -4782,7 +4794,7 @@ export function registerAllBotCommands() {
     }
 
     if (txt === "🆘 Hỗ Trợ" || txt === "🆘 Hỗ trợ" || txt === "Hỗ Trợ") {
-      const adminLink = "https://t.me/hihiiibo";
+      const adminLink = "https://t.me/bonbonxlxzuy";
       const msgSupport = `🆘 <b>HỖ TRỢ KHÁCH HÀNG</b>\n\n` +
         `Chào bạn, nếu bạn gặp vấn đề cần hỗ trợ, vui lòng gửi nội dung hỗ trợ cho Admin qua link bên dưới:\n` +
         `👤 <b>Admin:</b> ${adminLink}\n\n` +
@@ -4867,9 +4879,12 @@ export function registerAllBotCommands() {
     if (parsed) {
       const pType = String(parsed.type || "").toLowerCase();
       if (pType === "td") {
-        const amount = parseInt(parsed.amountStr, 10);
-        if (isNaN(amount) || amount < 1000) {
-          bot1.sendMessage(chat, `⚠️ Cược <b>Trên Dưới</b> tối thiểu từ <b>1.000 xu</b>!`, { parse_mode: "HTML" });
+        const directUsers = readJson(userJsonFile);
+        const directUser = directUsers.find((u: any) => String(u.id) === String(chat));
+        const directBalance = Number(directUser?.sd !== undefined ? directUser.sd : (directUser?.money || 0));
+        const amount = parseBetAmount(parsed.amountStr, directBalance, 0, SESSION_LIMIT);
+        if (!Number.isFinite(amount) || amount < 1000) {
+          bot1.sendMessage(chat, `⚠️ Cược <b>Trên Dưới</b> tối thiểu từ <b>1.000 xu</b>!\nVí dụ: <code>TD 1m</code>, <code>TD all</code> hoặc <code>TD max</code>.`, { parse_mode: "HTML" });
           return;
         }
         await handleTDCommand(String(chat), amount, chat);
@@ -4877,9 +4892,12 @@ export function registerAllBotCommands() {
       } else if (isTelegramXXBetType(pType)) {
         const userId = String(chat);
         const username = msg.from?.first_name || "Ẩn danh";
-        const amount = parseInt(parsed.amountStr, 10);
-        if (isNaN(amount)) {
-          bot1.sendMessage(chat, `⚠️ Số tiền cược không hợp lệ. Vui lòng nhập số tiền.`, { parse_mode: "HTML" });
+        const directUsers = readJson(userJsonFile);
+        const directUser = directUsers.find((u: any) => String(u.id) === String(chat));
+        const directBalance = Number(directUser?.sd !== undefined ? directUser.sd : (directUser?.money || 0));
+        const amount = parseBetAmount(parsed.amountStr, directBalance, 0, SESSION_LIMIT);
+        if (!Number.isFinite(amount) || amount <= 0) {
+          bot1.sendMessage(chat, `⚠️ Số tiền cược không hợp lệ. Ví dụ: <code>XXC 50k</code>, <code>XXC 1m</code>, <code>XXC all</code> hoặc <code>XXC max</code>.`, { parse_mode: "HTML" });
           return;
         }
         // Direct execution for Telegram XX commands in private chat
