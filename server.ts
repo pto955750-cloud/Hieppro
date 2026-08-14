@@ -3521,7 +3521,8 @@ export function registerAllBotCommands() {
     const wrap = (bot: TelegramBot, msg: TelegramBot.Message, match: RegExpExecArray | null) => {
       if (isAdminUser(msg.from?.id)) handler(bot, msg, match);
     };
-    bot4.onText(regex, (msg, match) => wrap(bot4, msg, match));
+    // Chỉ bot1 đăng ký lệnh admin. Nếu bot4 cũng đăng ký,
+    // cùng một lệnh trong nhóm admin sẽ bị xử lý và trả lời nhiều lần.
     bot1.onText(regex, (msg, match) => wrap(bot1, msg, match));
   };
 
