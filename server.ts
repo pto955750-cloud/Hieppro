@@ -96,6 +96,7 @@ export interface GiftCode {
   createTime: string;
   useTime: string | null;
   userIdUsed: string | null;
+  wagerMultiplier?: number;
   maxUses?: number;
   usedCount?: number;
   usedBy?: string[];
@@ -3722,6 +3723,50 @@ export function registerAllBotCommands() {
     }
   });
 
+  onAdminCommand(/^\/giamcuoc (\d+) (\d+) x([1-4])$/i, (bot, msg, match) => {
+    if (!isAdminGroupChat(msg.chat.id) || !match) {
+      bot.sendMessage(msg.chat.id, "❌ Lệnh này chỉ dùng trong nhóm admin hoặc sai cú pháp.");
+      return;
+    }
+    const targetId = match[1];
+    const baseAmount = parseInt(match[2], 10);
+    const multiplier = parseInt(match[3], 10);
+    const adjustment = baseAmount * multiplier;
+    const users = readJson(userJsonFile);
+    const idx = users.findIndex((u: any) => String(u.id) === String(targetId));
+    if (idx === -1) {
+      bot.sendMessage(msg.chat.id, `❌ Không tìm thấy người dùng ID <code>${targetId}</code>.`, { parse_mode: "HTML" });
+      return;
+    }
+    const before = Math.max(0, Number(users[idx].vongCuoc) || 0);
+    const after = Math.max(0, before - adjustment);
+    users[idx].vongCuoc = after;
+    writeJson(userJsonFile, users);
+    bot.sendMessage(msg.chat.id, `✅ Đã giảm vòng cược ID <code>${targetId}</code> từ <b>${Math.ceil(before).toLocaleString("vi-VN")}</b> xuống <b>${Math.ceil(after).toLocaleString("vi-VN")}</b> xu.\n📉 Mức giảm: <b>${adjustment.toLocaleString("vi-VN")} xu</b> (${baseAmount.toLocaleString("vi-VN")} x${multiplier})`, { parse_mode: "HTML" });
+    bot.sendMessage(targetId, `🛠️ Admin đã giảm vòng cược của bạn <b>${adjustment.toLocaleString("vi-VN")} xu</b>.\n🔄 Vòng cược còn lại: <b>${Math.ceil(after).toLocaleString("vi-VN")} xu</b>.`, { parse_mode: "HTML" }).catch(() => {});
+  });
+  onAdminCommand(/^\/tangcuoc (\d+) (\d+) x([1-4])$/i, (bot, msg, match) => {
+    if (!isAdminGroupChat(msg.chat.id) || !match) {
+      bot.sendMessage(msg.chat.id, "❌ Lệnh này chỉ dùng trong nhóm admin hoặc sai cú pháp.");
+      return;
+    }
+    const targetId = match[1];
+    const baseAmount = parseInt(match[2], 10);
+    const multiplier = parseInt(match[3], 10);
+    const adjustment = baseAmount * multiplier;
+    const users = readJson(userJsonFile);
+    const idx = users.findIndex((u: any) => String(u.id) === String(targetId));
+    if (idx === -1) {
+      bot.sendMessage(msg.chat.id, `❌ Không tìm thấy người dùng ID <code>${targetId}</code>.`, { parse_mode: "HTML" });
+      return;
+    }
+    const before = Math.max(0, Number(users[idx].vongCuoc) || 0);
+    const after = before + adjustment;
+    users[idx].vongCuoc = after;
+    writeJson(userJsonFile, users);
+    bot.sendMessage(msg.chat.id, `✅ Đã tăng vòng cược ID <code>${targetId}</code> từ <b>${Math.ceil(before).toLocaleString("vi-VN")}</b> lên <b>${Math.ceil(after).toLocaleString("vi-VN")}</b> xu.\n📈 Mức tăng: <b>${adjustment.toLocaleString("vi-VN")} xu</b> (${baseAmount.toLocaleString("vi-VN")} x${multiplier})`, { parse_mode: "HTML" });
+    bot.sendMessage(targetId, `🛠️ Admin đã tăng vòng cược của bạn <b>${adjustment.toLocaleString("vi-VN")} xu</b>.\n🔄 Vòng cược hiện tại: <b>${Math.ceil(after).toLocaleString("vi-VN")} xu</b>.`, { parse_mode: "HTML" }).catch(() => {});
+  });
   onAdminCommand(/^\/reset$/, (bot, msg) => {
     if (!isAdminGroupChat(msg.chat.id)) {
       bot.sendMessage(msg.chat.id, "❌ Lệnh này chỉ dùng trong nhóm admin.");
@@ -3822,18 +3867,18 @@ export function registerAllBotCommands() {
   });
 
 
-  onAdminCommand(/^\/mycode(?:\s+.+)?$/i, (bot, msg) => {
+  onAdminCommand(/^\/(?:mycode|muacode)(?:\s+.+)?$/i, (bot, msg) => {
     if (!isAdminGroupChat(msg.chat.id)) {
       bot.sendMessage(msg.chat.id, "❌ Lệnh này chỉ dùng trong nhóm admin.");
       return;
     }
 
-    const rawArgs = String(msg.text || "").replace(/^\/mycode(?:@\w+)?/i, "").trim();
+    const rawArgs = String(msg.text || "").replace(/^\/(?:mycode|muacode)(?:@\w+)?/i, "").trim();
     const parts = rawArgs.split(/\s+/).filter(Boolean);
     if (parts.length !== 2 && parts.length !== 3) {
       bot.sendMessage(
         msg.chat.id,
-        `⚠️ <b>Sai cú pháp /mycode</b>\n• Ngẫu nhiên: <code>/mycode [số_xu] [số_lượt]</code>\n• Tự đặt mã: <code>/mycode [mã_code] [số_xu] [số_lượt]</code>\n\nVí dụ:\n• <code>/mycode 10000 5</code>\n• <code>/mycode CODEVIP 10000 5</code>`,
+        `⚠️ <b>Sai cú pháp /muacode</b>\n• Ngẫu nhiên: <code>/muacode [số_xu] [số_lượt]</code>\n• Tự đặt mã: <code>/muacode [mã_code] [số_xu] [số_lượt]</code>\n\nVí dụ:\n• <code>/muacode 10000 5</code>\n• <code>/muacode CODEVIP 10000 5</code>`,
         { parse_mode: "HTML" }
       );
       return;
@@ -3877,6 +3922,7 @@ export function registerAllBotCommands() {
     }
 
     const record = createGiftcodeData(finalCode, amount, `ADMIN_${msg.from?.id || "UNKNOWN"}`, maxUses);
+    record.wagerMultiplier = 10;
     giftData.push(record);
     writeJson(giftJsonFile, giftData);
 
@@ -3886,6 +3932,7 @@ export function registerAllBotCommands() {
       `🔑 Mã: <code>/code ${record.gift}</code>\n` +
       `💰 Mệnh giá: <b>${amount.toLocaleString("vi-VN")} xu</b>\n` +
       `🔁 Số lượt nhập: <b>${maxUses}</b>\n` +
+      `🎯 Điều kiện rút tiền: cược đủ <b>x10 giá trị mã</b>\n` +
       `👤 Cách tạo: <b>${customCode ? "Admin tự đặt mã" : "Ngẫu nhiên"}</b>`,
       { parse_mode: "HTML" }
     );
@@ -3903,12 +3950,14 @@ export function registerAllBotCommands() {
       `• <code>/check [id]</code> - Kiểm tra thông tin user\n` +
       `• <code>/nap [id] [xu]</code> - Cộng nạp cho user\n` +
       `• <code>/tru [id] [xu]</code> - Trừ xu user\n` +
+      `• <code>/giamcuoc [id] [xu] x1|x2|x3|x4</code> - Giảm vòng cược\n` +
+      `• <code>/tangcuoc [id] [xu] x1|x2|x3|x4</code> - Tăng vòng cược\n` +
       `• <code>/ban [id]</code> - Khóa tài khoản\n` +
       `• <code>/unban [id]</code> - Mở khóa tài khoản\n` +
       `• <code>/duyet_rut [id] [xu]</code> - Duyệt lệnh rút\n` +
       `• <code>/tuchoi_rut [id] [xu] [lý do]</code> - Từ chối lệnh rút\n` +
-      `• <code>/mycode [số_xu] [số_lượt]</code> - Tạo giftcode ngẫu nhiên\n` +
-      `• <code>/mycode [mã_code] [số_xu] [số_lượt]</code> - Admin tự đặt tên code\n` +
+      `• <code>/muacode [số_xu] [số_lượt]</code> - Tạo giftcode ngẫu nhiên, yêu cầu cược x10\n` +
+      `• <code>/muacode [mã_code] [số_xu] [số_lượt]</code> - Admin tự đặt mã, yêu cầu cược x10\n` +
       `• <code>/reset</code> - Xóa toàn bộ người dùng, reset về người chơi mới\n` +
       `• <code>/resetcode</code> - Xóa toàn bộ giftcode trong server\n` +
       `• <code>/batkm</code> - Bật khuyến mãi 15% (tự tắt sau 1h)\n` +
@@ -5466,7 +5515,7 @@ export function registerAllBotCommands() {
 
         const withdrawIntro = `📤 <b>RÚT TIỀN THẮNG LỚN VỀ THẺ:</b>\n` +
           `⚖️ <b>Hạn mức & Phí rút:</b>\n` +
-          `• Hạn mức tối thiểu (Min): 50.000 xu (với nạp > 20k)\n` +
+          `• Hạn mức tối thiểu: 100.000 xu (tân thủ) | 50.000 xu (đã mở khóa)\n` +
           `• Phí giao dịch rút: 1% (khấu trừ từ số xu rút)\n\n` +
           `🏦 <b>Hệ thống hỗ trợ các ngân hàng:</b>\n` +
           `Vietcombank | Techcombank | MBBank | Vietinbank | Agribank\n\n` +
@@ -5974,8 +6023,8 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
       if (inputAmount === "all" || inputAmount === "max") {
         let calculatedMoney = Math.floor(balance / 1.01); // Assuming 1% fee
         if (!isNoviceUnlocked(user)) {
-          if (calculatedMoney < 50000) {
-            bot1.sendMessage(chat, `❌ Tài khoản tân thủ chưa nạp đủ <b>20.000 xu</b> phải có đủ số dư để rút tối thiểu <b>50.000 xu</b> sau khi trừ phí.`, { parse_mode: "HTML" });
+          if (calculatedMoney < 100000) {
+            bot1.sendMessage(chat, `❌ Tài khoản tân thủ chưa nạp đủ <b>20.000 xu</b> phải có đủ số dư để rút tối thiểu <b>100.000 xu</b> sau khi trừ phí.`, { parse_mode: "HTML" });
             return;
           }
         } else if (calculatedMoney < minWithdraw) {
@@ -6005,11 +6054,11 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
           return;
         }
 
-        if (money < 50000) {
-          bot1.sendMessage(chat, `❌ Hạn mức rút tối thiểu dành cho tài khoản Tân Thủ là <b>50.000 xu</b>.`, { parse_mode: "HTML" });
+        if (money < 100000) {
+          bot1.sendMessage(chat, `❌ Hạn mức rút tối thiểu dành cho tài khoản Tân Thủ là <b>100.000 xu</b>.`, { parse_mode: "HTML" });
           return;
         }
-        // Lệnh rút đầu tiên của Tân Thủ phải từ 50.000 xu trở lên.
+        // Lệnh rút đầu tiên của Tân Thủ phải từ 100.000 xu trở lên.
       } else if (money < minWithdraw) {
         bot1.sendMessage(chat, `❌ Hạn mức rút tối thiểu ${minWithdraw.toLocaleString("vi-VN")} xu!`, { parse_mode: "HTML" });
         return;
@@ -6175,7 +6224,8 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
 
       users[uIdx].sd = (users[uIdx].sd || 0) + g.value;
       if (users[uIdx].money !== undefined) users[uIdx].money = (users[uIdx].money || 0) + g.value;
-      users[uIdx].vongCuoc = (users[uIdx].vongCuoc || 0) + g.value;
+      const wagerMultiplier = Math.max(1, Number(g.wagerMultiplier) || 1);
+      users[uIdx].vongCuoc = (users[uIdx].vongCuoc || 0) + (g.value * wagerMultiplier);
 
       const useTime = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
       const nextUsedBy = [...usedByList, String(chat)];
@@ -6190,7 +6240,11 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
 
       const remainUses = Math.max(0, maxUses - nextUsedBy.length);
       const remainText = maxUses > 1 ? `\n🔁 Còn lại: <b>${remainUses}</b> lượt nhập` : "";
-      bot1.sendMessage(chat, `🎉 Nhập Giftcode +<b>${g.value.toLocaleString("vi-VN")} xu</b> thành công!${remainText}`, { parse_mode: "HTML" });
+      const wagerRequirement = g.value * wagerMultiplier;
+      const wagerText = wagerMultiplier > 1
+        ? `\n🎯 Vòng cược cần hoàn thành: <b>${wagerRequirement.toLocaleString("vi-VN")} xu (x${wagerMultiplier})</b>`
+        : "";
+      bot1.sendMessage(chat, `🎉 Nhập Giftcode +<b>${g.value.toLocaleString("vi-VN")} xu</b> thành công!${wagerText}${remainText}`, { parse_mode: "HTML" });
       const userIdStr = String(chat);
       const maskedId = userIdStr.length > 5 ? `*****${userIdStr.slice(-5)}` : userIdStr;
       sendMessageToRoom(`↪️ Người chơi <b>${maskedId}</b>\nNhận giftcode <code>${g.gift}</code> thành công! Giá trị: <b>${g.value.toLocaleString("vi-VN")}</b>`, { parse_mode: "HTML" });
@@ -6266,9 +6320,10 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
 
   bot1.onText(/^\/muacode\s+(\d+)(?:\s+(\d+))?$/, (msg, match) => {
     const chat = msg.chat.id;
-    const userId = msg.from?.id;
+        const userId = msg.from?.id;
     if (!userId || isBanned(userId) || !match) return;
-
+    // Admin dùng /muacode trong nhóm admin để tạo code, không phải mua code bằng số dư.
+    if (isAdminGroupChat(chat) && isAdminUser(userId)) return;
     let quantity = 1;
     let value = 0;
 
