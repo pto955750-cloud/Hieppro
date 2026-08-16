@@ -17,8 +17,49 @@ const __dirname = process.cwd();
 
 const userFilePath = path.join(__dirname, 'user.json');
 const configFilePath = path.join(__dirname, 'config.json');
-const GROUP_CHAT_ID = String(process.env.GROUP_CHAT_ID || '').trim();
-const PROMOTION_INTERVAL_MS = 5 * 60 * 1000;
+const roomFilePath = path.join(__dirname, 'rooms.json');
+
+const PROMOTION_MESSAGE = `🎁 NHẬN CODE FREE 🎁
+
+🕵️ Tương tác đủ mốc là nhận code ngay - trị giá đến 22.222đ
+🕵️ Đơn giản vậy thôi, còn chờ gì nữa?
+
+🛩 /help - Xem chi tiết chương trình
+🛩 /checktt - Kiểm tra tương tác của bạn`;
+
+function readRoomIds() {
+  try {
+    if (!fs.existsSync(roomFilePath)) {
+      fs.writeFileSync(roomFilePath, '[]', 'utf8');
+      return [];
+    }
+    const raw = fs.readFileSync(roomFilePath, 'utf8');
+    const rooms = JSON.parse(raw);
+    return Array.isArray(rooms) ? rooms.map(String) : [];
+  } catch (error) {
+    console.error("❌ Lỗi đọc file rooms.json:", error.message);
+    return [];
+  }
+}
+
+function writeRoomIds(roomIds) {
+  try {
+    fs.writeFileSync(roomFilePath, JSON.stringify([...new Set(roomIds)], null, 2), 'utf8');
+  } catch (error) {
+    console.error("❌ Lỗi lưu file rooms.json:", error.message);
+  }
+}
+
+function rememberRoom(chat) {
+  if (!chat || !['group', 'supergroup'].includes(chat.type)) return;
+  const roomIds = readRoomIds();
+  const roomId = String(chat.id);
+  if (!roomIds.includes(roomId)) {
+    roomIds.push(roomId);
+    writeRoomIds(roomIds);
+    console.log(`✅ Đã ghi nhận room: ${chat.title || roomId}`);
+  }
+}
 
 // --- HÀM TRỢ GIÚP ĐỌC / GHI DỮ LIỆU AN TOÀN ---
 
@@ -50,7 +91,6 @@ function readConfig() {
       const defaultYMD = new Date().toISOString().split('T')[0];
       const defaultConfig = {
         tokens: [],
-        groupChatId: '',
         messageMilestones: [
           { count: 10, code: "DRAGON_10", amount: "500đ" },
           { count: 100, code: "DRAGON_100", amount: "1.111đ" },
@@ -94,7 +134,7 @@ if (tokens.length === 0) {
 }
 
 // Khởi tạo cụm active bots từ danh sách token đã cấu hình
-export const activeBots = [];
+const activeBots = [];
 
 tokens.forEach((token, index) => {
   try {
@@ -117,71 +157,6 @@ activeBots.forEach((bot, botIdx) => {
     console.error(`❌ Lỗi lấy thông tin bot #${botIdx + 1}:`, err.message);
   });
 });
-
-function getRoomChatId() {
-  const currentConfig = readConfig();
-  return String(GROUP_CHAT_ID || currentConfig.groupChatId || '').trim();
-}
-
-export function sendFreeCodePromotionToRoom() {
-  const roomId = getRoomChatId();
-  if (!roomId || activeBots.length === 0) {
-    console.log('⚠️ Chưa cấu hình groupChatId/GROUP_CHAT_ID hoặc chưa có bot hoạt động.');
-    return Promise.resolve(null);
-  }
-
-  const promotionText = `🎁 <b>NHẬN CODE FREE</b> 🎁\n\n` +
-    `🕵️ Tương tác đủ mốc là nhận code ngay - trị giá đến 22.222đ\n` +
-    `🕵️ Đơn giản vậy thôi, còn chờ gì nữa?\n\n` +
-    `🛩 /help - Xem chi tiết chương trình\n` +
-    `🛩 /checktt - Kiểm tra tương tác của bạn`;
-
-  return activeBots[0].sendMessage(roomId, promotionText, {
-    parse_mode: 'HTML',
-    disable_web_page_preview: true
-  }).catch(error => {
-    console.error('❌ Lỗi gửi thông báo nhận code vào room:', error.message);
-    return null;
-  });
-}
-
-function moderateRoomMessage(bot, msg, text) {
-  if (msg.chat.type === 'private') return false;
-
-  const roomId = getRoomChatId();
-  if (roomId && String(msg.chat.id) !== roomId) return false;
-
-  const hasLink = /(https?:\\/\\/[^\\s]+|t\\.me\\/[^\\s]+|www\\.[^\\s]+)/i.test(text);
-  const hasAtSymbol = text.includes('@');
-  if (!hasLink && !hasAtSymbol) return false;
-
-  bot.deleteMessage(msg.chat.id, msg.message_id).catch(() => {});
-
-  const userId = String(msg.from?.id || '');
-  if (!userId) return true;
-
-  const users = readUserData();
-  const user = users.find(u => String(u.id) === userId);
-  if (!user) return true;
-
-  user.linkViolationCount = (user.linkViolationCount || 0) + 1;
-  if (user.linkViolationCount >= 3) {
-    const untilDate = Math.floor(Date.now() / 1000) + 30 * 60;
-    bot.restrictChatMember(msg.chat.id, msg.from.id, {
-      until_date: untilDate,
-      permissions: { can_send_messages: false }
-    }).catch(() => {});
-    user.linkViolationCount = 0;
-  }
-  writeUserData(users);
-  return true;
-}
-
-// Gửi thông báo khi khởi động và lặp lại mỗi 2 giờ nếu đã cấu hình room.
-setTimeout(() => {
-  sendFreeCodePromotionToRoom();
-  if (getRoomChatId()) setInterval(sendFreeCodePromotionToRoom, PROMOTION_INTERVAL_MS);
-}, 3000);
 
 // --- HÀM KIỂM TRA RESET SAU 00H HẰNG NGÀY ---
 function checkAndRunDailyReset() {
@@ -220,6 +195,26 @@ function checkAndRunDailyReset() {
 // Chạy luồng kiểm tra reset định kỳ mỗi 10 giây
 setInterval(checkAndRunDailyReset, 10000);
 
+// Tự động gửi thông báo chương trình vào các room đã từng tương tác với bot mỗi 4 phút.
+// Chỉ bot đầu tiên trong cụm gửi để tránh gửi trùng khi chạy nhiều bot.
+const PROMOTION_INTERVAL_MS = 4 * 60 * 1000;
+setInterval(() => {
+  const senderBot = activeBots[0];
+  if (!senderBot) return;
+
+  const roomIds = readRoomIds();
+  roomIds.forEach(roomId => {
+    senderBot.sendMessage(roomId, PROMOTION_MESSAGE, { disable_web_page_preview: true })
+      .then(() => console.log(`📣 Đã gửi thông báo nhận code vào room ${roomId}`))
+      .catch(error => {
+        console.error(`❌ Không gửi được thông báo vào room ${roomId}:`, error.message);
+        if (/chat not found|bot was kicked|forbidden|not enough rights/i.test(error.message || '')) {
+          writeRoomIds(readRoomIds().filter(id => id !== String(roomId)));
+        }
+      });
+  });
+}, PROMOTION_INTERVAL_MS);
+
 // --- ĐĂNG KÝ SỰ KIỆN LẮNG NGHE CHO TOÀN BỘ CÁN BỘ BOT TRONG CỤM ---
 activeBots.forEach((bot, index) => {
   bot.on("message", async (msg) => {
@@ -227,13 +222,25 @@ activeBots.forEach((bot, index) => {
     if (!text) return;
 
     const chatId = msg.chat.id;
+    rememberRoom(msg.chat);
     const userId = msg.from?.id ? msg.from.id.toString() : null;
     const senderName = msg.from?.username || msg.from?.first_name || 'Người chơi';
 
     if (!userId) return;
 
-    // Xóa link hoặc mọi tin nhắn có ký tự @ trong room trước khi tính tương tác.
-    if (moderateRoomMessage(bot, msg, text)) return;
+    // Tự động xoá tin nhắn người chơi trong room nếu có link hoặc ký tự @.
+    // Các lệnh hệ thống như /help và /checktt được giữ lại để bot vẫn hoạt động bình thường.
+    const isRoom = ['group', 'supergroup'].includes(msg.chat.type);
+    const isSystemCommand = text.startsWith('/');
+    const containsLink = /(?:https?:\\/\\/|www\\.|t\\.me\\/|telegram\\.me\\/|(?:^|\\s)(?:[a-z0-9-]+\\.)+[a-z]{2,}(?:\\/\\S*)?)/i.test(text);
+    const containsAtMention = /@[\\p{L}\\p{N}_]{1,}/u.test(text);
+
+    if (isRoom && !isSystemCommand && (containsLink || containsAtMention)) {
+      bot.deleteMessage(chatId, msg.message_id)
+        .then(() => console.log(`🧹 Đã xoá tin nhắn chứa link/@ của ${senderName} trong room ${chatId}`))
+        .catch(error => console.error(`❌ Không thể xoá tin nhắn trong room ${chatId}:`, error.message));
+      return;
+    }
 
     // Quét sự kiện sang mới trước khi tính tương tác hằng ngày
     checkAndRunDailyReset();
@@ -287,7 +294,10 @@ ${milestoneIntro}
       const milestones = (currentConfig.messageMilestones || []).sort((a, b) => a.count - b.count);
       
       const usersList = readUserData();
-      const activeUser = usersList.find(u => String(u.id) === String(userId)) || user;
+      const activeUser = usersList.find(u => String(u.id) === String(userId)) || {
+        name: senderName,
+        msgCount: 0
+      };
       const userMsgCount = activeUser.msgCount || 0;
 
       let milestoneIntro = milestones.map(m => `• Đạt ${m.count.toLocaleString("vi-VN")} tin nhắn → Nhận ${m.amount}`).join('\n');
@@ -531,4 +541,3 @@ ${claimedCodesText}
 });
 
 console.log("🚀 Hệ thống Telegram Custom Multibot đang sẵn sàng chạy nền!");
-export { getRoomChatId, moderateRoomMessage };
