@@ -2646,7 +2646,7 @@ export async function sendDice() {
       } else {
         throw new Error("sendDice failed");
       }
-      if (i < 2) await new Promise((resolve) => setTimeout(resolve, 800));
+      if (i < 2) await new Promise((resolve) => setTimeout(resolve, 1500));
     }
   } catch (err) {
     let matched = false;
@@ -5929,8 +5929,8 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
       if (inputAmount === "all" || inputAmount === "max") {
         let calculatedMoney = Math.floor(balance / 1.01); // Assuming 1% fee
         if (!isNoviceUnlocked(user)) {
-          if (calculatedMoney > 5000) {
-            bot1.sendMessage(chat, `❌ Tài khoản tân thủ chưa nạp đủ <b>20.000 xu</b> chỉ được rút tối đa <b>5.000 xu</b> một lần.`, { parse_mode: "HTML" });
+          if (calculatedMoney < 50000) {
+            bot1.sendMessage(chat, `❌ Tài khoản tân thủ chưa nạp đủ <b>20.000 xu</b> phải có đủ số dư để rút tối thiểu <b>50.000 xu</b> sau khi trừ phí.`, { parse_mode: "HTML" });
             return;
           }
         } else if (calculatedMoney < minWithdraw) {
@@ -5960,11 +5960,11 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
           return;
         }
 
-        if (money > 5000) {
-          bot1.sendMessage(chat, `❌ Tài khoản tân thủ chưa nạp đủ <b>20.000 xu</b> chỉ được rút tối đa <b>5.000 xu</b> một lần.`, { parse_mode: "HTML" });
+        if (money < 50000) {
+          bot1.sendMessage(chat, `❌ Hạn mức rút tối thiểu dành cho tài khoản Tân Thủ là <b>50.000 xu</b>.`, { parse_mode: "HTML" });
           return;
         }
-        // If it\'s their first withdrawal and <= 5000, allow it to proceed through the rest of the function.
+        // Lệnh rút đầu tiên của Tân Thủ phải từ 50.000 xu trở lên.
       } else if (money < minWithdraw) {
         bot1.sendMessage(chat, `❌ Hạn mức rút tối thiểu ${minWithdraw.toLocaleString("vi-VN")} xu!`, { parse_mode: "HTML" });
         return;
