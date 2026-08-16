@@ -517,6 +517,31 @@ export function createManualDepositRequest(user: any, userId: string | number, a
   return { time, content, requestId };
 }
 
+export function saveDepositQrMessage(user: any, requestId: string, chatId: string | number, messageId: number) {
+  const item = (user?.depositHistory || []).find((h: any) => String(h.requestId || "") === String(requestId));
+  if (!item) return;
+  item.qrChatId = String(chatId);
+  item.qrMessageId = Number(messageId);
+}
+
+export function deleteDepositQrMessage(user: any, requestId?: string, amount?: number, content?: string) {
+  const history = Array.isArray(user?.depositHistory) ? user.depositHistory : [];
+  const item = history.find((h: any) => {
+    const status = String(h.status || "");
+    if (status !== "Chờ chuyển khoản" && status !== "Chờ kiểm tra") return false;
+    const sameRequest = requestId && String(h.requestId || "") === String(requestId);
+    const sameContent = content && String(h.transferContent || "").trim() === String(content).trim();
+    const historyAmount = Number(String(h.amount || 0).replace(/\./g, "").replace(/,/g, ""));
+    const sameAmount = amount !== undefined && historyAmount === Number(amount);
+    return !!(sameRequest || sameContent || (sameAmount && !requestId && !content));
+  });
+  if (item?.qrChatId !== undefined && item?.qrMessageId !== undefined) {
+    bot1.deleteMessage(String(item.qrChatId), String(item.qrMessageId)).catch(() => {});
+    delete item.qrChatId;
+    delete item.qrMessageId;
+  }
+}
+
 export const DEPOSIT_ORDER_COOLDOWN_SECONDS = 150;
 
 export function getDepositOrderCooldownRemainingSeconds(user: any) {
@@ -2078,9 +2103,9 @@ export function getDuaTopReplyMarkup() {
   return {
     inline_keyboard: [
       [
-        { text: "Tốp Hôm Nay", callback_data: "duatop_today" },
-        { text: "Tốp Hôm Qua", callback_data: "duatop_yesterday" },
-        { text: "Tốp Tuần", callback_data: "duatop_week" }
+        { text: "🏆 Tốp Hôm Nay", callback_data: "duatop_today" },
+        { text: "📅 Tốp Hôm Qua", callback_data: "duatop_yesterday" },
+        { text: "👑 Tốp Tuần", callback_data: "duatop_week" }
       ],
       [{ text: "🔥 BXH ĐU DÂY", callback_data: "duatop_du_day" }]
     ]
@@ -3649,6 +3674,7 @@ export function registerAllBotCommands() {
       return;
     }
 
+    deleteDepositQrMessage(users[idx], undefined, money);
     const result = addDepositToUser(users[idx], money);
 
     if (!users[idx].depositHistory) users[idx].depositHistory = [];
@@ -3919,7 +3945,7 @@ export function registerAllBotCommands() {
       bot.sendMessage(msg.chat.id, `✅ Chấp thuận đơn rút ${money.toLocaleString("vi-VN")} xu cho ID ${targetId}.`);
       bot1.sendMessage(targetId, `✅ Đơn rút xu trị giá <b>${money.toLocaleString("vi-VN")} xu</b> đã được phê duyệt chuyển khoản thành công!`, { parse_mode: "HTML" }).catch(() => {});
       if (adminMsgId) unpinFromAdminGroup(adminMsgId);
-      sendMessageToRoom(`<b>🤩🏮 ID người chơi: ${formatMaskedId(u.id)} - ${bankName} Rút thành công: ${money.toLocaleString("vi-VN")}</b>`, { parse_mode: "HTML" });
+      sendMessageToRoom(`🎉🧧 [BOT] Người chơi ID: ${formatMaskedId(u.id)}\n\n- Rút Bank thành công: ${money.toLocaleString("vi-VN")}`);
     }
   });
 
@@ -4232,7 +4258,7 @@ export function registerAllBotCommands() {
             ? `MM ${parseInt(String(type || "").toLowerCase().replace("mm", ""), 10)}`
             : type.toUpperCase();
       const betAmountText = betValue.toLocaleString("vi-VN");
-      const publicBetSummary = `🥉 Đặt thành công phiên XX #${state.phien}\n${shortBetCode} ${betAmountText}`;
+      const publicBetSummary = `${badgePrefix}Đặt thành công phiên XX #${state.phien}\n${shortBetCode} ${betAmountText}`;
       const privateAnonymousSummary = `🕵️ <b>${anonymousLabel}</b> cược thành công <b>${typeLabel}</b> • <b>${betValue.toLocaleString("vi-VN")} xu</b> • phiên <b>#${state.phien}</b>`;
       const mainBotRoomSummary =
         `${anonymousBadge} Đặt thành công phiên XX #${state.phien}\n` +
@@ -4853,7 +4879,7 @@ export function registerAllBotCommands() {
             inline_keyboard: [
               [{ text: "📥 Nạp Xu", callback_data: "deposit" }, { text: "📤 Rút Bank", callback_data: "withdraw" }],
               [{ text: "👑 Víp", callback_data: "vip_info" }],
-              [{ text: "Chuyển Tiền", callback_data: "transfer_guide" }, { text: "🔑 Nhập Giftcode", callback_data: "redeem_gift" }],
+              [{ text: "💸 Chuyển Tiền", callback_data: "transfer_guide" }, { text: "🔑 Nhập Giftcode", callback_data: "redeem_gift" }],
               [{ text: "🎟️ Mua Giftcode", callback_data: "buy_giftcode" }],
               [{ text: "📜 LS Cược", callback_data: "history_bet" }, { text: "📜 LS Nạp", callback_data: "history_dep" }, { text: "📜 LS Rút", callback_data: "history_wit" }]
             ]
@@ -5196,10 +5222,10 @@ export function registerAllBotCommands() {
           reply_markup: {
             inline_keyboard: [
               [
-                { text: "Tốp Đu Dây Thắng Hôm Nay", callback_data: "duatop_duday_win" },
+                { text: "🔥 Tốp Đu Dây Thắng Hôm Nay", callback_data: "duatop_duday_win" },
               ],
               [
-                { text: "Tốp Đu Dây Thua Hôm Nay", callback_data: "duatop_duday_loss" }
+                { text: "💥 Tốp Đu Dây Thua Hôm Nay", callback_data: "duatop_duday_loss" }
               ]
             ]
           }
@@ -5323,22 +5349,22 @@ export function registerAllBotCommands() {
             reply_markup: {
               inline_keyboard: [
                 [
-                  { text: "10.000", callback_data: "deposit_quick_10000" },
-                  { text: "20.000", callback_data: "deposit_quick_20000" },
-                  { text: "50.000", callback_data: "deposit_quick_50000" }
+                  { text: "💵 10.000", callback_data: "deposit_quick_10000" },
+                  { text: "💵 20.000", callback_data: "deposit_quick_20000" },
+                  { text: "💵 50.000", callback_data: "deposit_quick_50000" }
                 ],
                 [
-                  { text: "100.000", callback_data: "deposit_quick_100000" },
-                  { text: "200.000", callback_data: "deposit_quick_200000" },
-                  { text: "300.000", callback_data: "deposit_quick_300000" }
+                  { text: "💰 100.000", callback_data: "deposit_quick_100000" },
+                  { text: "💰 200.000", callback_data: "deposit_quick_200000" },
+                  { text: "💰 300.000", callback_data: "deposit_quick_300000" }
                 ],
                 [
-                  { text: "500.000", callback_data: "deposit_quick_500000" },
-                  { text: "1.000.000", callback_data: "deposit_quick_1000000" },
-                  { text: "2.000.000", callback_data: "deposit_quick_2000000" }
+                  { text: "💎 500.000", callback_data: "deposit_quick_500000" },
+                  { text: "💎 1.000.000", callback_data: "deposit_quick_1000000" },
+                  { text: "👑 2.000.000", callback_data: "deposit_quick_2000000" }
                 ],
                 [
-                  { text: "3.000.000", callback_data: "deposit_quick_3000000" }
+                  { text: "👑 3.000.000", callback_data: "deposit_quick_3000000" }
                 ]
               ]
             }
@@ -5374,8 +5400,10 @@ export function registerAllBotCommands() {
             inline_keyboard: [[{ text: "✅ Đã Chuyển Khoản", callback_data: `deposit_sent_${req.requestId}` }]]
           }
         }).then((sentMessage) => {
+          saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
+          writeJson(userJsonFile, users);
           setTimeout(() => {
-            bot1.deleteMessage(chat, sentMessage.message_id).catch(e => console.error("Error deleting message:", e));
+            deleteDepositQrMessage(user, req.requestId);
           }, 10 * 60 * 1000); // 10 minutes
         }).catch(() => {
           bot1.sendMessage(chat, formatDepositOrderCaption(amount, req.content), {
@@ -5384,8 +5412,10 @@ export function registerAllBotCommands() {
               inline_keyboard: [[{ text: "✅ Đã Chuyển Khoản", callback_data: `deposit_sent_${req.requestId}` }]]
             }
           }).then((sentMessage) => {
+            saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
+            writeJson(userJsonFile, users);
             setTimeout(() => {
-              bot1.deleteMessage(chat, sentMessage.message_id).catch(e => console.error("Error deleting message:", e));
+              deleteDepositQrMessage(user, req.requestId);
             }, 10 * 60 * 1000); // 10 minutes
           }).catch(e => console.error("Error sending fallback message:", e));
         });
@@ -5557,6 +5587,16 @@ export function registerAllBotCommands() {
 
         writeJson(userJsonFile, users);
         bot1.sendMessage(chat, msgStr, { parse_mode: "HTML" });
+        sendMessageToRoom(
+          `🔥 ID: <code>${formatMaskedId(user.id)}</code> đã điểm danh Fan cứng!\n` +
+          `Tham gia Fan cứng DRAGON để nhận code 20K ngay nào.`,
+          {
+            parse_mode: "HTML",
+            reply_markup: {
+              inline_keyboard: [[{ text: "🔥 Điểm danh Fan cứng", url: `https://t.me/${botUsernames[0]}?start=event_checkin` }]]
+            }
+          }
+        );
         bot1.answerCallbackQuery(q.id, { text: "Đã điểm danh!" }).catch(() => {});
       } else if (act === "history_bet") {
         const history = (user.betHistory || []).slice().reverse();
@@ -5777,6 +5817,7 @@ export function registerAllBotCommands() {
           return;
         }
         const user = users[idx];
+        deleteDepositQrMessage(user, undefined, amount);
         const result = addDepositToUser(user, amount);
 
         if (!user.depositHistory) user.depositHistory = [];
@@ -5837,8 +5878,10 @@ export function registerAllBotCommands() {
             inline_keyboard: [[{ text: "✅ Đã Chuyển Khoản", callback_data: `deposit_sent_${req.requestId}` }]]
           }
         }).then((sentMessage) => {
+          saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
+          writeJson(userJsonFile, users);
           setTimeout(() => {
-            bot1.deleteMessage(chat, sentMessage.message_id).catch(e => console.error("Error deleting message:", e));
+            deleteDepositQrMessage(user, req.requestId);
           }, 10 * 60 * 1000); // 10 minutes
         }).catch(() => {
           bot1.sendMessage(chat, formatDepositOrderCaption(amount, req.content), {
@@ -5847,8 +5890,10 @@ export function registerAllBotCommands() {
               inline_keyboard: [[{ text: "✅ Đã Chuyển Khoản", callback_data: `deposit_sent_${req.requestId}` }]]
             }
           }).then((sentMessage) => {
+            saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
+            writeJson(userJsonFile, users);
             setTimeout(() => {
-              bot1.deleteMessage(chat, sentMessage.message_id).catch(e => console.error("Error deleting message:", e));
+              deleteDepositQrMessage(user, req.requestId);
             }, 10 * 60 * 1000); // 10 minutes
           }).catch(e => console.error("Error sending fallback message:", e));
         });
@@ -6418,6 +6463,18 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
           }
         }
       );
+    } else if (startParam === "event_checkin") {
+      bot1.sendMessage(
+        chat,
+        `🔥 <b>ĐIỂM DANH FAN CỨNG DRAGON</b>\n\n` +
+        `✅ Đổi tên Telegram có chứa <b>${EVENT_KEYWORD}</b>\n` +
+        `✅ Hôm nay đã nạp tối thiểu <b>${EVENT_DAILY_MIN_DEPOSIT.toLocaleString("vi-VN")}đ</b>\n\n` +
+        `🎁 Điểm danh đủ điều kiện để nhận code <b>20K</b>.`,
+        {
+          parse_mode: "HTML",
+          reply_markup: { inline_keyboard: [[{ text: "✅ Điểm danh ngay", callback_data: "event_checkin" }]] }
+        }
+      );
     } else if (startParam === "games") {
       const users = readJson(userJsonFile);
       const user = users.find((x: any) => String(x.id) === String(chat));
@@ -6513,9 +6570,10 @@ async function bootstrap() {
       const user = users[userIdx];
       
       // Sử dụng hàm addDepositToUser để xử lý cộng tiền, vòng cược, VIP, khuyến mãi
-      const result = addDepositToUser(user, amount);
+        deleteDepositQrMessage(user, transId, amount, content);
+        const result = addDepositToUser(user, amount);
 
-      // Lưu lịch sử nạp tiền
+        // Lưu lịch sử nạp tiền
       if (!user.depositHistory) user.depositHistory = [];
       user.depositHistory.unshift({
         time: moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss"),
@@ -6752,7 +6810,7 @@ async function bootstrap() {
       bot1.sendMessage(id, `❌ Đơn rút xu trị giá ${money.toLocaleString("vi-VN")} xu đã bị từ chối! Hoàn xu vào ví.`).catch(() => {});
     } else {
       bot1.sendMessage(id, `✅ Yêu cầu rút xu trị giá ${money.toLocaleString("vi-VN")} xu đã được duyệt chuyển khoản thành công!`).catch(() => {});
-      sendMessageToRoom(`<b>🤩 Rút Xu Thành Công - ID ${formatMaskedId(u.id)}: +${money.toLocaleString("vi-VN")} xu về ${bankName}</b>`, { parse_mode: "HTML" });
+      sendMessageToRoom(`🎉🧧 [BOT] Người chơi ID: ${formatMaskedId(u.id)}\n\n- Rút Bank thành công: ${money.toLocaleString("vi-VN")}`);
     }
 
     writeJson(userJsonFile, users);
