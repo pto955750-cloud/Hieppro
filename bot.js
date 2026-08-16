@@ -232,8 +232,8 @@ activeBots.forEach((bot, index) => {
     // Các lệnh hệ thống như /help và /checktt được giữ lại để bot vẫn hoạt động bình thường.
     const isRoom = ['group', 'supergroup'].includes(msg.chat.type);
     const isSystemCommand = text.startsWith('/');
-    const containsLink = /(?:https?:\\/\\/|www\\.|t\\.me\\/|telegram\\.me\\/|(?:^|\\s)(?:[a-z0-9-]+\\.)+[a-z]{2,}(?:\\/\\S*)?)/i.test(text);
-    const containsAtMention = /@[\\p{L}\\p{N}_]{1,}/u.test(text);
+    const containsLink = /(?:https?:\/\/|www\.|t\.me\/|telegram\.me\/|(?:^|\s)(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/\S*)?)/i.test(text);
+    const containsAtMention = /@[\p{L}\p{N}_]{1,}/u.test(text);
 
     if (isRoom && !isSystemCommand && (containsLink || containsAtMention)) {
       bot.deleteMessage(chatId, msg.message_id)
