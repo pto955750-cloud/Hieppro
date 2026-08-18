@@ -5901,13 +5901,39 @@ export function registerAllBotCommands() {
       bot1.answerCallbackQuery(q.id, { text: "Đã mở thông tin VIP" }).catch(() => {});
       const vipUsers = readJson(userJsonFile);
       const vipUser = vipUsers.find((u: any) => String(u.id) === String(chat)) || { id: chat, vipPoints: 0, vipPointsTotal: 0 };
-      bot1.sendMessage(chat, formatVipGuideMessage(vipUser), { parse_mode: "HTML" }).catch((err: any) => console.error("vip_info error:", err?.message || err));
+      bot1.sendMessage(chat, formatVipGuideMessage(vipUser), {
+        parse_mode: "HTML",
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "Đổi điểm VIP", icon_custom_emoji_id: "5246762912428603768", callback_data: "vip_redeem" }],
+            [{ text: "Làm mới VIP", icon_custom_emoji_id: "5197371802136892976", callback_data: "vip_refresh" }]
+          ]
+        }
+      }).catch((err: any) => console.error("vip_info error:", err?.message || err));
       return;
     }
     try {
       const users = readJson(userJsonFile);
       const user = users.find((u: any) => String(u.id) === String(chat));
       if (!user) return;
+
+      if (act === "vip_redeem") {
+        bot1.sendMessage(chat, "❤️ <b>Cách đổi điểm VIP</b>\n<code>/doidiemvip [số điểm]</code>\nVD: <code>/doidiemvip 100</code>", { parse_mode: "HTML" }).catch(() => {});
+        bot1.answerCallbackQuery(q.id).catch(() => {});
+        return;
+      } else if (act === "vip_refresh") {
+        bot1.sendMessage(chat, formatVipGuideMessage(user), {
+          parse_mode: "HTML",
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "Đổi điểm VIP", icon_custom_emoji_id: "5246762912428603768", callback_data: "vip_redeem" }],
+              [{ text: "Làm mới VIP", icon_custom_emoji_id: "5197371802136892976", callback_data: "vip_refresh" }]
+            ]
+          }
+        }).catch(() => {});
+        bot1.answerCallbackQuery(q.id).catch(() => {});
+        return;
+      }
 
       if (act.startsWith("solo_roll_")) {
         const roomCode = act.replace("solo_roll_", "").toUpperCase();
