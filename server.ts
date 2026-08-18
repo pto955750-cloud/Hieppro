@@ -1554,9 +1554,9 @@ export function formatSoloOpenRooms(rooms: SoloRoom[] = readSoloRooms()): string
 }
 
 export function formatSoloLobbyMessage(rooms: SoloRoom[] = readSoloRooms()): string {
-  return `🎲 <b>GAME SOLO XÚC XẮC</b> 🎲\n` +
+  return `${custom3DEmoji("5456337168781810982", "🎲")} <b>GAME SOLO XÚC XẮC</b> ${custom3DEmoji("5456337168781810982", "🎲")}\n` +
     `Tạo phòng và mời bạn bè tham gia đấu xúc xắc. Mỗi người tung <b>1 viên xúc xắc 3D Telegram</b>. Người có kết quả cao hơn sẽ thắng.\n\n` +
-    `👉 Số tiền chơi tối thiểu là <b>${SOLO_MIN_BET.toLocaleString("vi-VN")}</b> (không giới hạn tối đa theo cấu hình game, chỉ cần đủ số dư).\n` +
+    `${custom3DEmoji("5449683594425410231", "👉")} Số tiền chơi tối thiểu là <b>${SOLO_MIN_BET.toLocaleString("vi-VN")}</b> (không giới hạn tối đa theo cấu hình game, chỉ cần đủ số dư).\n` +
     `- Tỉ lệ trả thưởng <b>${SOLO_PAYOUT_RATE.toFixed(2)}</b>\n\n` +
     `Cách chơi:\n` +
     `<code>solo [Số tiền]</code> để tạo phòng chơi\n` +
@@ -1568,7 +1568,7 @@ export function formatSoloLobbyMessage(rooms: SoloRoom[] = readSoloRooms()): str
 }
 
 export function formatRoomDefaultGuideMessage(): string {
-  return `💥 <b>GAME TÀI XỈU SĂN HŨ</b> 💥\n` +
+  return `${custom3DEmoji("5424972470023104089", "💥")} <b>GAME TÀI XỈU SĂN HŨ</b> ${custom3DEmoji("5424972470023104089", "💥")}\n` +
     `🏛 Nhóm chơi game: ${gameRoomLink}\n\n` +
     `- T: Tổng 3 viên XX từ 11 - 18 Tài.\n` +
     `- X: Tổng 3 viên XX từ 3 - 10 Xỉu.\n` +
@@ -1671,15 +1671,15 @@ export function formatSoloPinnedRoomMessage(room: SoloRoom): string {
 }
 
 export function formatTelegramXXGuideMessage(): string {
-  return `🎲 <b>XÚC XẮC TELEGRAM</b> 🎲\n\n` +
+  return `${custom3DEmoji("6332246446871418518", "🎲")} <b>XÚC XẮC TELEGRAM</b> ${custom3DEmoji("6332246446871418518", "🎲")}\n\n` +
     `Chế độ chơi trực tiếp trong bot chính.\n\n` +
     `Nội dung | Kết quả 1 xúc xắc | Tỷ lệ ăn\n` +
     `<code>XXC</code> | <b>2,4,6</b> | <b>x${TELEGRAM_XX_PAYOUT_RATE.toFixed(2)}</b>\n` +
     `<code>XXL</code> | <b>1,3,5</b> | <b>x${TELEGRAM_XX_PAYOUT_RATE.toFixed(2)}</b>\n` +
     `<code>XXX</code> | <b>1,2,3</b> | <b>x${TELEGRAM_XX_PAYOUT_RATE.toFixed(2)}</b>\n` +
     `<code>XXT</code> | <b>4,5,6</b> | <b>x${TELEGRAM_XX_PAYOUT_RATE.toFixed(2)}</b>\n\n` +
-    `👉 Tối thiểu là <b>${TELEGRAM_XX_MIN_BET.toLocaleString("vi-VN")}</b> và tối đa là <b>${TELEGRAM_XX_MAX_BET.toLocaleString("vi-VN")}</b>\n\n` +
-    `🔖 Cách chơi: <code>tung xx [Nội dung] [tiền cược]</code>\n` +
+    `${custom3DEmoji("5449683594425410231", "👉")} Tối thiểu là <b>${TELEGRAM_XX_MIN_BET.toLocaleString("vi-VN")}</b> và tối đa là <b>${TELEGRAM_XX_MAX_BET.toLocaleString("vi-VN")}</b>\n\n` +
+    `${custom3DEmoji("5246762912428603768", "🔖")} Cách chơi: <code>tung xx [Nội dung] [tiền cược]</code>\n` +
     `VD: <code>tung xx XXC 10000</code> hoặc <code>tung xx XXL 10000</code>`;
 }
 
@@ -1726,7 +1726,7 @@ export interface XsmbResult {
 
 export function formatLoDeTelegramGuideMessage(): string {
   return (
-    `🍀<b>LÔ ĐỀ TELEGRAM</b>🍀\n\n` +
+    `${custom3DEmoji("6332545917761098810", "🍀")}<b>LÔ ĐỀ TELEGRAM</b>${custom3DEmoji("6332545917761098810", "🍀")}\n\n` +
     `➡ Kết quả được xác định thông qua <b>KẾT QUẢ XỔ SỐ MIỀN BẮC</b> ngày hôm đó.\n\n` +
     `➡ <b>TỈ LỆ ĐIỂM</b>\n` +
     `• Lô ► 1 điểm ► 23.000 đ\n` +
@@ -1738,20 +1738,20 @@ export function formatLoDeTelegramGuideMessage(): string {
     `• Xiên 2: x15\n` +
     `• Xiên 3: x40\n` +
     `• Xiên 4: x100\n\n` +
-    `🎮 <b>CÁCH CHƠI</b>\n` +
+    `${custom3DEmoji("6332246446871418518", "🎮")} <b>CÁCH CHƠI</b>\n` +
     `<code>/lo 00 10d</code>\n` +
     `<code>/de 00 10d</code>\n` +
     `<code>/xienhai 00,01 10d</code>\n` +
     `<code>/xienba 00,01,02 10d</code>\n` +
     `<code>/xienbon 00,01,02,03 10d</code>\n\n` +
     `➡ <b>TỔNG TIỀN MỖI LỆNH:</b> 2.000 - 2.000.000\n\n` +
-    `💡 Hệ thống tự đối chiếu KQ XSMB và tự trả thưởng sau khi có kết quả.\n` +
-    `🎯 Đề lấy theo <b>2 số cuối giải Đặc Biệt</b>.\n` +
+    `${custom3DEmoji("5406683434124859552", "💡")} Hệ thống tự đối chiếu KQ XSMB và tự trả thưởng sau khi có kết quả.\n` +
+    `${custom3DEmoji("5416117059207572332", "🎯")} Đề lấy theo <b>2 số cuối giải Đặc Biệt</b>.\n` +
     `🔗 Lô Xiên đối chiếu theo <b>giải 1 đến giải 7</b>.\n` +
     `• Xiên 2: phải đủ <b>2 cặp số</b> xuất hiện trong 2 số cuối từ giải 1 đến giải 7.\n` +
     `• Xiên 3: phải đủ <b>3 cặp số</b> xuất hiện trong 2 số cuối từ giải 1 đến giải 7.\n` +
     `• Xiên 4: phải đủ <b>4 cặp số</b> xuất hiện trong 2 số cuối từ giải 1 đến giải 7.\n` +
-    `⏰ Thời gian khóa cược: <b>17:30 - 18:50</b> hàng ngày (Thời gian còn lại mở cược bình thường).`
+    `${custom3DEmoji("5242195906199035850", "⏰")} Thời gian khóa cược: <b>17:30 - 18:50</b> hàng ngày (Thời gian còn lại mở cược bình thường).`
   );
 }
 
@@ -2142,21 +2142,21 @@ async function placeLoDeBetForUser(chatId: string | number, type: LoDeBetType, n
 }
 
 export function formatGameCatalogMessage(rooms: SoloRoom[] = readSoloRooms()): string {
-  return `🎮 <b>Chọn Game Chơi Ngay</b>\n` +
+  return `${custom3DEmoji("6332246446871418518", "🎮")} <b>Chọn Game Chơi Ngay</b>\n` +
     `Chúc Ông Chủ May Mắn`;
 }
 
 export function getGameCatalogReplyMarkup() {
   return {
     inline_keyboard: [
-      [{ text: "🧧 Tài Xỉu Room", callback_data: "game_catalog_room_default" }],
+      [{ text: "Tài Xỉu Room", icon_custom_emoji_id: "5456230168261566428", callback_data: "game_catalog_room_default" }],
       [
-        { text: "🎲 Solo Xúc Xắc", callback_data: "game_catalog_solo" },
-        { text: "🎯 Xúc Xắc Telegram", callback_data: "game_catalog_telegram" }
+        { text: "Solo Xúc Xắc", icon_custom_emoji_id: "5456337168781810982", callback_data: "game_catalog_solo" },
+        { text: "Xúc Xắc Telegram", icon_custom_emoji_id: "6332246446871418518", callback_data: "game_catalog_telegram" }
       ],
       [
-        { text: "🍀 Lô Đề Telegram", callback_data: "game_catalog_lode" },
-        { text: "⬆️ Trên Dưới ⬇️", callback_data: "game_catalog_td" }
+        { text: "Lô Đề Telegram", icon_custom_emoji_id: "6332545917761098810", callback_data: "game_catalog_lode" },
+        { text: "Trên Dưới", icon_custom_emoji_id: "5224257782013769471", callback_data: "game_catalog_td" }
       ]
     ]
   };
@@ -2168,7 +2168,7 @@ export function getDuaTopReplyMarkup() {
       [
         { text: "🏆 Tốp Hôm Nay", callback_data: "duatop_today" },
         { text: "📅 Tốp Hôm Qua", callback_data: "duatop_yesterday" },
-        { text: "👑 Tốp Tuần", callback_data: "duatop_week" }
+        { text: "Tốp Tuần", icon_custom_emoji_id: "5454390891466726015", callback_data: "duatop_week" }
       ],
       [{ text: "🔥 BXH ĐU DÂY", callback_data: "duatop_du_day" }]
     ]
@@ -3130,7 +3130,7 @@ ${recentClStats}
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [[
-        { text: "💵 Nạp Tiền Ngay", url: `https://t.me/${botUsernames[0]}?start=deposit` },
+        { text: "Nạp Tiền Ngay", icon_custom_emoji_id: "5456230168261566428", url: `https://t.me/${botUsernames[0]}?start=deposit` },
         { text: "📊 Lịch Sử Phiên", url: "https://t.me/lichsuphiendragon" }
       ]],
     },
@@ -3193,7 +3193,7 @@ ${recentClStats}
     `${custom3DEmoji("5424972470023104089", "🎁")} <b>Tiền thưởng:</b> <code>5.000</code>\n` +
     `<i>Nếu 2 số cuối ID của bạn trùng số may mắn thì chat lệnh <code>/nhanthuong</code> để nhận.</i>`;
 
-  const lamCaiText = `${getRandom3DEmoji()} ${custom3DEmoji("5246762912428603768", "⏰")} Còn 20s để LÀM CÁI phiên #${state.phien + 1}\n\n✅ /lamcai [số tiền] (1.000.000 - 5.000.000)\n⚠️ Khi làm CÁI hệ thống sẽ tạm giữ số tiền tương ứng (2× số tiền làm cái làm giới hạn trả thưởng phiên).`;
+  const lamCaiText = `${custom3DEmoji("5246762912428603768", "⏰")} Còn 20s để LÀM CÁI phiên #${state.phien + 1}\n\n${custom3DEmoji("5440539497383087970", "✅")} /lamcai [số tiền] (1.000.000 - 5.000.000)\n${custom3DEmoji("5210956306952758910", "⚠️")} Khi làm CÁI hệ thống sẽ tạm giữ số tiền tương ứng (2× số tiền làm cái làm giới hạn trả thưởng phiên).`;
 
   if (lobbySent) {
     await bot1.sendMessage(groupt, luckyWheelText, { parse_mode: "HTML" }).catch(() => {});
@@ -3212,8 +3212,8 @@ ${recentClStats}
     let pot = 10000;
     try { pot = readJson("hu.json").pot || 10000; } catch {}
     state.phienAnnounced = true;
-    const bankerStatus = `${getRandom3DEmoji()} ` + (currentCai.value ? `${custom3DEmoji("5467538555158943525", "👑")} Chủ cái: <b>${currentCai.value.name}</b>` : `${custom3DEmoji("5276032951342088188", "❌")} Không Có Ai Làm Cái [Bot Tự Làm Cái]`);
-    sendMessageToRoom(`${bankerStatus}\n💰 Hũ Hiện Tại: ${pot.toLocaleString("vi-VN")} xu 💰`, {
+    const bankerStatus =  (currentCai.value ? `${custom3DEmoji("5467538555158943525", "👑")} Chủ cái: <b>${currentCai.value.name}</b>` : `${custom3DEmoji("5276032951342088188", "❌")} Không Có Ai Làm Cái [Bot Tự Làm Cái]`);
+    sendMessageToRoom(`${bankerStatus}\n${custom3DEmoji("5224257782013769471", "💰")} Hũ Hiện Tại: ${pot.toLocaleString("vi-VN")} xu`, {
       reply_markup: {
         inline_keyboard: [[{ text: "⚡ Nạp Tiền Ngay", url: `https://t.me/${botUsernames[0]}?start=deposit` }]],
       },
@@ -3221,7 +3221,7 @@ ${recentClStats}
     // Khôi phục tin nhắn mời đặt cược
     setTimeout(() => {
       sendMessageToRoom(
-        `${getRandom3DEmoji()} ${custom3DEmoji("5456140674028019486", "📝")} <b>Xin mời đặt cược phiên #${state.phien}</b>
+        `${custom3DEmoji("5456140674028019486", "📝")} <b>Xin mời đặt cược phiên #${state.phien}</b>
 ` +
           `💰 Tiền cược tối thiểu <b>1.000</b> và tối đa <b>5.000.000</b>
 
@@ -3572,7 +3572,7 @@ export function tickGameLoop() {
     state.secondsLeft -= 1;
     if (state.secondsLeft <= 0) {
       state.gamePhase = "ROLLING";
-      sendMessageToRoom(`💥 Bắt đầu tung XX phiên #${state.phien} 💥`, { parse_mode: "HTML" });
+      sendMessageToRoom(`${custom3DEmoji("5276032951342088188", "💥")} Bắt đầu tung XX phiên #${state.phien} ${custom3DEmoji("5276032951342088188", "💥")}`, { parse_mode: "HTML" });
       // Cho text "Bắt đầu tung" hiện trước, rồi mới tới "Tung XX" và bắt đầu tung xúc xắc
       setTimeout(() => {
         // Bỏ thông báo "🎲 Tung XX phiên #..." để tránh spam nhóm
@@ -4859,11 +4859,11 @@ export function registerAllBotCommands() {
     }
 
     if (txt === "⬆️ Trên Dưới ⬇️" || txt === "Trên Dưới") {
-      const guide = `⬆️ <b>XÚC XẮC TRÊN DƯỚI</b> ⬇️\n\n` +
-        `1️⃣ Người chơi nhập <code>TD [số tiền]</code>. Sau khi ghi nhận bot sẽ tung 2 🎲 lượt đầu tiên, người chơi sẽ dự đoán ⬆️ (cao hơn) hoặc ⬇️ (nhỏ hơn) 2 🎲 vừa tung.\n\n` +
+      const guide = `${custom3DEmoji("5224257782013769471", "⬆️")} <b>XÚC XẮC TRÊN DƯỚI</b> ${custom3DEmoji("5224257782013769471", "⬇️")}\n\n` +
+        `1️⃣ Người chơi nhập <code>TD [số tiền]</code>. Sau khi ghi nhận bot sẽ tung 2 ${custom3DEmoji("5456337168781810982", "🎲")} lượt đầu tiên, người chơi sẽ dự đoán ${custom3DEmoji("5224257782013769471", "⬆️")} (cao hơn) hoặc ${custom3DEmoji("5224257782013769471", "⬇️")} (nhỏ hơn) 2 ${custom3DEmoji("5456337168781810982", "🎲")} vừa tung.\n\n` +
         `2️⃣ Bot sẽ tiếp tục tung 2 🎲 và so sánh với dự đoán đã chọn, nếu trùng khớp sẽ thắng cược.\n` +
-        `❌ <b>Hòa mất 50% tiền cược.</b>\n\n` +
-        `👉 Gõ <code>td 2000</code> để bắt đầu chơi ngay!`;
+        `${custom3DEmoji("5276032951342088188", "❌")} <b>Hòa mất 50% tiền cược.</b>\n\n` +
+        `${custom3DEmoji("5449683594425410231", "👉")} Gõ <code>td 2000</code> để bắt đầu chơi ngay!`;
       bot1.sendMessage(chat, guide, { parse_mode: "HTML" });
       return;
     }
@@ -4984,7 +4984,7 @@ export function registerAllBotCommands() {
 
       bot1.sendMessage(chat, text, {
         parse_mode: "HTML",
-        reply_markup: { inline_keyboard: [[{ text: "✅ Điểm danh", callback_data: "event_checkin" }]] }
+        reply_markup: { inline_keyboard: [[{ text: "Điểm danh", icon_custom_emoji_id: "5409048419211682843", callback_data: "event_checkin" }]] }
       });
       return;
     }
@@ -5015,7 +5015,7 @@ export function registerAllBotCommands() {
           reply_markup: {
             inline_keyboard: [
               [{ text: "📥 Nạp Xu", callback_data: "deposit" }, { text: "📤 Rút Bank", callback_data: "withdraw" }],
-              [{ text: "👑 Víp", callback_data: "vip_info" }],
+              [{ text: "Víp", icon_custom_emoji_id: "5445355530111437729", callback_data: "vip_info" }],
               [{ text: "💸 Chuyển Tiền", callback_data: "transfer_guide" }, { text: "🔑 Nhập Giftcode", callback_data: "redeem_gift" }],
               [{ text: "🎟️ Mua Giftcode", callback_data: "buy_giftcode" }],
               [{ text: "📜 LS Cược", callback_data: "history_bet" }, { text: "📜 LS Nạp", callback_data: "history_dep" }, { text: "📜 LS Rút", callback_data: "history_wit" }]
@@ -5328,7 +5328,7 @@ export function registerAllBotCommands() {
         return;
       } else if (act === "game_catalog_td") {
         bot1.answerCallbackQuery(q.id).catch(() => {});
-        const guide = `⬆️ <b>XÚC XẮC TRÊN DƯỚI</b> ⬇️\n\n` +
+        const guide = `${custom3DEmoji("5224257782013769471", "⬆️")} <b>XÚC XẮC TRÊN DƯỚI</b> ${custom3DEmoji("5224257782013769471", "⬇️")}\n\n` +
           `1️⃣ Người chơi nhập <code>TD [số tiền]</code>. Sau khi ghi nhận bot sẽ tung 2 🎲 lượt đầu tiên, người chơi sẽ dự đoán ⬆️ (cao hơn) hoặc ⬇️ (nhỏ hơn) 2 🎲 vừa tung.\n\n` +
           `2️⃣ Bot sẽ tiếp tục tung 2 🎲 và so sánh với dự đoán đã chọn, nếu trùng khớp sẽ thắng cược.\n` +
           `❌ <b>Hòa mất 50% tiền cược.</b>\n\n` +
@@ -5498,10 +5498,10 @@ export function registerAllBotCommands() {
                 [
                   { text: "500.000", icon_custom_emoji_id: "5244837092042750681", callback_data: "deposit_quick_500000" },
                   { text: "1.000.000", icon_custom_emoji_id: "5246762912428603768", callback_data: "deposit_quick_1000000" },
-                  { text: "👑 2.000.000", callback_data: "deposit_quick_2000000" }
+                  { text: "2.000.000", icon_custom_emoji_id: "5456337168781810982", callback_data: "deposit_quick_2000000" }
                 ],
                 [
-                  { text: "👑 3.000.000", callback_data: "deposit_quick_3000000" }
+                  { text: "3.000.000", icon_custom_emoji_id: "5456580414254619349", callback_data: "deposit_quick_3000000" }
                 ]
               ]
             }
@@ -5546,7 +5546,7 @@ export function registerAllBotCommands() {
           bot1.sendMessage(chat, formatDepositOrderCaption(amount, req.content), {
             parse_mode: "HTML",
             reply_markup: {
-              inline_keyboard: [[{ text: "✅ Đã Chuyển Khoản", callback_data: `deposit_sent_${req.requestId}` }]]
+              inline_keyboard: [[{ text: "Đã Chuyển Khoản", icon_custom_emoji_id: "5240066289614987080", callback_data: `deposit_sent_${req.requestId}` }]]
             }
           }).then((sentMessage) => {
             saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
@@ -6013,7 +6013,7 @@ export function registerAllBotCommands() {
           caption: formatDepositOrderCaption(amount, req.content),
           parse_mode: "HTML",
           reply_markup: {
-            inline_keyboard: [[{ text: "✅ Đã Chuyển Khoản", callback_data: `deposit_sent_${req.requestId}` }]]
+            inline_keyboard: [[{ text: "Đã Chuyển Khoản", icon_custom_emoji_id: "5240066289614987080", callback_data: `deposit_sent_${req.requestId}` }]]
           }
         }).then((sentMessage) => {
           saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
@@ -6025,7 +6025,7 @@ export function registerAllBotCommands() {
           bot1.sendMessage(chat, formatDepositOrderCaption(amount, req.content), {
             parse_mode: "HTML",
             reply_markup: {
-              inline_keyboard: [[{ text: "✅ Đã Chuyển Khoản", callback_data: `deposit_sent_${req.requestId}` }]]
+              inline_keyboard: [[{ text: "Đã Chuyển Khoản", icon_custom_emoji_id: "5240066289614987080", callback_data: `deposit_sent_${req.requestId}` }]]
             }
           }).then((sentMessage) => {
             saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
@@ -6596,8 +6596,8 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
           parse_mode: "HTML",
           reply_markup: {
             inline_keyboard: [
-              [{ text: "🏦 Bank", callback_data: "deposit_bank" }],
-              [{ text: "🎫 Thẻ cào (bảo trì)", callback_data: "deposit_card_maintenance" }]
+              [{ text: "Bank", icon_custom_emoji_id: "5443127283898405358", callback_data: "deposit_bank" }],
+              [{ text: "Thẻ cào (bảo trì)", icon_custom_emoji_id: "5235640209852343235", callback_data: "deposit_card_maintenance" }]
             ]
           }
         }
