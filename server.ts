@@ -98,7 +98,6 @@ export interface GiftCode {
   maxUses?: number;
   usedCount?: number;
   usedBy?: string[];
-  noWager?: boolean;
 }
 
 export interface SoloRoom {
@@ -700,7 +699,7 @@ export function isTelegramNameQualified(from: any, keyword = EVENT_KEYWORD): boo
   return fullName.includes(kw) || username.includes(kw);
 }
 
-export function createGiftcodeData(code: string, value: number, creatorId: string, maxUses = 1, createTime = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss"), noWager = false): GiftCode {
+export function createGiftcodeData(code: string, value: number, creatorId: string, maxUses = 1, createTime = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss")): GiftCode {
   return {
     gift: normalizeRoomGiftcode(code),
     value,
@@ -711,7 +710,6 @@ export function createGiftcodeData(code: string, value: number, creatorId: strin
     maxUses: Math.max(1, Math.floor(Number(maxUses) || 1)),
     usedCount: 0,
     usedBy: [],
-    noWager: Boolean(noWager),
   };
 }
 
@@ -779,17 +777,17 @@ const pollDisabled = process.env.DISABLE_TELEGRAM_POLLING === "true";
 const botOptions = { polling: !pollDisabled };
 
 export const bot1 = isTokenValid(tokenBot1) ? new TelegramBot(tokenBot1, botOptions) : new TelegramBot("123:dummy1", { polling: false });
+const processedAdminNapMessages = new Set<string>();
 export const bot2 = isTokenValid(tokenBot2) ? new TelegramBot(tokenBot2, botOptions) : new TelegramBot("123:dummy2", { polling: false });
 export const bot3 = isTokenValid(tokenBot3) ? new TelegramBot(tokenBot3, botOptions) : new TelegramBot("123:dummy3", { polling: false });
 export const bot4 = isTokenValid(tokenBot4) ? new TelegramBot(tokenBot4, botOptions) : new TelegramBot("123:dummy4", { polling: false });
 export const bot5 = isTokenValid(tokenBot5) ? new TelegramBot(tokenBot5, botOptions) : new TelegramBot("123:dummy5", { polling: false });
 
 export const bots = [bot1, bot2, bot3, bot4, bot5];
-const processedAdminNapMessages = new Set<string>();
 
 // --- DIRECT ALL-EMOJI 3D MAPPER ---
 const FIXED_CUSTOM_EMOJI_IDS: Record<string, string> = {
-  "🎮":"6332246446871418518","🖼":"6332246446871418518","🎯":"6332246446871418518","🧧":"6332545917761098810","🍀":"6332545917761098810","🎲":"5456337168781810982","💥":"5276032951342088188","⬆️":"5224257782013769471","⬇️":"5224257782013769471","⬆":"5224257782013769471","⬇":"5224257782013769471","💰":"5224257782013769471","💵":"5456230168261566428","💎":"5244837092042750681","✅":"5440539497383087970","⚠️":"5210956306952758910","⚠":"5210956306952758910","🎁":"5424972470023104089","👉":"5449683594425410231","👤":"5453902265922376865","📥":"5416117059207572332","🔥":"5447644880824181073","🏆":"5454390891466726015","📅":"5246762912428603768","🔑":"5244837092042750681","📜":"5242195906199035850","🎟":"5235640209852343235","💸":"5447183459602669338","🚀":"5406683434124859552","⏰":"5242195906199035850","💡":"5406683434124859552","📝":"5456140674028019486","👑":"5440539497383087970","⚔️":"5456580414254619349","⚔":"5456580414254619349","❌":"5276032951342088188","⛔":"5210952531676504517","🎉":"5456230168261566428","📌":"5240066289614987080","📊":"5397782960512444700","🏦":"5443127283898405358","🎫":"5235640209852343235","🔢":"5237759703198474072","🔗":"5238083517962793068","🗓️":"5246762912428603768","🗓":"5246762912428603768","538219":"5382194935057372936"
+  "🎮":"6332246446871418518","🖼":"6332246446871418518","🎯":"6332246446871418518","🧧":"6332545917761098810","🍀":"6332545917761098810","🎲":"5456337168781810982","💥":"5276032951342088188","⬆️":"5224257782013769471","⬇️":"5224257782013769471","⬆":"5224257782013769471","⬇":"5224257782013769471","💰":"5224257782013769471","💵":"5456230168261566428","💎":"5244837092042750681","✅":"5440539497383087970","⚠️":"5210956306952758910","⚠":"5210956306952758910","🎁":"5424972470023104089","👉":"5449683594425410231","👤":"5453902265922376865","📥":"5416117059207572332","🔥":"5447644880824181073","🏆":"5454390891466726015","📅":"5246762912428603768","🔑":"5244837092042750681","📜":"5242195906199035850","🎟":"5235640209852343235","💸":"5447183459602669338","🚀":"5406683434124859552","⏰":"5242195906199035850","💡":"5406683434124859552","📝":"5456140674028019486","👑":"5440539497383087970","⚔️":"5456580414254619349","⚔":"5456580414254619349","❌":"5276032951342088188","⛔":"5210952531676504517","🎉":"5456230168261566428","📌":"5240066289614987080","📊":"5397782960512444700","🏦":"5443127283898405358","🎫":"5235640209852343235","🔢":"5237759703198474072","🔗":"5238083517962793068","🗓️":"5246762912428603768","🗓":"5246762912428603768","538219":"5382194935057372936","🕵️":"5449683594425410231","🛩️":"5386367538735104399"
 };
 function all3d(emoji: string): string { return `<tg-emoji emoji-id="${FIXED_CUSTOM_EMOJI_IDS[emoji] || "5382194935057372936"}">${emoji}</tg-emoji>`; }
 function convertAllExceptStats(value: unknown): string {
@@ -856,6 +854,20 @@ export async function sendMessageToRoom(text: string, options: any = {}) {
     }
   };
   return await trySend(0);
+}
+
+export const FREE_CODE_PROMO_MESSAGE = `🎁 <b>NHẬN CODE FREE</b> 🎁\n\n🕵️ Tương tác đủ mốc là nhận code ngay - trị giá đến 20.000đ!\n🕵️ Đơn giản vậy thôi, còn chờ gì nữa?\n\n🛩️ <code>/help</code> - Xem chi tiết chương trình\n🛩️ <code>/checktt</code> - Kiểm tra tương tác của bạn`;
+
+let freeCodePromoStarted = false;
+export function startFreeCodePromoScheduler() {
+  if (freeCodePromoStarted) return;
+  freeCodePromoStarted = true;
+  const sendPromo = () => {
+    sendMessageToRoom(FREE_CODE_PROMO_MESSAGE, { parse_mode: "HTML", disable_web_page_preview: true }).catch((err: any) => {
+      console.error("❌ Lỗi gửi thông báo FREE CODE:", err?.message || err);
+    });
+  };
+  setInterval(sendPromo, 240_000);
 }
 
 export function sendResilientReply(chatId: string | number, text: string, options: any = {}) {
@@ -3618,6 +3630,12 @@ export function tickGameLoop() {
 export function registerAllBotCommands() {
   const onAdminCommand = (regex: RegExp, handler: (bot: TelegramBot, msg: TelegramBot.Message, match: RegExpExecArray | null) => void) => {
     const wrap = (bot: TelegramBot, msg: TelegramBot.Message, match: RegExpExecArray | null) => {
+      const isNapCommand = /\/nap/i.test(regex.source);
+      if (isNapCommand) {
+        const napMessageKey = `${msg.chat.id}:${msg.message_id}`;
+        if (processedAdminNapMessages.has(napMessageKey)) return;
+        processedAdminNapMessages.add(napMessageKey);
+      }
       if (isAdminUser(msg.from?.id)) handler(bot, msg, match);
     };
     bot4.onText(regex, (msg, match) => wrap(bot4, msg, match));
@@ -6339,7 +6357,7 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
 
       users[uIdx].sd = (users[uIdx].sd || 0) + g.value;
       if (users[uIdx].money !== undefined) users[uIdx].money = (users[uIdx].money || 0) + g.value;
-      if (!g.noWager) users[uIdx].vongCuoc = (users[uIdx].vongCuoc || 0) + g.value;
+      users[uIdx].vongCuoc = (users[uIdx].vongCuoc || 0) + g.value;
 
       const useTime = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
       const nextUsedBy = [...usedByList, String(chat)];
@@ -6485,7 +6503,7 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
 
       for (let i = 0; i < quantity; i++) {
         const generatedCode = generateGiftCode();
-        newCodes.push(createGiftcodeData(generatedCode, value, String(userId), 1, new Date().toLocaleString("vi-VN"), isAdminGroupChat(chat)));
+        newCodes.push(createGiftcodeData(generatedCode, value, String(userId), 1, new Date().toLocaleString("vi-VN")));
         codeStrings.push(`🔑 Gói: <b>${value.toLocaleString("vi-VN")}</b> xu 👉 Code: <code>/code ${generatedCode}</code>`);
       }
 
@@ -6685,6 +6703,7 @@ async function bootstrap() {
   setInterval(tickGameLoop, 1000);
   maybeDispatchRandomHourlyGiftCode();
   setInterval(maybeDispatchRandomHourlyGiftCode, 15000);
+  startFreeCodePromoScheduler();
   maybeAutoSettleLoDe().catch(() => {});
   setInterval(() => { maybeAutoSettleLoDe().catch(() => {}); }, 60_000);
 
@@ -6702,7 +6721,7 @@ async function bootstrap() {
   app.post("/sepay/webhook", async (req, res) => {
     try {
       const data = req.body;
-      const transId = String(data.id);
+      const transId = String(data.id || data.referenceCode || data.transactionId || "");
       const amount = Number(data.transferAmount);
       const content = String(data.content || "").trim().toUpperCase();
 
@@ -6713,13 +6732,14 @@ async function bootstrap() {
       }
 
       const telegramId = match[1];
+      const transactionKey = transId || `${telegramId}:${amount}:${content}`;
 
       // Kiểm tra giao dịch đã xử lý chưa
       const processedTransactions = new Set(readJson(processedTransactionsJsonFile, "[]"));
-      if (processedTransactions.has(transId)) {
+      if (processedTransactions.has(transactionKey)) {
         return res.sendStatus(200);
       }
-      processedTransactions.add(transId);
+      processedTransactions.add(transactionKey);
       writeJson(processedTransactionsJsonFile, Array.from(processedTransactions));
 
       // ===== CỘNG TIỀN =====
@@ -6734,7 +6754,7 @@ async function bootstrap() {
       const user = users[userIdx];
       
       // Sử dụng hàm addDepositToUser để xử lý cộng tiền, vòng cược, VIP, khuyến mãi
-        deleteDepositQrMessage(String(user.id), transId, amount, content);
+        deleteDepositQrMessage(String(user.id), transactionKey, amount, content);
         const result = addDepositToUser(user, amount);
 
         // Lưu lịch sử nạp tiền
@@ -6744,7 +6764,7 @@ async function bootstrap() {
         amount: amount.toLocaleString("vi-VN"),
         status: "Thành công (Auto SePay)",
         transferContent: content,
-        requestId: transId,
+        requestId: transactionKey,
         adminNotified: true
       });
 
