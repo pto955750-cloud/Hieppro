@@ -80,7 +80,7 @@ function writeConfig(config) {
 // --- HỆ THỐNG CẤU HÌNH BOT (Đơn hoặc Cụm các Bots) ---
 const config = readConfig();
 const BOT_TOKENS = (config.tokens && config.tokens.length > 0) ? config.tokens : [
-  "8812672402:AAHCrDOmem37MMn9x8o5MM_y0A49xksfjSU", // Thêm Bot token chính tại đây (hoặc cấu hình qua Web UI)
+  "8918298510:AAFSIO2Eo3qS92Bo31YhkuLzMv4kGe_JunE", // Thêm Bot token chính tại đây (hoặc cấu hình qua Web UI)
 ];
 
 const tokens = BOT_TOKENS.filter(Boolean);
