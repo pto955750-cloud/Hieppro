@@ -79,9 +79,9 @@ function writeConfig(config) {
 
 // --- HỆ THỐNG CẤU HÌNH BOT (Đơn hoặc Cụm các Bots) ---
 const config = readConfig();
-// Bot tương tác phải dùng token riêng, không lấy nhầm tokens của BotChinh trong config.json.
-const INTERACTION_BOT_TOKEN = process.env.INTERACTION_BOT_TOKEN || process.env.BOT_TOKEN_INTERACTION || "8918298510:AAFSIO2Eo3qS92Bo31YhkuLzMv4kGe_JunE";
-const BOT_TOKENS = [INTERACTION_BOT_TOKEN];
+const BOT_TOKENS = (config.tokens && config.tokens.length > 0) ? config.tokens : [
+  "8918298510:AAFSIO2Eo3qS92Bo31YhkuLzMv4kGe_JunE", // Thêm Bot token chính tại đây (hoặc cấu hình qua Web UI)
+];
 
 const tokens = BOT_TOKENS.filter(Boolean);
 
@@ -97,7 +97,7 @@ tokens.forEach((token, index) => {
   try {
     const bot = new TelegramBot(token, { polling: true });
     activeBots.push(bot);
-    console.log(`✅ Khởi động bot tương tác #${index + 1} (${token.substring(0, 8)}...)`);
+    console.log(`✅ Khởi động thành công Bot #${index + 1} (${token.substring(0, 8)}...)`);
   } catch (err) {
     console.error(`❌ Không thể khởi chạy Bot token #${index + 1}:`, err.message);
   }
@@ -212,7 +212,7 @@ activeBots.forEach((bot, botIdx) => {
     console.log(`🤖 Đã đồng bộ bot #${botIdx + 1}: @${me.username}`);
     if (botIdx === 0) botUsername = me.username;
   }).catch(err => {
-    console.error(`❌ Lỗi lấy thông tin bot tương tác #${botIdx + 1}:`, err.message);
+    console.error(`❌ Lỗi lấy thông tin bot #${botIdx + 1}:`, err.message);
   });
 });
 
