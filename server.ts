@@ -784,6 +784,26 @@ export const bot4 = isTokenValid(tokenBot4) ? new TelegramBot(tokenBot4, botOpti
 export const bot5 = isTokenValid(tokenBot5) ? new TelegramBot(tokenBot5, botOptions) : new TelegramBot("123:dummy5", { polling: false });
 
 export const bots = [bot1, bot2, bot3, bot4, bot5];
+
+// --- DIRECT ALL-EMOJI 3D MAPPER ---
+const FIXED_CUSTOM_EMOJI_IDS: Record<string, string> = {
+  "🎮":"6332246446871418518","🖼":"6332246446871418518","🎯":"6332246446871418518","🧧":"6332545917761098810","🍀":"6332545917761098810","🎲":"5456337168781810982","💥":"5276032951342088188","⬆️":"5224257782013769471","⬇️":"5224257782013769471","⬆":"5224257782013769471","⬇":"5224257782013769471","💰":"5224257782013769471","💵":"5456230168261566428","💎":"5244837092042750681","✅":"5440539497383087970","⚠️":"5210956306952758910","⚠":"5210956306952758910","🎁":"5424972470023104089","👉":"5449683594425410231","👤":"5453902265922376865","📥":"5416117059207572332","🔥":"5447644880824181073","🏆":"5454390891466726015","📅":"5246762912428603768","🔑":"5244837092042750681","📜":"5242195906199035850","🎟":"5235640209852343235","💸":"5447183459602669338","🚀":"5406683434124859552","⏰":"5242195906199035850","💡":"5406683434124859552","📝":"5456140674028019486","👑":"5440539497383087970","⚔️":"5456580414254619349","⚔":"5456580414254619349","❌":"5276032951342088188","⛔":"5210952531676504517","🎉":"5456230168261566428","📌":"5240066289614987080","📊":"5397782960512444700","🏦":"5443127283898405358","🎫":"5235640209852343235","🔢":"5237759703198474072","🔗":"5238083517962793068","🗓️":"5246762912428603768","🗓":"5246762912428603768","538219":"5382194935057372936"
+};
+function all3d(emoji: string): string { return `<tg-emoji emoji-id="${FIXED_CUSTOM_EMOJI_IDS[emoji] || "5382194935057372936"}">${emoji}</tg-emoji>`; }
+function convertAllExceptStats(value: unknown): string {
+  const input = String(value ?? "");
+  const keep: string[] = [];
+  let out = input.replace(/Thống kê kết quả gần đây:[\s\S]*?<\/b>\s*\n?/g, (section) => { keep.push(section); return `__KEEP_STATS_${keep.length - 1}__`; });
+  const existing: string[] = [];
+  out = out.replace(/<tg-emoji\b[^>]*>.*?<\/tg-emoji>/gs, (tag) => { existing.push(tag); return `__KEEP_TG_${existing.length - 1}__`; });
+  for (const emoji of Object.keys(FIXED_CUSTOM_EMOJI_IDS).filter(k => k.length < 10).sort((a,b)=>b.length-a.length)) out = out.split(emoji).join(all3d(emoji));
+  out = out.replace(/__KEEP_TG_(\d+)__/g, (_,i)=>existing[Number(i)]||"");
+  return out.replace(/__KEEP_STATS_(\d+)__/g, (_,i)=>keep[Number(i)]||"");
+}
+function mapMarkup(m: any): any { if (!m?.inline_keyboard) return m; return {...m, inline_keyboard:m.inline_keyboard.map((r:any[])=>r.map((b:any)=>{ if(!b?.text) return b; const e=Object.keys(FIXED_CUSTOM_EMOJI_IDS).find(x=>String(b.text).includes(x)); return e ? {...b,text:String(b.text).split(e).join("").trim(),icon_custom_emoji_id:b.icon_custom_emoji_id||FIXED_CUSTOM_EMOJI_IDS[e]} : b; }))}; }
+function installAll3D(bot: any) { const sm=bot.sendMessage.bind(bot); bot.sendMessage=(c:any,t:any,o:any={})=>sm(c,convertAllExceptStats(t),{...o,parse_mode:"HTML",reply_markup:mapMarkup(o.reply_markup)}); const sp=bot.sendPhoto.bind(bot); bot.sendPhoto=(c:any,p:any,o:any={})=>sp(c,p,{...o,parse_mode:"HTML",caption:o.caption==null?o.caption:convertAllExceptStats(o.caption),reply_markup:mapMarkup(o.reply_markup)}); }
+[bots[0],bots[1],bots[2],bots[3],bots[4]].forEach(installAll3D);
+
 export const botUsernames = ["Dragon_1gon_bot", "Dragon_2gon_bot", "Dragon_3gon_bot", "Dragon_4gon_bot", "Dragon_5gon_bot"];
 export const botErrors: (string | null)[] = [null, null, null, null, null];
 
@@ -3122,9 +3142,9 @@ export async function sendDice() {
 ┗━━━━━━━━━━━━┛</pre>
 Thống kê kết quả gần đây:
 ${recentTxStats}
-      ${custom3DEmoji("5449449325434266744", "🔵")}  <b>Tài</b>             ${custom3DEmoji("5453902265922376865", "🔴")}   <b>XỈU</b>
+      🔵  <b>Tài</b>             🔴   <b>XỈU</b>
 ${recentClStats}
-      ${custom3DEmoji("5244837092042750681", "⚪️")}  <b>Chẵn</b>        ${custom3DEmoji("5206607081334906820", "⚫️")}   <b>Lẻ</b>`;
+      ⚪️  <b>Chẵn</b>        ⚫️   <b>Lẻ</b>`;
   // Gửi kết quả phiên trước, rồi mới gửi thông báo "làm cái" để đảm bảo thứ tự hiển thị
   const lobbySent = await bot1.sendMessage(groupt, lobbyMsg, {
     parse_mode: "HTML",
@@ -4972,14 +4992,14 @@ export function registerAllBotCommands() {
       const displayName = `${msg.from?.first_name || ""} ${msg.from?.last_name || ""}`.trim() || (msg.from?.username ? `@${msg.from.username}` : "Người chơi");
       const text =
         `🖼 <b>EVENT TREO ẢNH / ĐIỂM DANH Dragon.Room</b>\n\n` +
-        `✅ Đổi tên Telegram có chứa <b>${EVENT_KEYWORD}</b>\n` +
+        `${custom3DEmoji("5440539497383087970", "✅")} Đổi tên Telegram có chứa <b>${EVENT_KEYWORD}</b>\n` +
         `✅ Mỗi ngày điểm danh 1 lần\n` +
         `✅ Mỗi ngày phải nạp tối thiểu <b>${EVENT_DAILY_MIN_DEPOSIT.toLocaleString("vi-VN")}đ</b> mới được điểm danh\n` +
         `✅ Đủ <b>${EVENT_STREAK_TARGET_DAYS} ngày</b> liên tục và có nạp trong <b>${EVENT_STREAK_TARGET_DAYS} ngày</b> gần nhất\n\n` +
-        `🎁 Thưởng: <b>Giftcode ${EVENT_REWARD_GIFTCODE_VALUE.toLocaleString("vi-VN")}</b>\n` +
+        `${custom3DEmoji("5424972470023104089", "🎁")} Thưởng: <b>Giftcode ${EVENT_REWARD_GIFTCODE_VALUE.toLocaleString("vi-VN")}</b>\n` +
         `👉 Sau khi đổi tên xong, bấm <b>✅ Điểm danh</b> để ghi nhận.\n\n` +
         `👤 Tên Telegram: <b>${displayName}</b>\n` +
-        `📥 Nạp hôm nay: <b>${depositToday.toLocaleString("vi-VN")}đ</b>\n` +
+        `${custom3DEmoji("5416117059207572332", "📥")} Nạp hôm nay: <b>${depositToday.toLocaleString("vi-VN")}đ</b>\n` +
         `🔥 Tiến độ: <b>${effectiveStreak}/${EVENT_STREAK_TARGET_DAYS}</b> ngày`;
 
       bot1.sendMessage(chat, text, {
@@ -5702,23 +5722,23 @@ export function registerAllBotCommands() {
         (user as any).eventCheckinStreak = streak;
 
         let msgStr =
-          `✅ <b>ĐIỂM DANH THÀNH CÔNG!</b>\n` +
-          `📅 Ngày: <b>${todayKey}</b>\n` +
-          `📥 Nạp hôm nay: <b>${depositToday.toLocaleString("vi-VN")}đ</b>\n` +
-          `🔥 Tiến độ: <b>${streak}/${EVENT_STREAK_TARGET_DAYS}</b> ngày liên tục`;
+          `${custom3DEmoji("5440539497383087970", "✅")} <b>ĐIỂM DANH THÀNH CÔNG!</b>\n` +
+          `${custom3DEmoji("5246762912428603768", "📅")} Ngày: <b>${todayKey}</b>\n` +
+          `${custom3DEmoji("5416117059207572332", "📥")} Nạp hôm nay: <b>${depositToday.toLocaleString("vi-VN")}đ</b>\n` +
+          `${custom3DEmoji("5447644880824181073", "🔥")} Tiến độ: <b>${streak}/${EVENT_STREAK_TARGET_DAYS}</b> ngày liên tục`;
 
         if (streak >= EVENT_STREAK_TARGET_DAYS) {
           const hasDeposit7d = hasUserSuccessfulDepositInLastDays(user, EVENT_STREAK_TARGET_DAYS);
           if (!hasDeposit7d) {
             msgStr +=
-              `\n\n⚠️ Bạn đã đủ ${EVENT_STREAK_TARGET_DAYS} ngày điểm danh nhưng chưa có nạp trong ${EVENT_STREAK_TARGET_DAYS} ngày gần nhất.`;
+              `\n\n${custom3DEmoji("5210956306952758910", "⚠️")} Bạn đã đủ ${EVENT_STREAK_TARGET_DAYS} ngày điểm danh nhưng chưa có nạp trong ${EVENT_STREAK_TARGET_DAYS} ngày gần nhất.`;
           } else {
             const code = createGiftcodeRecord(EVENT_REWARD_GIFTCODE_VALUE, "EVENT_CHECKIN");
             msgStr +=
-              `\n\n🎉 <b>CHÚC MỪNG BẠN ĐỦ ${EVENT_STREAK_TARGET_DAYS} NGÀY LIÊN TỤC!</b>\n` +
-              `🎁 Thưởng: <b>Giftcode ${EVENT_REWARD_GIFTCODE_VALUE.toLocaleString("vi-VN")}</b>\n` +
-              `🔑 Mã: <code>/code ${code}</code>\n\n` +
-              `✅ Chu kỳ điểm danh đã reset, mai bạn có thể bắt đầu vòng mới.`;
+              `${"\n\n"}${custom3DEmoji("5456230168261566428", "🎉")} <b>CHÚC MỪNG BẠN ĐỦ ${EVENT_STREAK_TARGET_DAYS} NGÀY LIÊN TỤC!</b>\n` +
+              `${custom3DEmoji("5424972470023104089", "🎁")} Thưởng: <b>Giftcode ${EVENT_REWARD_GIFTCODE_VALUE.toLocaleString("vi-VN")}</b>\n` +
+              `${custom3DEmoji("5244837092042750681", "🔑")} Mã: <code>/code ${code}</code>\n\n` +
+              `${custom3DEmoji("5440539497383087970", "✅")} Chu kỳ điểm danh đã reset, mai bạn có thể bắt đầu vòng mới.`;
             (user as any).eventCheckinStreak = 0;
           }
         }
@@ -6605,10 +6625,10 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
     } else if (startParam === "event_checkin") {
       bot1.sendMessage(
         chat,
-        `🔥 <b>ĐIỂM DANH FAN CỨNG DRAGON</b>\n\n` +
-        `✅ Đổi tên Telegram có chứa <b>${EVENT_KEYWORD}</b>\n` +
-        `✅ Hôm nay đã nạp tối thiểu <b>${EVENT_DAILY_MIN_DEPOSIT.toLocaleString("vi-VN")}đ</b>\n\n` +
-        `🎁 Điểm danh đủ điều kiện để nhận code <b>20K</b>.`,
+        `${custom3DEmoji("5447644880824181073", "🔥")} <b>ĐIỂM DANH FAN CỨNG DRAGON</b>\n\n` +
+        `${custom3DEmoji("5440539497383087970", "✅")} Đổi tên Telegram có chứa <b>${EVENT_KEYWORD}</b>\n` +
+        `${custom3DEmoji("5440539497383087970", "✅")} Hôm nay đã nạp tối thiểu <b>${EVENT_DAILY_MIN_DEPOSIT.toLocaleString("vi-VN")}đ</b>\n\n` +
+        `${custom3DEmoji("5424972470023104089", "🎁")} Điểm danh đủ điều kiện để nhận code <b>20K</b>.`,
         {
           parse_mode: "HTML",
           reply_markup: { inline_keyboard: [[{ text: "Điểm danh ngay", icon_custom_emoji_id: "5363938656874673963", callback_data: "event_checkin" }]] }
