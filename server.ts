@@ -588,11 +588,7 @@ import TelegramBot from "node-telegram-bot-api";
     });
   
     // Telegram privacy mode vẫn cho phép bắt lệnh có dấu / trong group.
-    // Emit lại vào listener chung để dùng cùng logic /help, /top, /checktt.
-    bot.onText(/^\/(help|top|checktt)(?:@\w+)?$/i, (msg) => {
-      const key = `${msg.chat.id}:${msg.message_id || "noid"}`;
-      if (!handledCommandKeys.has(key)) bot.emit("message", msg);
-    });
+    // Chỉ dùng listener message ở trên; không đăng ký onText lần hai để tránh phản hồi trùng.
   });
   console.log("🚀 Hệ thống Telegram Custom Multibot đang sẵn sàng chạy nền!");
 })();
@@ -1717,11 +1713,11 @@ export function isXiuSideType(type: string): boolean {
 }
 
 export const VIP_TIERS = [
-  { level: 0, badge: "🥉", name: "Đồng", thresholdPoints: 0, exchangeRate: 100 },
-  { level: 1, badge: "🥈", name: "Bạc", thresholdPoints: 10, exchangeRate: 100 },
-  { level: 2, badge: "🥇", name: "Vàng", thresholdPoints: 50, exchangeRate: 200 },
-  { level: 3, badge: "⭐", name: "Bạch Kim", thresholdPoints: 100, exchangeRate: 300 },
-  { level: 4, badge: "💎", name: "Kim Cương", thresholdPoints: 500, exchangeRate: 400 },
+  { level: 0, badge: custom3DEmoji("5449875686837726134", "🥉"), name: "Đồng", thresholdPoints: 0, exchangeRate: 100 },
+  { level: 1, badge: custom3DEmoji("5453902265922376865", "🥈"), name: "Bạc", thresholdPoints: 10, exchangeRate: 100 },
+  { level: 2, badge: custom3DEmoji("5447203607294265305", "🥇"), name: "Vàng", thresholdPoints: 50, exchangeRate: 200 },
+  { level: 3, badge: custom3DEmoji("544053949738307970", "⭐"), name: "Bạch Kim", thresholdPoints: 100, exchangeRate: 300 },
+  { level: 4, badge: custom3DEmoji("5438496463044752972", "💎"), name: "Kim Cương", thresholdPoints: 500, exchangeRate: 400 },
   { level: 5, badge: "🏆", name: "Cao Thủ", thresholdPoints: 1000, exchangeRate: 500 },
   { level: 6, badge: "⚔️", name: "Chiến Tướng", thresholdPoints: 5000, exchangeRate: 600 },
   { level: 7, badge: "💎", name: "Đại Tướng", thresholdPoints: 10000, exchangeRate: 700 },
@@ -3315,7 +3311,8 @@ export function handlePot(
     : `<i>Chưa có người nhận hũ</i>`;
 
   const totalPaid = payouts.reduce((sum, item) => sum + (Number(item.winAmount) || 0), 0);
-  const msg = `${getRandom3DEmoji()} <b>Nổ hũ ${huTitle} ${diceText}</b> 🔥\n${listWinnersText}\n💰 <b>Quỹ trả hũ:</b> <b>${potAmount.toLocaleString("vi-VN")} xu</b>\n🏆 <b>Đã trả:</b> <b>${totalPaid.toLocaleString("vi-VN")} xu</b>\n💎 <b>Số tiền trong hũ còn lại:</b> <b>${remainingPot.toLocaleString("vi-VN")} xu</b>`;
+  const jackpot3D = custom3DEmoji("5424972470023104089", "✨");
+  const msg = `${jackpot3D} <b>Nổ hũ ${huTitle} ${diceText}</b> ${custom3DEmoji("5424972470023104089", "🔥")}\n${listWinnersText}\n💰 <b>Quỹ trả hũ:</b> <b>${potAmount.toLocaleString("vi-VN")} xu</b>\n🏆 <b>Đã trả:</b> <b>${totalPaid.toLocaleString("vi-VN")} xu</b>\n💎 <b>Số tiền trong hũ còn lại:</b> <b>${remainingPot.toLocaleString("vi-VN")} xu</b>`;
 
   const potMessageOptions = {
     parse_mode: "HTML" as const,
