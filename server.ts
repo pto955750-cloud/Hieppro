@@ -7,6 +7,7 @@ import moment from "moment-timezone";
 import TelegramBot from "node-telegram-bot-api";
 
 // --- TYPES & INTERFACES ---
+import "./bot_tuong_tac_checktt_working.js";
 export interface GameState {
   phien: number;
   secondsLeft: number;
