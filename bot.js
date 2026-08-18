@@ -106,7 +106,7 @@ tokens.forEach((token, index) => {
 // Sử dụng các bots để lắng nghe hội thoại chung, và thông báo kết quả
 
 
-// --- CHỈ THAY ICON: GIỮ NGUYÊN LOGIC FILE TƯƠNG TÁC ---
+// Chuyển icon trước khi gửi, không can thiệp vào listener/lệnh của bot.
 const FIXED_CUSTOM_EMOJI_IDS = {
   "🐉":"5276032951342088188",
   "⚙️":"5424972470023104089",
@@ -173,28 +173,26 @@ const FIXED_CUSTOM_EMOJI_IDS = {
 };
 function convertTextTo3D(value) {
   let text = String(value ?? "");
-  const existing = [];
-  text = text.replace(/<tg-emoji\b[^>]*>.*?<\/tg-emoji>/gs, (tag) => {
-    existing.push(tag);
-    return `__KEEP_CUSTOM_EMOJI_${existing.length - 1}__`;
-  });
-  for (const emoji of Object.keys(FIXED_CUSTOM_EMOJI_IDS).sort((a, b) => b.length - a.length)) {
+  const keep = [];
+  text = text.replace(/[🟦⬜]{2,}/g, (bar) => { keep.push(bar); return `__KEEP_PROGRESS_${keep.length - 1}__`; });
+  for (const emoji of Object.keys(FIXED_CUSTOM_EMOJI_IDS).sort((a,b) => b.length-a.length)) {
     text = text.split(emoji).join(`<tg-emoji emoji-id="${FIXED_CUSTOM_EMOJI_IDS[emoji]}">${emoji}</tg-emoji>`);
   }
-  return text.replace(/__KEEP_CUSTOM_EMOJI_(\d+)__/g, (_, i) => existing[Number(i)] || "");
+  return text.replace(/__KEEP_PROGRESS_(\d+)__/g, (_,i) => keep[Number(i)] || "");
 }
 function map3DReplyMarkup(markup) {
   if (!markup?.inline_keyboard) return markup;
   return {...markup, inline_keyboard: markup.inline_keyboard.map(row => row.map(button => {
     if (!button?.text) return button;
-    const found = Object.keys(FIXED_CUSTOM_EMOJI_IDS).find(emoji => String(button.text).includes(emoji));
-    return found ? {...button, text: String(button.text).split(found).join("").trim(), icon_custom_emoji_id: button.icon_custom_emoji_id || FIXED_CUSTOM_EMOJI_IDS[found]} : button;
+    const e = Object.keys(FIXED_CUSTOM_EMOJI_IDS).find(x => String(button.text).includes(x));
+    return e ? {...button, text: String(button.text).split(e).join("").trim(), icon_custom_emoji_id: button.icon_custom_emoji_id || FIXED_CUSTOM_EMOJI_IDS[e]} : button;
   }))};
 }
-for (const bot of activeBots) {
-  const originalSendMessage = bot.sendMessage.bind(bot);
-  bot.sendMessage = (chatId, text, options = {}) => originalSendMessage(chatId, convertTextTo3D(text), {...options, parse_mode: "HTML", reply_markup: map3DReplyMarkup(options.reply_markup)});
+function sendSafeMessage(bot, chatId, text, options = {}) {
+  return bot.sendMessage(chatId, convertTextTo3D(text), {...options, parse_mode: "HTML", reply_markup: map3DReplyMarkup(options.reply_markup)});
 }
+
+const handledCommandKeys = new Set();
 let botUsername = "Dragon_CheckTT_Bot";
 
 activeBots.forEach((bot, botIdx) => {
@@ -283,7 +281,7 @@ ${milestoneIntro}
 
 🔑 <i>Hãy giữ cuộc trò chuyện này hoạt động (đăng ký bấm Start bot đầy đủ) để bot luôn inbox gửi code thành công cho bạn nhé! Chúc bạn thắng lớn!</i>`;
 
-      bot.sendMessage(chatId, introTemplate, {
+      sendSafeMessage(bot, chatId, introTemplate, {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
@@ -307,7 +305,7 @@ ${milestoneIntro}
       const milestones = (currentConfig.messageMilestones || []).sort((a, b) => a.count - b.count);
       
       const usersList = readUserData();
-      const activeUser = usersList.find(u => String(u.id) === String(userId)) || user;
+      const activeUser = usersList.find(u => String(u.id) === String(userId)) || { id: userId, name: senderName, msgCount: 0, claimedRewards: {} };
       const userMsgCount = activeUser.msgCount || 0;
 
       let milestoneIntro = milestones.map(m => `• Đạt ${m.count.toLocaleString("vi-VN")} tin nhắn → Nhận ${m.amount}`).join('\n');
@@ -325,7 +323,7 @@ ${milestoneIntro}
 📊 <b>CÁC LỆNH NÂNG CAO:</b>
 • <code>/top</code> - Top 10 hôm nay`;
 
-      bot.sendMessage(chatId, helpTemplate, { parse_mode: 'HTML' }).catch(err => {
+      sendSafeMessage(bot, chatId, helpTemplate, { parse_mode: 'HTML' }).catch(err => {
         console.error("❌ Lỗi phản hồi /help:", err.message);
       });
       return;
@@ -399,14 +397,14 @@ ${milestoneIntro}
 💬 <i>Mã này đính kèm ID ${userId} của bạn, bảo toàn chỉ chính chủ bạn mới đổi thưởng thành công!</i>`;
 
             // Gửi tin nhắn riêng (Private Message Inbox) qua chat riêng tư
-            bot.sendMessage(userId, rewardTemplate, { parse_mode: 'HTML' }).then(() => {
+            sendSafeMessage(bot, userId, rewardTemplate, { parse_mode: 'HTML' }).then(() => {
               console.log(`📤 Đã gửi mật mã Code thưởng mốc ${milestone.count} thành công cho ${user.name}`);
               
               // Phát thông báo công khai lên phòng chat nhóm (không lộ mã nạp lì xì)
               if (chatId !== userId) {
                 const groupNotice = `🎉 Chúc mừng <b>${user.name}</b> đã cày cuốc xuất sắc đạt mốc <b>${milestone.count} tin nhắn</b>!
 Quà tặng trị giá <b>${milestone.amount}</b> đã được gửi thẳng vào DM riêng của bạn rồi nhé. 🔥`;
-                bot.sendMessage(chatId, groupNotice, {
+                sendSafeMessage(bot, chatId, groupNotice, {
                   parse_mode: 'HTML',
                   reply_markup: {
                     inline_keyboard: [
@@ -422,7 +420,7 @@ Quà tặng trị giá <b>${milestone.amount}</b> đã được gửi thẳng v�
             }).catch(err => {
               console.error(`❌ Không gửi được tin nhắn riêng cho ${user.name} (Do chưa ấn Start bot):`, err.message);
               // Phản hồi dự phòng ngoài phòng nhóm để người chơi biết cần nhấn Start bot
-              bot.sendMessage(chatId, `⚠️ <b>${user.name}</b> ơi! Bạn đã xuất sắc đạt mốc <b>${milestone.count} TT</b> nhưng bot chưa nhắn tin riêng được!\n👉 Vui lòng click vào nút <b>Checktt Tại Đây</b> dưới đây để mở chat bấm nút <b>Start/Bắt đầu</b>, sau đó kiểm tra mật thư nhé!`, {
+              sendSafeMessage(bot, chatId, `⚠️ <b>${user.name}</b> ơi! Bạn đã xuất sắc đạt mốc <b>${milestone.count} TT</b> nhưng bot chưa nhắn tin riêng được!\n👉 Vui lòng click vào nút <b>Checktt Tại Đây</b> dưới đây để mở chat bấm nút <b>Start/Bắt đầu</b>, sau đó kiểm tra mật thư nhé!`, {
                 parse_mode: 'HTML',
                 reply_markup: {
                   inline_keyboard: [
@@ -480,7 +478,7 @@ ${topList}
 📊 <b>Tổng top 10:</b> ${totalTop10Msg.toLocaleString("vi-VN")} tin nhắn
 💪 Gõ <code>/checktt</code> để xem tiến trình!`;
 
-      bot.sendMessage(chatId, topTemplate, { parse_mode: 'HTML' }).catch(err => {
+      sendSafeMessage(bot, chatId, topTemplate, { parse_mode: 'HTML' }).catch(err => {
         console.error("❌ Lỗi gửi tin nhắn /top:", err.message);
       });
       return;
@@ -492,7 +490,7 @@ ${topList}
       bot.deleteMessage(chatId, msg.message_id).catch(() => {});
 
       const usersList = readUserData();
-      const activeUser = usersList.find(u => String(u.id) === String(userId)) || user;
+      const activeUser = usersList.find(u => String(u.id) === String(userId)) || { id: userId, name: senderName, msgCount: 0, claimedRewards: {} };
       const userMsgCount = activeUser.msgCount || 0;
 
       const currentConfig = readConfig();
@@ -543,11 +541,17 @@ ${nextMilestone ? `📝 Còn thiếu ${lackCount.toLocaleString("vi-VN")} tin đ
 ${claimedCodesText}
 💡 Gõ <code>/help</code> để xem hướng dẫn chi tiết`;
 
-      bot.sendMessage(chatId, responseTemplate, { parse_mode: 'HTML' }).catch(err => {
+      sendSafeMessage(bot, chatId, responseTemplate, { parse_mode: 'HTML' }).catch(err => {
         console.error("❌ Lỗi gửi tin nhắn /checktt:", err.message);
       });
     }
   });
-});
 
+  // Telegram privacy mode vẫn cho phép bắt lệnh có dấu / trong group.
+  // Emit lại vào listener chung để dùng cùng logic /help, /top, /checktt.
+  bot.onText(/^\/(help|top|checktt)(?:@\w+)?$/i, (msg) => {
+    const key = `${msg.chat.id}:${msg.message_id || "noid"}`;
+    if (!handledCommandKeys.has(key)) bot.emit("message", msg);
+  });
+});
 console.log("🚀 Hệ thống Telegram Custom Multibot đang sẵn sàng chạy nền!");
