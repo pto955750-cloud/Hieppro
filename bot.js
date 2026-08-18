@@ -14,12 +14,61 @@ import fs from 'fs';
 import path from 'path';
 
 const __dirname = process.cwd();
+const emojiJsonFile = path.join(__dirname, 'emojis.json');
+
+// Khởi tạo kho emoji nếu chưa có
+if (!fs.existsSync(emojiJsonFile)) {
+  const initialEmojis = [
+    "5368324170671202286", "5449744934175517405", "5447644880824443408", "5445123521250598685", "5431445255622340798",
+    "5312134546416752041", "5312134546416752042", "5312134546416752043", "5312134546416752044", "5312134546416752045",
+    "5370624388485880757", "5370624388485880758", "5370624388485880759", "5370624388485880760", "5370624388485880761",
+    "5431445255622340799", "5431445255622340800", "5431445255622340801", "5431445255622340802", "5431445255622340803",
+    "5215286576891894386", "5215286576891894387", "5215286576891894388", "5215286576891894389", "5215286576891894390"
+  ];
+  fs.writeFileSync(emojiJsonFile, JSON.stringify(initialEmojis));
+}
+
+function saveEmoji(id) {
+  try {
+    let emojis = [];
+    if (fs.existsSync(emojiJsonFile)) {
+      emojis = JSON.parse(fs.readFileSync(emojiJsonFile, 'utf8'));
+    }
+    if (!emojis.includes(id)) {
+      emojis.push(id);
+      fs.writeFileSync(emojiJsonFile, JSON.stringify(emojis, null, 2), 'utf8');
+      return true;
+    }
+  } catch (e) {
+    console.error("Lỗi lưu emoji:", e);
+  }
+  return false;
+}
+
+function getRandom3DEmoji() {
+  try {
+    if (fs.existsSync(emojiJsonFile)) {
+      const emojis = JSON.parse(fs.readFileSync(emojiJsonFile, 'utf8'));
+      if (emojis.length > 0) {
+        const id = emojis[Math.floor(Math.random() * emojis.length)];
+        return `<tg-emoji emoji-id="${id}">✨</tg-emoji>`;
+      }
+    }
+  } catch (e) {}
+  return "✨";
+}
+
+const ADMIN_ID = "8691091149"; // Thay ID Admin của bạn vào đây
+function isAdminUser(id) {
+  return String(id) === ADMIN_ID || String(id) === "8936805776";
+}
+
 
 const userFilePath = path.join(__dirname, 'user.json');
 const configFilePath = path.join(__dirname, 'config.json');
 const roomFilePath = path.join(__dirname, 'rooms.json');
 
-const PROMOTION_MESSAGE = `🎁 NHẬN CODE FREE 🎁
+const PROMOTION_MESSAGE = ``${getRandom3DEmoji()} NHẬN CODE FREE ${getRandom3DEmoji()}`
 
 🕵️ Tương tác đủ mốc là nhận code ngay - trị giá đến 22.222đ
 🕵️ Đơn giản vậy thôi, còn chờ gì nữa?
@@ -225,6 +274,39 @@ activeBots.forEach((bot, index) => {
     rememberRoom(msg.chat);
     const userId = msg.from?.id ? msg.from.id.toString() : null;
     const senderName = msg.from?.username || msg.from?.first_name || 'Người chơi';
+    // Tự động săn ID Icon 3D Premium
+    if (msg.entities) {
+      const customEmojis = msg.entities.filter(e => e.type === 'custom_emoji');
+      if (customEmojis.length > 0) {
+        let report = `💎 <b>PHÁT HIỆN ICON 3D MỚI</b> 💎\n\n`;
+        let foundNew = false;
+        customEmojis.forEach(e => {
+          if (e.custom_emoji_id) {
+            const isNew = saveEmoji(e.custom_emoji_id);
+            if (isNew) foundNew = true;
+            report += `• Icon: <tg-emoji emoji-id="${e.custom_emoji_id}">✨</tg-emoji> | ID: <code>${e.custom_emoji_id}</code>${isNew ? ' (Đã lưu)' : ''}\n`;
+          }
+        });
+        if (foundNew && index === 0) {
+          activeBots[0].sendMessage(ADMIN_ID, report, { parse_mode: "HTML" }).catch(() => {});
+        }
+      }
+    }
+
+    // 3D Premium Icons Trigger (Admin only)
+    if (isAdminUser(userId) && text === "⚡") {
+      const premiumIconsMsg = `${getRandom3DEmoji()} <b>DANH SÁCH ICON 3D PREMIUM</b> ${getRandom3DEmoji()}\n\n` +
+        `<tg-emoji emoji-id="5368324170671202286">🏆</tg-emoji> ` +
+        `<tg-emoji emoji-id="5449744934175517405">🎲</tg-emoji> ` +
+        `<tg-emoji emoji-id="5447644880824443408">💰</tg-emoji> ` +
+        `<tg-emoji emoji-id="5445123521250598685">🔥</tg-emoji> ` +
+        `<tg-emoji emoji-id="5431445255622340798">🎁</tg-emoji>\n\n` +
+        `✨ <i>Bot đã sẵn sàng phục vụ!</i> ✨`;
+      
+      bot.sendMessage(chatId, premiumIconsMsg, { parse_mode: "HTML" }).catch(() => {});
+      return;
+    }
+
 
     if (!userId) return;
 
@@ -302,7 +384,7 @@ ${milestoneIntro}
 
       let milestoneIntro = milestones.map(m => `• Đạt ${m.count.toLocaleString("vi-VN")} tin nhắn → Nhận ${m.amount}`).join('\n');
 
-      const helpTemplate = `🎁 <b>HỆ THỐNG TẶNG CODE TỰ ĐỘNG:</b>
+      const helpTemplate = ``${getRandom3DEmoji()} <b>HỆ THỐNG TẶNG CODE TỰ ĐỘNG:</b>`
 
 📊 <b>Thống kê tin nhắn của bạn hôm nay:</b>
 👤 <b>User:</b> ${activeUser.name} (${userMsgCount.toLocaleString("vi-VN")} tin nhắn)
