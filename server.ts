@@ -5641,8 +5641,8 @@ export function registerAllBotCommands() {
           parse_mode: "HTML",
           reply_markup: {
             inline_keyboard: [
-              [{ text: "📥 Nạp Xu", callback_data: "deposit" }, { text: "📤 Rút Bank", callback_data: "withdraw" }],
-              [{ text: "Víp", icon_custom_emoji_id: "5445355530111437729", callback_data: "vip_info" }],
+              [{ text: "Nạp Xu", icon_custom_emoji_id: "5416117059207572332", callback_data: "deposit" }, { text: "Rút Bank", icon_custom_emoji_id: "5244837092042750681", callback_data: "withdraw" }],
+              [{ text: "VIP", icon_custom_emoji_id: "5449875686837726134", callback_data: "vip_info" }],
               [{ text: "💸 Chuyển Tiền", callback_data: "transfer_guide" }, { text: "🔑 Nhập Giftcode", callback_data: "redeem_gift" }],
               [{ text: "🎟️ Mua Giftcode", callback_data: "buy_giftcode" }],
               [{ text: "📜 LS Cược", callback_data: "history_bet" }, { text: "📜 LS Nạp", callback_data: "history_dep" }, { text: "📜 LS Rút", callback_data: "history_wit" }]
@@ -5896,8 +5896,14 @@ export function registerAllBotCommands() {
   bot1.on("callback_query", async (q) => {
     const act = q.data;
     const chat = q.message?.chat.id;
-    if (!chat || !act || isBanned(chat)) return;
-
+        if (!chat || !act || isBanned(chat)) return;
+    if (act === "vip_info") {
+      bot1.answerCallbackQuery(q.id, { text: "Đã mở thông tin VIP" }).catch(() => {});
+      const vipUsers = readJson(userJsonFile);
+      const vipUser = vipUsers.find((u: any) => String(u.id) === String(chat)) || { id: chat, vipPoints: 0, vipPointsTotal: 0 };
+      bot1.sendMessage(chat, formatVipGuideMessage(vipUser), { parse_mode: "HTML" }).catch((err: any) => console.error("vip_info error:", err?.message || err));
+      return;
+    }
     try {
       const users = readJson(userJsonFile);
       const user = users.find((u: any) => String(u.id) === String(chat));
