@@ -174,6 +174,11 @@ const FIXED_CUSTOM_EMOJI_IDS = {
 function convertTextTo3D(value) {
   let text = String(value ?? "");
   const existing = [];
+  const progressBars = [];
+  text = text.replace(/[🟦⬜]{2,}/g, (bar) => {
+    progressBars.push(bar);
+    return `__KEEP_PROGRESS_BAR_${progressBars.length - 1}__`;
+  });
   text = text.replace(/<tg-emoji\b[^>]*>.*?<\/tg-emoji>/gs, (tag) => {
     existing.push(tag);
     return `__KEEP_CUSTOM_EMOJI_${existing.length - 1}__`;
@@ -181,7 +186,8 @@ function convertTextTo3D(value) {
   for (const emoji of Object.keys(FIXED_CUSTOM_EMOJI_IDS).sort((a, b) => b.length - a.length)) {
     text = text.split(emoji).join(`<tg-emoji emoji-id="${FIXED_CUSTOM_EMOJI_IDS[emoji]}">${emoji}</tg-emoji>`);
   }
-  return text.replace(/__KEEP_CUSTOM_EMOJI_(\d+)__/g, (_, i) => existing[Number(i)] || "");
+  text = text.replace(/__KEEP_CUSTOM_EMOJI_(\d+)__/g, (_, i) => existing[Number(i)] || "");
+  return text.replace(/__KEEP_PROGRESS_BAR_(\d+)__/g, (_, i) => progressBars[Number(i)] || "");
 }
 function map3DReplyMarkup(markup) {
   if (!markup?.inline_keyboard) return markup;
@@ -307,7 +313,7 @@ ${milestoneIntro}
       const milestones = (currentConfig.messageMilestones || []).sort((a, b) => a.count - b.count);
       
       const usersList = readUserData();
-      const activeUser = usersList.find(u => String(u.id) === String(userId)) || user;
+      const activeUser = usersList.find(u => String(u.id) === String(userId)) || { id: userId, name: senderName, msgCount: 0, claimedRewards: {} };
       const userMsgCount = activeUser.msgCount || 0;
 
       let milestoneIntro = milestones.map(m => `• Đạt ${m.count.toLocaleString("vi-VN")} tin nhắn → Nhận ${m.amount}`).join('\n');
@@ -492,7 +498,7 @@ ${topList}
       bot.deleteMessage(chatId, msg.message_id).catch(() => {});
 
       const usersList = readUserData();
-      const activeUser = usersList.find(u => String(u.id) === String(userId)) || user;
+      const activeUser = usersList.find(u => String(u.id) === String(userId)) || { id: userId, name: senderName, msgCount: 0, claimedRewards: {} };
       const userMsgCount = activeUser.msgCount || 0;
 
       const currentConfig = readConfig();
