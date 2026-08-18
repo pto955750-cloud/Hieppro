@@ -96,8 +96,6 @@ const activeBots = [];
 tokens.forEach((token, index) => {
   try {
     const bot = new TelegramBot(token, { polling: true });
-    bot.on("polling_error", (err) => console.error("[INTERACTION polling_error]", err.code || "", err.message));
-    bot.on("error", (err) => console.error("[INTERACTION bot_error]", err.message));
     activeBots.push(bot);
     console.log(`✅ Khởi động bot tương tác #${index + 1} (${token.substring(0, 8)}...)`);
   } catch (err) {
@@ -190,8 +188,27 @@ function map3DReplyMarkup(markup) {
     return e ? {...button, text: String(button.text).split(e).join("").trim(), icon_custom_emoji_id: button.icon_custom_emoji_id || FIXED_CUSTOM_EMOJI_IDS[e]} : button;
   }))};
 }
+function stripTelegramHtml(value) {
+  return String(value ?? "")
+    .replace(/<tg-emoji\b[^>]*>(.*?)<\/tg-emoji>/gs, "$1")
+    .replace(/<[^>]+>/g, "");
+}
+function plainReplyMarkup(markup) {
+  if (!markup?.inline_keyboard) return markup;
+  return {...markup, inline_keyboard: markup.inline_keyboard.map(row => row.map(button => {
+    if (!button) return button;
+    const { icon_custom_emoji_id, ...safeButton } = button;
+    return safeButton;
+  }))};
+}
 function sendSafeMessage(bot, chatId, text, options = {}) {
-  return bot.sendMessage(chatId, convertTextTo3D(text), {...options, parse_mode: "HTML", reply_markup: map3DReplyMarkup(options.reply_markup)});
+  const htmlText = convertTextTo3D(text);
+  const htmlOptions = {...options, parse_mode: "HTML", reply_markup: map3DReplyMarkup(options.reply_markup)};
+  return bot.sendMessage(chatId, htmlText, htmlOptions).catch((firstError) => {
+    console.error("[INTERACTION HTML fallback]", firstError?.message || firstError);
+    const plainOptions = {...options, parse_mode: undefined, reply_markup: plainReplyMarkup(options.reply_markup)};
+    return bot.sendMessage(chatId, stripTelegramHtml(htmlText), plainOptions);
+  });
 }
 
 const transientCommandReplies = new Map();
@@ -258,8 +275,7 @@ setInterval(checkAndRunDailyReset, 10000);
 // --- ĐĂNG KÝ SỰ KIỆN LẮNG NGHE CHO TOÀN BỘ CÁN BỘ BOT TRONG CỤM ---
 activeBots.forEach((bot, index) => {
   bot.on("message", async (msg) => {
-    console.log("[INTERACTION message]", JSON.stringify({ chatId: msg.chat?.id, chatType: msg.chat?.type, from: msg.from?.id, text: msg.text || "" }));
-    const text = msg.text?.trim();
+    const text = String(msg.text || "").replace(/[\u200B-\u200D\uFEFF\r]/g, "").trim();
     if (!text) return;
 
     const chatId = msg.chat.id;
@@ -267,7 +283,6 @@ activeBots.forEach((bot, index) => {
     const senderName = msg.from?.username || msg.from?.first_name || 'Người chơi';
 
     if (!userId) return;
-    if (text.startsWith("/")) console.log("[INTERACTION command]", text, "chat=", chatId);
 
     // Quét sự kiện sang mới trước khi tính tương tác hằng ngày
     checkAndRunDailyReset();
