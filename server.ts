@@ -96,7 +96,6 @@ export interface GiftCode {
   createTime: string;
   useTime: string | null;
   userIdUsed: string | null;
-  wagerMultiplier?: number;
   maxUses?: number;
   usedCount?: number;
   usedBy?: string[];
@@ -142,7 +141,7 @@ export const xsmbResultsJsonFile = "xsmb_results.json";
 
 export const adminn = process.env.ADMIN_GROUP || "-1003933306407";
 export const groupt = process.env.GAME_GROUP || "-1003928586317";
-export const gameRoomLink = process.env.GAME_ROOM_LINK || "https://t.me/ZEDROOMnroom";
+export const gameRoomLink = process.env.GAME_ROOM_LINK || "https://t.me/dragonnroom";
 
 export const SESSION_LIMIT = 10000000;
 export const CANCUA_LIMIT = 5000000;
@@ -155,19 +154,21 @@ export const TELEGRAM_XX_MIN_BET = 2000;
 export const TELEGRAM_XX_MAX_BET = 199000;
 export const TELEGRAM_XX_PAYOUT_RATE = 1.88;
 export const HOURLY_ROOM_GIFTCODE_VALUE = 1111;
-export const EVENT_KEYWORD = "ZEDROOM.Room";
+export const EVENT_KEYWORD = "Dragon.Room";
 export const EVENT_DAILY_MIN_DEPOSIT = 30000;
 export const EVENT_STREAK_TARGET_DAYS = 7;
 export const EVENT_REWARD_GIFTCODE_VALUE = 20000;
-// Thời gian chờ để mỗi viên xúc xắc Telegram quay xong rồi mới tung viên tiếp theo.
-export const TELEGRAM_DICE_ANIMATION_MS = 5000;
 // Dùng đường dẫn tuyệt đối để chạy ổn trên Railway/PM2/Docker
-export const welcomeStartImagePath = path.join(process.cwd(), "ZEDROOM_room_start.png");
-// Danh sách game dùng cùng ảnh hiển thị khi bấm /start
-export const gameCatalogImagePath = welcomeStartImagePath;
+export const welcomeStartImagePath = path.join(process.cwd(), "dragon_room_start.png");
+export const gameCatalogImagePath = "danh_sach_tro_choi.jpeg";
 
-// Chỉ duy nhất tài khoản này có quyền quản trị.
-export const adminId: number[] = [8691091149];
+export const adminId: number[] = [8691091149, 8936805776];
+if (process.env.ADMIN_ID) {
+  process.env.ADMIN_ID.split(",").forEach((id) => {
+    const num = parseInt(id.trim(), 10);
+    if (!isNaN(num) && !adminId.includes(num)) adminId.push(num);
+  });
+}
 
 export const isAdminUser = (userId?: number) => !!userId && adminId.includes(userId);
 export const isNoviceUnlocked = (user: any) => (user?.nap || 0) >= 20000;
@@ -570,10 +571,10 @@ export function getDepositOrderCooldownRemainingSeconds(user: any) {
   return Math.max(0, DEPOSIT_ORDER_COOLDOWN_SECONDS - elapsedSeconds);
 }
 
-export const DEPOSIT_BANK_CODE = "MB";
-export const DEPOSIT_BANK_NAME = "MB";
-export const DEPOSIT_ACCOUNT_NO = "02222229092002";
-export const DEPOSIT_ACCOUNT_NAME = "KHANH HIEP";
+export const DEPOSIT_BANK_CODE = "MSB";
+export const DEPOSIT_BANK_NAME = "MSB";
+export const DEPOSIT_ACCOUNT_NO = "80000280575";
+export const DEPOSIT_ACCOUNT_NAME = "HA TUAN ANH";
 
 export function buildDepositQrImageUrl(amount: number, content: string) {
   const accountName = encodeURIComponent(DEPOSIT_ACCOUNT_NAME);
@@ -663,12 +664,6 @@ export function createGiftcodeRecord(value: number, creatorId: string, maxUses =
   return code;
 }
 
-export function resetAllUsersToNew() {
-  // Xóa toàn bộ tài khoản để mọi người phải /start đăng ký lại từ đầu.
-  // Không tự gọi trong lúc khởi động để tránh bị xóa dữ liệu mỗi lần restart bot.
-  writeJson(userJsonFile, []);
-}
-
 export function initJsonFiles() {
   readJson(userJsonFile, "[]");
   readJson(giftJsonFile, "[]");
@@ -730,7 +725,7 @@ export const bot4 = isTokenValid(tokenBot4) ? new TelegramBot(tokenBot4, botOpti
 export const bot5 = isTokenValid(tokenBot5) ? new TelegramBot(tokenBot5, botOptions) : new TelegramBot("123:dummy5", { polling: false });
 
 export const bots = [bot1, bot2, bot3, bot4, bot5];
-export const botUsernames = ["ZEDROOM_1gon_bot", "ZEDROOM_2gon_bot", "ZEDROOM_3gon_bot", "ZEDROOM_4gon_bot", "ZEDROOM_5gon_bot"];
+export const botUsernames = ["Dragon_1gon_bot", "Dragon_2gon_bot", "Dragon_3gon_bot", "Dragon_4gon_bot", "Dragon_5gon_bot"];
 export const botErrors: (string | null)[] = [null, null, null, null, null];
 
 bots.forEach((bot, idx) => {
@@ -824,7 +819,7 @@ export function getWelcomeStartCaption(chatId: string | number, name: string, ba
   return `🥂 Xin chào chủ nhân Hihiiii!\n\n` +
     `⭐ ID của bạn là: <code>${chatId}</code>\n` +
     `⭐ Số dư: <b>${balance.toLocaleString("vi-VN")}đ</b>\n\n` +
-    `Tham gia Room nhận giftcode hàng ngày: https://t.me/ZEDROOMnroom nhé`;
+    `Tham gia Room nhận giftcode hàng ngày: https://t.me/dragonnroom nhé`;
 }
 
 export function sendWelcomeStartMessage(chatId: string | number, name: string = "Hảo Hán") {
@@ -1195,7 +1190,9 @@ export async function handleTDCommand(userId: string, amount: number, chatId: st
 
   // Tung xúc xắc Telegram thực tế
   const d1 = await bot1.sendDice(chatId);
+  await new Promise(r => setTimeout(r, 3500));
   const d2 = await bot1.sendDice(chatId);
+  await new Promise(r => setTimeout(r, 3500));
   const roll1 = [d1.dice?.value || 1, d2.dice?.value || 1];
   const sum1 = roll1[0] + roll1[1];
   
@@ -1263,7 +1260,9 @@ export async function handleTDAction(userId: string, action: string, chatId: str
 
   // Tung xúc xắc mới
   const d1 = await bot1.sendDice(chatId);
+  await new Promise(r => setTimeout(r, 3500));
   const d2 = await bot1.sendDice(chatId);
+  await new Promise(r => setTimeout(r, 3500));
   const roll2 = [d1.dice?.value || 1, d2.dice?.value || 1];
   const sum2 = roll2[0] + roll2[1];
   
@@ -1399,7 +1398,7 @@ export function isBanned(userId: string | number): boolean {
   return banned.some((u: any) => String(u.id) === String(userId));
 }
 
-export const ROOM_GIFTCODE_PREFIX = "ZEDROOM";
+export const ROOM_GIFTCODE_PREFIX = "DRAGON";
 
 export function normalizeRoomGiftcode(code: string): string {
   const raw = String(code ?? "").trim().toUpperCase();
@@ -1727,7 +1726,7 @@ function httpGetText(url: string, timeoutMs = 20_000): Promise<string> {
   return new Promise((resolve, reject) => {
     const req = https.get(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ZEDROOMRoomBot/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; DragonRoomBot/1.0)",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       }
     }, (res) => {
@@ -2676,8 +2675,7 @@ export async function sendDice() {
       } else {
         throw new Error("sendDice failed");
       }
-      // Chờ viên hiện tại dừng hẳn rồi mới tung viên tiếp theo, tránh hiệu ứng bị chồng lên nhau.
-      if (i < 2) await new Promise((resolve) => setTimeout(resolve, TELEGRAM_DICE_ANIMATION_MS));
+      if (i < 2) await new Promise((resolve) => setTimeout(resolve, 3500));
     }
   } catch (err) {
     let matched = false;
@@ -2708,8 +2706,7 @@ export async function sendDice() {
     );
   }
 
-  // Chờ viên thứ 3 dừng hẳn trước khi chốt kết quả và mở khóa chat.
-  await new Promise((resolve) => setTimeout(resolve, TELEGRAM_DICE_ANIMATION_MS));
+  await new Promise((resolve) => setTimeout(resolve, 3000));
   // Tung hết viên XX thứ 3 mới mở khoá chat
   if (state.chatLocked) unlockGroupChat();
 
@@ -3075,7 +3072,7 @@ ${recentClStats}
     reply_markup: {
       inline_keyboard: [[
         { text: "💵 Nạp Tiền Ngay", url: `https://t.me/${botUsernames[0]}?start=deposit` },
-        { text: "📊 Lịch Sử Phiên", url: "https://t.me/lichsuphienZEDROOM" }
+        { text: "📊 Lịch Sử Phiên", url: "https://t.me/lichsuphiendragon" }
       ]],
     },
   }).catch(() => null);
@@ -3546,15 +3543,6 @@ export function registerAllBotCommands() {
     bot1.onText(regex, (msg, match) => wrap(bot1, msg, match));
   };
 
-  onAdminCommand(/^\/resetusers$/i, (bot, msg) => {
-    resetAllUsersToNew();
-    bot.sendMessage(
-      msg.chat.id,
-      "✅ Đã reset toàn bộ người dùng về trạng thái mới. Tất cả tài khoản cần gõ /start để đăng ký lại.",
-      { parse_mode: "HTML" }
-    ).catch(() => {});
-  });
-
   const handleCheckCommand = async (bot: TelegramBot, msg: TelegramBot.Message, match: RegExpExecArray | null) => {
     const senderId = msg.from?.id;
     const chatId = msg.chat.id;
@@ -3738,50 +3726,6 @@ export function registerAllBotCommands() {
     }
   });
 
-  onAdminCommand(/^\/giamcuoc (\d+) (\d+) x([1-4])$/i, (bot, msg, match) => {
-    if (!isAdminGroupChat(msg.chat.id) || !match) {
-      bot.sendMessage(msg.chat.id, "❌ Lệnh này chỉ dùng trong nhóm admin hoặc sai cú pháp.");
-      return;
-    }
-    const targetId = match[1];
-    const baseAmount = parseInt(match[2], 10);
-    const multiplier = parseInt(match[3], 10);
-    const adjustment = baseAmount * multiplier;
-    const users = readJson(userJsonFile);
-    const idx = users.findIndex((u: any) => String(u.id) === String(targetId));
-    if (idx === -1) {
-      bot.sendMessage(msg.chat.id, `❌ Không tìm thấy người dùng ID <code>${targetId}</code>.`, { parse_mode: "HTML" });
-      return;
-    }
-    const before = Math.max(0, Number(users[idx].vongCuoc) || 0);
-    const after = Math.max(0, before - adjustment);
-    users[idx].vongCuoc = after;
-    writeJson(userJsonFile, users);
-    bot.sendMessage(msg.chat.id, `✅ Đã giảm vòng cược ID <code>${targetId}</code> từ <b>${Math.ceil(before).toLocaleString("vi-VN")}</b> xuống <b>${Math.ceil(after).toLocaleString("vi-VN")}</b> xu.\n📉 Mức giảm: <b>${adjustment.toLocaleString("vi-VN")} xu</b> (${baseAmount.toLocaleString("vi-VN")} x${multiplier})`, { parse_mode: "HTML" });
-    bot.sendMessage(targetId, `🛠️ Admin đã giảm vòng cược của bạn <b>${adjustment.toLocaleString("vi-VN")} xu</b>.\n🔄 Vòng cược còn lại: <b>${Math.ceil(after).toLocaleString("vi-VN")} xu</b>.`, { parse_mode: "HTML" }).catch(() => {});
-  });
-  onAdminCommand(/^\/tangcuoc (\d+) (\d+) x([1-4])$/i, (bot, msg, match) => {
-    if (!isAdminGroupChat(msg.chat.id) || !match) {
-      bot.sendMessage(msg.chat.id, "❌ Lệnh này chỉ dùng trong nhóm admin hoặc sai cú pháp.");
-      return;
-    }
-    const targetId = match[1];
-    const baseAmount = parseInt(match[2], 10);
-    const multiplier = parseInt(match[3], 10);
-    const adjustment = baseAmount * multiplier;
-    const users = readJson(userJsonFile);
-    const idx = users.findIndex((u: any) => String(u.id) === String(targetId));
-    if (idx === -1) {
-      bot.sendMessage(msg.chat.id, `❌ Không tìm thấy người dùng ID <code>${targetId}</code>.`, { parse_mode: "HTML" });
-      return;
-    }
-    const before = Math.max(0, Number(users[idx].vongCuoc) || 0);
-    const after = before + adjustment;
-    users[idx].vongCuoc = after;
-    writeJson(userJsonFile, users);
-    bot.sendMessage(msg.chat.id, `✅ Đã tăng vòng cược ID <code>${targetId}</code> từ <b>${Math.ceil(before).toLocaleString("vi-VN")}</b> lên <b>${Math.ceil(after).toLocaleString("vi-VN")}</b> xu.\n📈 Mức tăng: <b>${adjustment.toLocaleString("vi-VN")} xu</b> (${baseAmount.toLocaleString("vi-VN")} x${multiplier})`, { parse_mode: "HTML" });
-    bot.sendMessage(targetId, `🛠️ Admin đã tăng vòng cược của bạn <b>${adjustment.toLocaleString("vi-VN")} xu</b>.\n🔄 Vòng cược hiện tại: <b>${Math.ceil(after).toLocaleString("vi-VN")} xu</b>.`, { parse_mode: "HTML" }).catch(() => {});
-  });
   onAdminCommand(/^\/reset$/, (bot, msg) => {
     if (!isAdminGroupChat(msg.chat.id)) {
       bot.sendMessage(msg.chat.id, "❌ Lệnh này chỉ dùng trong nhóm admin.");
@@ -3819,7 +3763,7 @@ export function registerAllBotCommands() {
       `🔥 <b>THÔNG BÁO KHUYẾN MÃI SIÊU CẤP</b> 🔥\n\n` +
       `🚀 Hệ thống áp dụng <b>KM 15%</b> giá trị nạp!\n` +
       `⏰ Thời gian: Từ <b>${startStr}</b> đến <b>${endStr}</b>\n` +
-      `💰 Nạp ngay để nhận ưu đãi cực khủng từ ZEDROOM Room!`,
+      `💰 Nạp ngay để nhận ưu đãi cực khủng từ Dragon Room!`,
       { parse_mode: "HTML" }
     ).then((sentMsg) => {
       if (sentMsg && sentMsg.message_id) {
@@ -3850,7 +3794,7 @@ export function registerAllBotCommands() {
         `📢 <b>THÔNG BÁO KẾT THÚC KHUYẾN MÃI</b>\n\n` +
         `⛔ Chương trình KM 15% đã kết thúc.\n` +
         `🔄 Hệ thống trở về mức KM mặc định <b>3%</b>.\n` +
-        `🙏 Cảm ơn các bạn đã ủng hộ ZEDROOM Room!`,
+        `🙏 Cảm ơn các bạn đã ủng hộ Dragon Room!`,
         { parse_mode: "HTML" }
       );
     }, 60 * 60 * 1000);
@@ -3875,25 +3819,25 @@ export function registerAllBotCommands() {
       `📢 <b>THÔNG BÁO KẾT THÚC KHUYẾN MÃI</b>\n\n` +
       `⛔ Chương trình KM 15% đã kết thúc.\n` +
       `🔄 Hệ thống trở về mức KM mặc định <b>3%</b>.\n` +
-      `🙏 Cảm ơn các bạn đã ủng hộ ZEDROOM Room!`,
+      `🙏 Cảm ơn các bạn đã ủng hộ Dragon Room!`,
       { parse_mode: "HTML" }
     );
     bot.sendMessage(msg.chat.id, "✅ Đã TẮT khuyến mãi 15%.");
   });
 
 
-  onAdminCommand(/^\/(?:mycode|muacode)(?:\s+.+)?$/i, (bot, msg) => {
+  onAdminCommand(/^\/mycode(?:\s+.+)?$/i, (bot, msg) => {
     if (!isAdminGroupChat(msg.chat.id)) {
       bot.sendMessage(msg.chat.id, "❌ Lệnh này chỉ dùng trong nhóm admin.");
       return;
     }
 
-    const rawArgs = String(msg.text || "").replace(/^\/(?:mycode|muacode)(?:@\w+)?/i, "").trim();
+    const rawArgs = String(msg.text || "").replace(/^\/mycode(?:@\w+)?/i, "").trim();
     const parts = rawArgs.split(/\s+/).filter(Boolean);
     if (parts.length !== 2 && parts.length !== 3) {
       bot.sendMessage(
         msg.chat.id,
-        `⚠️ <b>Sai cú pháp /muacode</b>\n• Ngẫu nhiên: <code>/muacode [số_xu] [số_lượt]</code>\n• Tự đặt mã: <code>/muacode [mã_code] [số_xu] [số_lượt]</code>\n\nVí dụ:\n• <code>/muacode 10000 5</code>\n• <code>/muacode CODEVIP 10000 5</code>`,
+        `⚠️ <b>Sai cú pháp /mycode</b>\n• Ngẫu nhiên: <code>/mycode [số_xu] [số_lượt]</code>\n• Tự đặt mã: <code>/mycode [mã_code] [số_xu] [số_lượt]</code>\n\nVí dụ:\n• <code>/mycode 10000 5</code>\n• <code>/mycode CODEVIP 10000 5</code>`,
         { parse_mode: "HTML" }
       );
       return;
@@ -3937,7 +3881,6 @@ export function registerAllBotCommands() {
     }
 
     const record = createGiftcodeData(finalCode, amount, `ADMIN_${msg.from?.id || "UNKNOWN"}`, maxUses);
-    record.wagerMultiplier = 10;
     giftData.push(record);
     writeJson(giftJsonFile, giftData);
 
@@ -3947,7 +3890,6 @@ export function registerAllBotCommands() {
       `🔑 Mã: <code>/code ${record.gift}</code>\n` +
       `💰 Mệnh giá: <b>${amount.toLocaleString("vi-VN")} xu</b>\n` +
       `🔁 Số lượt nhập: <b>${maxUses}</b>\n` +
-      `🎯 Điều kiện rút tiền: cược đủ <b>x10 giá trị mã</b>\n` +
       `👤 Cách tạo: <b>${customCode ? "Admin tự đặt mã" : "Ngẫu nhiên"}</b>`,
       { parse_mode: "HTML" }
     );
@@ -3965,14 +3907,12 @@ export function registerAllBotCommands() {
       `• <code>/check [id]</code> - Kiểm tra thông tin user\n` +
       `• <code>/nap [id] [xu]</code> - Cộng nạp cho user\n` +
       `• <code>/tru [id] [xu]</code> - Trừ xu user\n` +
-      `• <code>/giamcuoc [id] [xu] x1|x2|x3|x4</code> - Giảm vòng cược\n` +
-      `• <code>/tangcuoc [id] [xu] x1|x2|x3|x4</code> - Tăng vòng cược\n` +
       `• <code>/ban [id]</code> - Khóa tài khoản\n` +
       `• <code>/unban [id]</code> - Mở khóa tài khoản\n` +
       `• <code>/duyet_rut [id] [xu]</code> - Duyệt lệnh rút\n` +
       `• <code>/tuchoi_rut [id] [xu] [lý do]</code> - Từ chối lệnh rút\n` +
-      `• <code>/muacode [số_xu] [số_lượt]</code> - Tạo giftcode ngẫu nhiên, yêu cầu cược x10\n` +
-      `• <code>/muacode [mã_code] [số_xu] [số_lượt]</code> - Admin tự đặt mã, yêu cầu cược x10\n` +
+      `• <code>/mycode [số_xu] [số_lượt]</code> - Tạo giftcode ngẫu nhiên\n` +
+      `• <code>/mycode [mã_code] [số_xu] [số_lượt]</code> - Admin tự đặt tên code\n` +
       `• <code>/reset</code> - Xóa toàn bộ người dùng, reset về người chơi mới\n` +
       `• <code>/resetcode</code> - Xóa toàn bộ giftcode trong server\n` +
       `• <code>/batkm</code> - Bật khuyến mãi 15% (tự tắt sau 1h)\n` +
@@ -4872,7 +4812,7 @@ export function registerAllBotCommands() {
     }
 
     if (txt === "🆘 Hỗ Trợ" || txt === "🆘 Hỗ trợ" || txt === "Hỗ Trợ") {
-      const adminLink = "https://t.me/hihiiibo";
+      const adminLink = "https://t.me/bonbonxlxzuy";
       const msgSupport = `🆘 <b>HỖ TRỢ KHÁCH HÀNG</b>\n\n` +
         `Chào bạn, nếu bạn gặp vấn đề cần hỗ trợ, vui lòng gửi nội dung hỗ trợ cho Admin qua link bên dưới:\n` +
         `👤 <b>Admin:</b> ${adminLink}\n\n` +
@@ -4898,7 +4838,7 @@ export function registerAllBotCommands() {
 
       const displayName = `${msg.from?.first_name || ""} ${msg.from?.last_name || ""}`.trim() || (msg.from?.username ? `@${msg.from.username}` : "Người chơi");
       const text =
-        `🖼 <b>EVENT TREO ẢNH / ĐIỂM DANH ZEDROOM.Room</b>\n\n` +
+        `🖼 <b>EVENT TREO ẢNH / ĐIỂM DANH Dragon.Room</b>\n\n` +
         `✅ Đổi tên Telegram có chứa <b>${EVENT_KEYWORD}</b>\n` +
         `✅ Mỗi ngày điểm danh 1 lần\n` +
         `✅ Mỗi ngày phải nạp tối thiểu <b>${EVENT_DAILY_MIN_DEPOSIT.toLocaleString("vi-VN")}đ</b> mới được điểm danh\n` +
@@ -5079,7 +5019,7 @@ export function registerAllBotCommands() {
         `🎟 Mã phòng: <code>${code}</code>\n` +
         `💰 Mức cược: <b>${amount.toLocaleString("vi-VN")} xu</b>\n` +
         `💵 Ví còn lại: <b>${getUserBalance(user).toLocaleString("vi-VN")} xu</b>\n` +
-        `📌 Bot đã ghim lệnh phòng trong room <a href="${gameRoomLink}">ZEDROOM Room</a>.\n` +
+        `📌 Bot đã ghim lệnh phòng trong room <a href="${gameRoomLink}">Dragon Room</a>.\n` +
         `👥 Bạn bè vào phòng bằng lệnh: <code>/solo ${code}</code>\n` +
         `⛔ Có thể hủy bằng: <code>/huy ${code}</code> sau 1 phút nếu chưa có ai vào.\n\n` +
         formatSoloLobbyMessage(soloRooms);
@@ -5217,7 +5157,7 @@ export function registerAllBotCommands() {
           {
             parse_mode: "HTML",
             disable_web_page_preview: true,
-            reply_markup: { inline_keyboard: [[{ text: "💬 Vào Phòng ZEDROOM Room", url: gameRoomLink }]] }
+            reply_markup: { inline_keyboard: [[{ text: "💬 Vào Phòng Dragon Room", url: gameRoomLink }]] }
           }
         );
         bot1.answerCallbackQuery(q.id, { text: "Đã mở Tài Xỉu Săn Hũ" }).catch(() => {});
@@ -5530,7 +5470,8 @@ export function registerAllBotCommands() {
 
         const withdrawIntro = `📤 <b>RÚT TIỀN THẮNG LỚN VỀ THẺ:</b>\n` +
           `⚖️ <b>Hạn mức & Phí rút:</b>\n` +
-          `• Hạn mức tối thiểu: 100.000 xu (tân thủ) | 50.000 xu (đã mở khóa)\n` +
+          `• Tân thủ (chưa nạp đủ 20k): Cố định 10.000 xu (Rút 1 lần duy nhất)\n` +
+          `• Hạn mức tối thiểu (Min) thành viên thường: 50.000 xu\n` +
           `• Phí giao dịch rút: 1% (khấu trừ từ số xu rút)\n\n` +
           `🏦 <b>Hệ thống hỗ trợ các ngân hàng:</b>\n` +
           `Vietcombank | Techcombank | MBBank | Vietinbank | Agribank\n\n` +
@@ -5653,7 +5594,7 @@ export function registerAllBotCommands() {
         bot1.sendMessage(chat, msgStr, { parse_mode: "HTML" });
         sendMessageToRoom(
           `🔥 ID: <code>${formatMaskedId(user.id)}</code> đã điểm danh Fan cứng!\n` +
-          `Tham gia Fan cứng ZEDROOM để nhận code 20K ngay nào.`,
+          `Tham gia Fan cứng DRAGON để nhận code 20K ngay nào.`,
           {
             parse_mode: "HTML",
             reply_markup: {
@@ -6017,7 +5958,8 @@ BVB - BaoVietBank`;
       // Display linked bank info with spoiler as requested
       if (match && !match[1]) {
         const withdrawInfo = `📤 <b>RÚT TIỀN</b> 
-• Min 50k
+• Tân thủ (chưa nạp đủ 20k): Cố định 10.000 xu (Rút 1 lần duy nhất)
+• Min thành viên thường: 50.000 xu
 • Phí giao dịch rút: 1% 
 ✍️ <b>Cú pháp rút tiền:</b>
 Gõ lệnh <code>/rut</code> để kiểm tra liên kết ngân hàng.
@@ -6038,10 +5980,11 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
       if (inputAmount === "all" || inputAmount === "max") {
         let calculatedMoney = Math.floor(balance / 1.01); // Assuming 1% fee
         if (!isNoviceUnlocked(user)) {
-          if (calculatedMoney < 100000) {
-            bot1.sendMessage(chat, `❌ Tài khoản tân thủ chưa nạp đủ <b>20.000 xu</b> phải có đủ số dư để rút tối thiểu <b>100.000 xu</b> sau khi trừ phí.`, { parse_mode: "HTML" });
+          if (calculatedMoney < 10000) {
+            bot1.sendMessage(chat, `❌ Tài khoản tân thủ chưa nạp đủ <b>20.000 xu</b> phải có đủ số dư để rút đúng <b>10.000 xu</b> sau khi trừ phí.`, { parse_mode: "HTML" });
             return;
           }
+          calculatedMoney = 10000;
         } else if (calculatedMoney < minWithdraw) {
           bot1.sendMessage(chat, `❌ Số dư của bạn không đủ để rút tối thiểu ${minWithdraw.toLocaleString("vi-VN")} xu sau khi trừ phí.`, { parse_mode: "HTML" });
           return;
@@ -6069,11 +6012,10 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
           return;
         }
 
-        if (money < 100000) {
-          bot1.sendMessage(chat, `❌ Hạn mức rút tối thiểu dành cho tài khoản Tân Thủ là <b>100.000 xu</b>.`, { parse_mode: "HTML" });
+        if (money !== 10000) {
+          bot1.sendMessage(chat, `❌ Tài khoản tân thủ chưa nạp đủ <b>20.000 xu</b> chỉ được phép rút đúng <b>10.000 xu</b> (Min và Max là 10k).`, { parse_mode: "HTML" });
           return;
         }
-        // Lệnh rút đầu tiên của Tân Thủ phải từ 100.000 xu trở lên.
       } else if (money < minWithdraw) {
         bot1.sendMessage(chat, `❌ Hạn mức rút tối thiểu ${minWithdraw.toLocaleString("vi-VN")} xu!`, { parse_mode: "HTML" });
         return;
@@ -6239,8 +6181,7 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
 
       users[uIdx].sd = (users[uIdx].sd || 0) + g.value;
       if (users[uIdx].money !== undefined) users[uIdx].money = (users[uIdx].money || 0) + g.value;
-      const wagerMultiplier = Math.max(1, Number(g.wagerMultiplier) || 1);
-      users[uIdx].vongCuoc = (users[uIdx].vongCuoc || 0) + (g.value * wagerMultiplier);
+      users[uIdx].vongCuoc = (users[uIdx].vongCuoc || 0) + g.value;
 
       const useTime = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
       const nextUsedBy = [...usedByList, String(chat)];
@@ -6255,11 +6196,7 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
 
       const remainUses = Math.max(0, maxUses - nextUsedBy.length);
       const remainText = maxUses > 1 ? `\n🔁 Còn lại: <b>${remainUses}</b> lượt nhập` : "";
-      const wagerRequirement = g.value * wagerMultiplier;
-      const wagerText = wagerMultiplier > 1
-        ? `\n🎯 Vòng cược cần hoàn thành: <b>${wagerRequirement.toLocaleString("vi-VN")} xu (x${wagerMultiplier})</b>`
-        : "";
-      bot1.sendMessage(chat, `🎉 Nhập Giftcode +<b>${g.value.toLocaleString("vi-VN")} xu</b> thành công!${wagerText}${remainText}`, { parse_mode: "HTML" });
+      bot1.sendMessage(chat, `🎉 Nhập Giftcode +<b>${g.value.toLocaleString("vi-VN")} xu</b> thành công!${remainText}`, { parse_mode: "HTML" });
       const userIdStr = String(chat);
       const maskedId = userIdStr.length > 5 ? `*****${userIdStr.slice(-5)}` : userIdStr;
       sendMessageToRoom(`↪️ Người chơi <b>${maskedId}</b>\nNhận giftcode <code>${g.gift}</code> thành công! Giá trị: <b>${g.value.toLocaleString("vi-VN")}</b>`, { parse_mode: "HTML" });
@@ -6335,10 +6272,9 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
 
   bot1.onText(/^\/muacode\s+(\d+)(?:\s+(\d+))?$/, (msg, match) => {
     const chat = msg.chat.id;
-        const userId = msg.from?.id;
+    const userId = msg.from?.id;
     if (!userId || isBanned(userId) || !match) return;
-    // Admin dùng /muacode trong nhóm admin để tạo code, không phải mua code bằng số dư.
-    if (isAdminGroupChat(chat) && isAdminUser(userId)) return;
+
     let quantity = 1;
     let value = 0;
 
@@ -6536,7 +6472,7 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
     } else if (startParam === "event_checkin") {
       bot1.sendMessage(
         chat,
-        `🔥 <b>ĐIỂM DANH FAN CỨNG ZEDROOM</b>\n\n` +
+        `🔥 <b>ĐIỂM DANH FAN CỨNG DRAGON</b>\n\n` +
         `✅ Đổi tên Telegram có chứa <b>${EVENT_KEYWORD}</b>\n` +
         `✅ Hôm nay đã nạp tối thiểu <b>${EVENT_DAILY_MIN_DEPOSIT.toLocaleString("vi-VN")}đ</b>\n\n` +
         `🎁 Điểm danh đủ điều kiện để nhận code <b>20K</b>.`,
@@ -6753,11 +6689,11 @@ async function bootstrap() {
         lessBetWinsRate: state.lessBetWinsRate,
       },
       botsStatus: [
-        { name: "Bot 1 (Chính)", tag: "ZEDROOM [BotChinh]", username: botUsernames[0], active: isTokenValid(tokenBot1), error: botErrors[0], token: tokenBot1 },
-        { name: "Bot 2 (Phụ 1)", tag: "ZEDROOM Room phụ 1", username: botUsernames[1], active: isTokenValid(tokenBot2), error: botErrors[1], token: tokenBot2 },
-        { name: "Bot 3 (Phụ 2)", tag: "ZEDROOM Room phụ 2", username: botUsernames[2], active: isTokenValid(tokenBot3), error: botErrors[2], token: tokenBot3 },
-        { name: "Bot 4 (Phụ 3)", tag: "ZEDROOM Room phụ 3", username: botUsernames[3], active: isTokenValid(tokenBot4), error: botErrors[3], token: tokenBot4 },
-        { name: "Bot 5 (Phụ 4)", tag: "ZEDROOM Room phụ 4", username: botUsernames[4], active: isTokenValid(tokenBot5), error: botErrors[4], token: tokenBot5 },
+        { name: "Bot 1 (Chính)", tag: "Dragon [BotChinh]", username: botUsernames[0], active: isTokenValid(tokenBot1), error: botErrors[0], token: tokenBot1 },
+        { name: "Bot 2 (Phụ 1)", tag: "Dragon Room phụ 1", username: botUsernames[1], active: isTokenValid(tokenBot2), error: botErrors[1], token: tokenBot2 },
+        { name: "Bot 3 (Phụ 2)", tag: "Dragon Room phụ 2", username: botUsernames[2], active: isTokenValid(tokenBot3), error: botErrors[2], token: tokenBot3 },
+        { name: "Bot 4 (Phụ 3)", tag: "Dragon Room phụ 3", username: botUsernames[3], active: isTokenValid(tokenBot4), error: botErrors[3], token: tokenBot4 },
+        { name: "Bot 5 (Phụ 4)", tag: "Dragon Room phụ 4", username: botUsernames[4], active: isTokenValid(tokenBot5), error: botErrors[4], token: tokenBot5 },
       ]
     });
   });
