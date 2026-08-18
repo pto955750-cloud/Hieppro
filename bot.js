@@ -110,7 +110,7 @@ let botUsername = "Dragon_CheckTT_Bot";
 
 // --- GLOBAL CUSTOM EMOJI 3D MAPPER ---
 // Tất cả emoji trong tin nhắn, caption và nút bấm sẽ được đổi sang icon 3D cố định.
-const FIXED_CUSTOM_EMOJI_IDS: Record<string, string> = {
+const FIXED_CUSTOM_EMOJI_IDS = {
   "🐉":"5456140674028019486", "⚙️":"5440539497383087970", "⚙":"5440539497383087970",
   "⚠️":"5210956306952758910", "⚠":"5210956306952758910", "❌":"5276032951342088188",
   "✅":"5440539497383087970", "👉":"5449683594425410231", "🎁":"5424972470023104089",
@@ -131,9 +131,9 @@ const FIXED_CUSTOM_EMOJI_IDS: Record<string, string> = {
   "⏰":"5242195906199035850", "💡":"5406683434124859552", "👤":"5453902265922372936"
 };
 
-function convertTextTo3D(value: unknown): string {
+function convertTextTo3D(value) {
   let text = String(value ?? "");
-  const existing: string[] = [];
+  const existing = [];
   text = text.replace(/<tg-emoji\b[^>]*>.*?<\/tg-emoji>/gs, (tag) => {
     existing.push(tag);
     return `__KEEP_CUSTOM_EMOJI_${existing.length - 1}__`;
@@ -145,11 +145,11 @@ function convertTextTo3D(value: unknown): string {
   return text.replace(/__KEEP_CUSTOM_EMOJI_(\d+)__/g, (_, i) => existing[Number(i)] || "");
 }
 
-function map3DReplyMarkup(markup: any): any {
+function map3DReplyMarkup(markup) {
   if (!markup?.inline_keyboard) return markup;
   return {
     ...markup,
-    inline_keyboard: markup.inline_keyboard.map((row: any[]) => row.map((button: any) => {
+    inline_keyboard: markup.inline_keyboard.map((row) => row.map((button) => {
       if (!button?.text) return button;
       const found = Object.keys(FIXED_CUSTOM_EMOJI_IDS).find((emoji) => String(button.text).includes(emoji));
       if (!found) return button;
@@ -164,7 +164,7 @@ function map3DReplyMarkup(markup: any): any {
 
 for (const bot of activeBots) {
   const originalSendMessage = bot.sendMessage.bind(bot);
-  (bot as any).sendMessage = (chatId: any, text: any, options: any = {}) =>
+  bot.sendMessage = (chatId, text, options = {}) =>
     originalSendMessage(chatId, convertTextTo3D(text), {
       ...options,
       parse_mode: "HTML",
@@ -173,7 +173,7 @@ for (const bot of activeBots) {
 }
 
 // Nhóm nào đã tương tác với bot sẽ nhận thông báo FREE CODE định kỳ.
-const promoChatIds = new Set<string>();
+const promoChatIds = new Set();
 const FREE_CODE_PROMO_MESSAGE = `🎁 <b>NHẬN CODE FREE</b> 🎁\n\n🕵️ Tương tác đủ mốc là nhận code ngay - trị giá đến 20.000đ!\n🕵️ Đơn giản vậy thôi, còn chờ gì nữa?\n\n🛩️ <code>/help</code> - Xem chi tiết chương trình\n🛩️ <code>/checktt</code> - Kiểm tra tương tác của bạn`;
 
 setInterval(() => {
@@ -183,7 +183,7 @@ setInterval(() => {
     sender.sendMessage(chatId, FREE_CODE_PROMO_MESSAGE, {
       parse_mode: "HTML",
       disable_web_page_preview: true
-    }).catch((error: any) => console.error("❌ Lỗi gửi FREE CODE:", error?.message || error));
+    }).catch((error) => console.error("❌ Lỗi gửi FREE CODE:", error?.message || error));
   }
 }, 240000);
 
