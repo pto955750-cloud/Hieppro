@@ -1716,7 +1716,7 @@ export const VIP_TIERS = [
   { level: 0, badge: custom3DEmoji("5449875686837726134", "🥉"), name: "Đồng", thresholdPoints: 0, exchangeRate: 100 },
   { level: 1, badge: custom3DEmoji("5453902265922376865", "🥈"), name: "Bạc", thresholdPoints: 10, exchangeRate: 100 },
   { level: 2, badge: custom3DEmoji("5447203607294265305", "🥇"), name: "Vàng", thresholdPoints: 50, exchangeRate: 200 },
-  { level: 3, badge: custom3DEmoji("544053949738307970", "⭐"), name: "Bạch Kim", thresholdPoints: 100, exchangeRate: 300 },
+  { level: 3, badge: custom3DEmoji("5440539497383087970", "⭐"), name: "Bạch Kim", thresholdPoints: 100, exchangeRate: 300 },
   { level: 4, badge: custom3DEmoji("5438496463044752972", "💎"), name: "Kim Cương", thresholdPoints: 500, exchangeRate: 400 },
   { level: 5, badge: "🏆", name: "Cao Thủ", thresholdPoints: 1000, exchangeRate: 500 },
   { level: 6, badge: "⚔️", name: "Chiến Tướng", thresholdPoints: 5000, exchangeRate: 600 },
@@ -5901,15 +5901,22 @@ export function registerAllBotCommands() {
       bot1.answerCallbackQuery(q.id, { text: "Đã mở thông tin VIP" }).catch(() => {});
       const vipUsers = readJson(userJsonFile);
       const vipUser = vipUsers.find((u: any) => String(u.id) === String(chat)) || { id: chat, vipPoints: 0, vipPointsTotal: 0 };
-      bot1.sendMessage(chat, formatVipGuideMessage(vipUser), {
-        parse_mode: "HTML",
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: "Đổi điểm VIP", icon_custom_emoji_id: "5246762912428603768", callback_data: "vip_redeem" }],
-            [{ text: "Làm mới VIP", icon_custom_emoji_id: "5197371802136892976", callback_data: "vip_refresh" }]
-          ]
-        }
-      }).catch((err: any) => console.error("vip_info error:", err?.message || err));
+      const vipHtml = formatVipGuideMessage(vipUser);
+      const vipMarkup = {
+        inline_keyboard: [
+          [{ text: "Đổi điểm VIP", icon_custom_emoji_id: "5246762912428603768", callback_data: "vip_redeem" }],
+          [{ text: "Làm mới VIP", icon_custom_emoji_id: "5197371802136892976", callback_data: "vip_refresh" }]
+        ]
+      };
+      bot1.sendMessage(chat, vipHtml, { parse_mode: "HTML", reply_markup: vipMarkup }).catch((err: any) => {
+        console.error("vip_info HTML error:", err?.message || err);
+        const vipPlain = vipHtml.replace(/<tg-emoji\b[^>]*>(.*?)<\/tg-emoji>/gs, "$1").replace(/<[^>]+>/g, "");
+        bot1.sendMessage(chat, vipPlain, {
+          reply_markup: {
+            inline_keyboard: [[{ text: "Đổi điểm VIP", callback_data: "vip_redeem" }], [{ text: "Làm mới VIP", callback_data: "vip_refresh" }]]
+          }
+        }).catch((fallbackErr: any) => console.error("vip_info fallback error:", fallbackErr?.message || fallbackErr));
+      });
       return;
     }
     try {
