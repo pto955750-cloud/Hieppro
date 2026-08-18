@@ -524,21 +524,33 @@ export function saveDepositQrMessage(user: any, requestId: string, chatId: strin
   item.qrMessageId = Number(messageId);
 }
 
-export function deleteDepositQrMessage(user: any, requestId?: string, amount?: number, content?: string) {
-  const history = Array.isArray(user?.depositHistory) ? user.depositHistory : [];
-  const item = history.find((h: any) => {
-    const status = String(h.status || "");
-    if (status !== "Chờ chuyển khoản" && status !== "Chờ kiểm tra") return false;
-    const sameRequest = requestId && String(h.requestId || "") === String(requestId);
-    const sameContent = content && String(h.transferContent || "").trim() === String(content).trim();
-    const historyAmount = Number(String(h.amount || 0).replace(/\./g, "").replace(/,/g, ""));
-    const sameAmount = amount !== undefined && historyAmount === Number(amount);
-    return !!(sameRequest || sameContent || (sameAmount && !requestId && !content));
-  });
-  if (item?.qrChatId !== undefined && item?.qrMessageId !== undefined) {
-    bot1.deleteMessage(String(item.qrChatId), String(item.qrMessageId)).catch(() => {});
-    delete item.qrChatId;
-    delete item.qrMessageId;
+export function deleteDepositQrMessage(userId: string, requestId?: string, amount?: number, content?: string) {
+  try {
+    const users = readJson(userJsonFile);
+    const user = users.find((u: any) => String(u.id) === String(userId));
+    if (!user) return;
+
+    const history = Array.isArray(user.depositHistory) ? user.depositHistory : [];
+    const item = history.find((h: any) => {
+      const status = String(h.status || "");
+      // Cho phép xóa ngay cả khi đã thành công hoặc hết hạn nếu vẫn còn lưu ID tin nhắn
+      const sameRequest = requestId && String(h.requestId || "") === String(requestId);
+      const sameContent = content && String(h.transferContent || "").trim() === String(content).trim();
+      const historyAmount = typeof h.amount === 'string' 
+        ? Number(h.amount.replace(/\./g, "").replace(/,/g, "")) 
+        : Number(h.amount || 0);
+      const sameAmount = amount !== undefined && historyAmount === Number(amount);
+      return !!(sameRequest || sameContent || (sameAmount && !requestId && !content));
+    });
+
+    if (item && item.qrChatId && item.qrMessageId) {
+      bot1.deleteMessage(item.qrChatId, item.qrMessageId).catch(() => {});
+      delete item.qrChatId;
+      delete item.qrMessageId;
+      writeJson(userJsonFile, users);
+    }
+  } catch (e) {
+    console.error("deleteDepositQrMessage error:", e);
   }
 }
 
@@ -571,10 +583,10 @@ export function getDepositOrderCooldownRemainingSeconds(user: any) {
   return Math.max(0, DEPOSIT_ORDER_COOLDOWN_SECONDS - elapsedSeconds);
 }
 
-export const DEPOSIT_BANK_CODE = "MSB";
-export const DEPOSIT_BANK_NAME = "MSB";
-export const DEPOSIT_ACCOUNT_NO = "80000280575";
-export const DEPOSIT_ACCOUNT_NAME = "HA TUAN ANH";
+export const DEPOSIT_BANK_CODE = "MB";
+export const DEPOSIT_BANK_NAME = "MB";
+export const DEPOSIT_ACCOUNT_NO = "02222229092002";
+export const DEPOSIT_ACCOUNT_NAME = "TO KHANH HIEP";
 
 export function buildDepositQrImageUrl(amount: number, content: string) {
   const accountName = encodeURIComponent(DEPOSIT_ACCOUNT_NAME);
@@ -3678,7 +3690,7 @@ export function registerAllBotCommands() {
       return;
     }
 
-    deleteDepositQrMessage(users[idx], undefined, money);
+    deleteDepositQrMessage(String(users[idx].id), undefined, money);
     const result = addDepositToUser(users[idx], money);
 
     if (!users[idx].depositHistory) users[idx].depositHistory = [];
@@ -3916,9 +3928,37 @@ export function registerAllBotCommands() {
       `• <code>/reset</code> - Xóa toàn bộ người dùng, reset về người chơi mới\n` +
       `• <code>/resetcode</code> - Xóa toàn bộ giftcode trong server\n` +
       `• <code>/batkm</code> - Bật khuyến mãi 15% (tự tắt sau 1h)\n` +
-      `• <code>/tatkm</code> - Tắt khuyến mãi thủ công\n\n` +
+      `• <code>/tatkm</code> - Tắt khuyến mãi thủ công\n` +
+      `• <code>/thongbao [nội dung]</code> - Gửi thông báo tới toàn bộ User\n\n` +
       `🔐 <i>Lệnh này chỉ admin mới dùng được và chỉ hiển thị trong nhóm admin.</i>`;
     bot.sendMessage(msg.chat.id, helpText, { parse_mode: "HTML" });
+  });
+
+
+  onAdminCommand(/^\/thongbao\s+([\s\S]+)$/, async (bot, msg, match) => {
+    if (!isAdminGroupChat(msg.chat.id)) {
+      bot.sendMessage(msg.chat.id, "❌ Lệnh này chỉ dùng trong nhóm admin.");
+      return;
+    }
+    const announcement = match[1];
+    const users = readJson(userJsonFile);
+    let successCount = 0;
+    let failCount = 0;
+
+    bot.sendMessage(msg.chat.id, `🚀 Bắt đầu gửi thông báo tới ${users.length} người dùng...`);
+
+    for (const u of users) {
+      try {
+        await bot1.sendMessage(u.id, announcement, { parse_mode: "HTML" });
+        successCount++;
+        // Thêm độ trễ nhỏ để tránh rate limit
+        if (successCount % 25 === 0) await new Promise(r => setTimeout(r, 1000));
+      } catch (e) {
+        failCount++;
+      }
+    }
+
+    bot.sendMessage(msg.chat.id, `✅ Hoàn tất gửi thông báo!\n- Thành công: ${successCount}\n- Thất bại: ${failCount}`);
   });
 
   onAdminCommand(/^\/top$/, (bot, msg) => {
@@ -4301,6 +4341,21 @@ export function registerAllBotCommands() {
     processedGroupMessages.add(msgKey);
 
     let text = msg.text.trim();
+    // 3D Premium Icons Trigger (Admin only)
+    if (isAdminUser(msg.from?.id) && text === "⚡") {
+      const premiumIconsMsg = `🚀 <b>DANH SÁCH ICON 3D PREMIUM</b> 🚀\n\n` +
+        `<tg-emoji emoji-id="5368324170671202286">🏆</tg-emoji> ` +
+        `<tg-emoji emoji-id="5449744934175517405">🎲</tg-emoji> ` +
+        `<tg-emoji emoji-id="5447644880824443408">💰</tg-emoji> ` +
+        `<tg-emoji emoji-id="5445123521250598685">🔥</tg-emoji> ` +
+        `<tg-emoji emoji-id="5445123521250598685">💎</tg-emoji> ` +
+        `<tg-emoji emoji-id="5431445255622340798">🎁</tg-emoji>\n\n` +
+        `✨ <i>Bot đã sẵn sàng phục vụ!</i> ✨`;
+      
+      bot.sendMessage(chat, premiumIconsMsg, { parse_mode: "HTML" }).catch(() => {});
+      return;
+    }
+
 
     // Quick bet logic: convert "t all", "x max", etc.
     const quickBetRegex = /^(t|tai|x|xiu|c|chan|l|le|tc|tl|xc|xl|tt|xx|cc|ll)\s+(all|max)$/i;
@@ -4812,7 +4867,7 @@ export function registerAllBotCommands() {
     }
 
     if (txt === "🆘 Hỗ Trợ" || txt === "🆘 Hỗ trợ" || txt === "Hỗ Trợ") {
-      const adminLink = "https://t.me/bonbonxlxzuy";
+      const adminLink = "https://t.me/hihiiibo";
       const msgSupport = `🆘 <b>HỖ TRỢ KHÁCH HÀNG</b>\n\n` +
         `Chào bạn, nếu bạn gặp vấn đề cần hỗ trợ, vui lòng gửi nội dung hỗ trợ cho Admin qua link bên dưới:\n` +
         `👤 <b>Admin:</b> ${adminLink}\n\n` +
@@ -5407,7 +5462,7 @@ export function registerAllBotCommands() {
           saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
           writeJson(userJsonFile, users);
           setTimeout(() => {
-            deleteDepositQrMessage(user, req.requestId);
+            deleteDepositQrMessage(String(user.id), req.requestId);
           }, 10 * 60 * 1000); // 10 minutes
         }).catch(() => {
           bot1.sendMessage(chat, formatDepositOrderCaption(amount, req.content), {
@@ -5419,7 +5474,7 @@ export function registerAllBotCommands() {
             saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
             writeJson(userJsonFile, users);
             setTimeout(() => {
-              deleteDepositQrMessage(user, req.requestId);
+              deleteDepositQrMessage(String(user.id), req.requestId);
             }, 10 * 60 * 1000); // 10 minutes
           }).catch(e => console.error("Error sending fallback message:", e));
         });
@@ -5593,12 +5648,12 @@ export function registerAllBotCommands() {
         writeJson(userJsonFile, users);
         bot1.sendMessage(chat, msgStr, { parse_mode: "HTML" });
         sendMessageToRoom(
-          `🔥 ID: <code>${formatMaskedId(user.id)}</code> đã điểm danh Fan cứng!\n` +
+          `🔥 ID: ${formatMaskedId(user.id)} đã điểm danh Fan cứng!\n` +
           `Tham gia Fan cứng DRAGON để nhận code 20K ngay nào.`,
           {
             parse_mode: "HTML",
             reply_markup: {
-              inline_keyboard: [[{ text: "🔥 Điểm danh Fan cứng", url: `https://t.me/${botUsernames[0]}?start=event_checkin` }]]
+              inline_keyboard: [[{ text: "🔥 Điểm danh ngay", url: `https://t.me/${botUsernames[0]}?start=event_checkin` }]]
             }
           }
         );
@@ -5822,7 +5877,7 @@ export function registerAllBotCommands() {
           return;
         }
         const user = users[idx];
-        deleteDepositQrMessage(user, undefined, amount);
+        deleteDepositQrMessage(String(user.id), undefined, amount);
         const result = addDepositToUser(user, amount);
 
         if (!user.depositHistory) user.depositHistory = [];
@@ -5886,7 +5941,7 @@ export function registerAllBotCommands() {
           saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
           writeJson(userJsonFile, users);
           setTimeout(() => {
-            deleteDepositQrMessage(user, req.requestId);
+            deleteDepositQrMessage(String(user.id), req.requestId);
           }, 10 * 60 * 1000); // 10 minutes
         }).catch(() => {
           bot1.sendMessage(chat, formatDepositOrderCaption(amount, req.content), {
@@ -5898,7 +5953,7 @@ export function registerAllBotCommands() {
             saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
             writeJson(userJsonFile, users);
             setTimeout(() => {
-              deleteDepositQrMessage(user, req.requestId);
+              deleteDepositQrMessage(String(user.id), req.requestId);
             }, 10 * 60 * 1000); // 10 minutes
           }).catch(e => console.error("Error sending fallback message:", e));
         });
@@ -6576,7 +6631,7 @@ async function bootstrap() {
       const user = users[userIdx];
       
       // Sử dụng hàm addDepositToUser để xử lý cộng tiền, vòng cược, VIP, khuyến mãi
-        deleteDepositQrMessage(user, transId, amount, content);
+        deleteDepositQrMessage(String(user.id), transId, amount, content);
         const result = addDepositToUser(user, amount);
 
         // Lưu lịch sử nạp tiền
