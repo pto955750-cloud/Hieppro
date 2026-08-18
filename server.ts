@@ -412,9 +412,9 @@ if (!fs.existsSync(emojiJsonFile)) {
   const initialEmojis = [
     "5456140674028019486", "5415655814079723871", "5438496463044752972", "5447644880824181073", "5467538555158943525",
     "5424972470023104089", "5449449325434266744", "5453902265922376865", "5447203607294265305", "5237911156630232962",
-    "5447644880824181073", "5276032951342088188", "5438496463044752972", "5314504236132747481", "5424972470023104089",
-    "5456140674028019486", "5447644880824181073", "5244837092042750681", "5206607081334906820", "5210952531676504517",
-    "5246762912428603768", "5440539497383087970", "5447203607294265305", "5453902265922376865", "5215286576891894390"
+    "5370624388485880757", "5370624388485880758", "5370624388485880759", "5370624388485880760", "5370624388485880761",
+    "5431445255622340799", "5431445255622340800", "5431445255622340801", "5431445255622340802", "5431445255622340803",
+    "5215286576891894386", "5215286576891894387", "5215286576891894388", "5215286576891894389", "5215286576891894390"
   ];
   fs.writeFileSync(emojiJsonFile, JSON.stringify(initialEmojis));
 }
@@ -3076,7 +3076,7 @@ export async function sendDice() {
       const bType = String(b.betType || "").toLowerCase();
       if (b.isWin && specialTypes.includes(bType) && b.payout >= 100000) {
         const maskedId = uid.length > 5 ? `*****${uid.slice(-5)}` : uid;
-        const bigWinMsg = `🎉 THẮNG LỚN 🎉\n` +
+        const bigWinMsg = `${getRandom3DEmoji()} <b>🎉 THẮNG LỚN 🎉</b>\n` +
           `👤 Người chơi: ${maskedId}\n` +
           `🎮 Game: Xúc Xắc ${bType.toUpperCase()}\n` +
           `💵 Tiền cược: ${b.amount.toLocaleString("vi-VN")}\n` +
@@ -3106,7 +3106,7 @@ export async function sendDice() {
   const boldTotalLoss = toBoldDigits(totalLoss.toLocaleString("vi-VN"));
   const boldPotIncrease = toBoldDigits(potIncrease.toLocaleString("vi-VN"));
   const boldPotAmount = toBoldDigits(potAmount.toLocaleString("vi-VN"));
-  const lobbyMsg = `🎲 <b>Kết quả XX phiên #${state.phien}</b>\n` +
+  const lobbyMsg = `${getRandom3DEmoji()} <b>🎲 Kết quả XX phiên #${state.phien}</b>\n` +
     `<pre>┏━━━━━━━━━━━━┓
 ┃  ${boldDiceResults}  👉[${boldSumOfResults}] ${sumCat} ${clCat} ${taixiuEmoji}${chanleEmoji}
 ┃ 🎡 Giải số cược vòng quay: ${boldQuayPrize} (1-9)
@@ -3132,7 +3132,7 @@ ${recentClStats}
     },
   }).catch(() => null);
 
-  const resultToGroup = `🎲 Kết quả phiên ${state.phien} 🎲\n ${diceResults.join("  ")} 👉 ${sumCat} ${clCat} ${taixiuEmoji} ${chanleEmoji}`;
+  const resultToGroup = `${getRandom3DEmoji()} 🎲 Kết quả phiên ${state.phien} 🎲\n ${diceResults.join("  ")} 👉 ${sumCat} ${clCat} ${taixiuEmoji} ${chanleEmoji}`;
   bot2.sendMessage("-1004298002180", resultToGroup).catch(() => {});
 
   let triggerPot = false;
@@ -3180,16 +3180,16 @@ ${recentClStats}
 
   // Khôi phục các thông báo theo yêu cầu (không reply)
   const luckyWheelText =
-    `🎡 <b>Vòng quay may mắn</b> (số 1-9): đặt <code>MM [số] [tiền]</code>\n` +
+    `${getRandom3DEmoji()} 🎡 <b>Vòng quay may mắn</b> (số 1-9): đặt <code>MM [số] [tiền]</code>\n` +
     `VD: <code>MM 5 20000</code>\n` +
     `- Tỉ lệ trả thưởng: <b>x10</b>`;
 
   const luckyNumberText =
-    `🎯 <b>Con số may mắn của phiên này:</b> <code>${state.luckyNumber}</code>\n` +
+    `${getRandom3DEmoji()} 🎯 <b>Con số may mắn của phiên này:</b> <code>${state.luckyNumber}</code>\n` +
     `🎁 <b>Tiền thưởng:</b> <code>5.000</code>\n` +
     `<i>Nếu 2 số cuối ID của bạn trùng số may mắn thì chat lệnh <code>/nhanthuong</code> để nhận.</i>`;
 
-  const lamCaiText = `⏰ Còn 20s để LÀM CÁI phiên #${state.phien + 1}\n\n✅ /lamcai [số tiền] (1.000.000 - 5.000.000)\n⚠️ Khi làm CÁI hệ thống sẽ tạm giữ số tiền tương ứng (2× số tiền làm cái làm giới hạn trả thưởng phiên).`;
+  const lamCaiText = `${getRandom3DEmoji()} ⏰ Còn 20s để LÀM CÁI phiên #${state.phien + 1}\n\n✅ /lamcai [số tiền] (1.000.000 - 5.000.000)\n⚠️ Khi làm CÁI hệ thống sẽ tạm giữ số tiền tương ứng (2× số tiền làm cái làm giới hạn trả thưởng phiên).`;
 
   if (lobbySent) {
     await bot2.sendMessage(groupt, luckyWheelText, { parse_mode: "HTML" }).catch(() => {});
@@ -3208,7 +3208,7 @@ ${recentClStats}
     let pot = 10000;
     try { pot = readJson("hu.json").pot || 10000; } catch {}
     state.phienAnnounced = true;
-    const bankerStatus = currentCai.value ? `👑 Chủ cái: <b>${currentCai.value.name}</b>` : `❌ Không Có Ai Làm Cái [Bot Tự Làm Cái]`;
+    const bankerStatus = `${getRandom3DEmoji()} ` + (currentCai.value ? `👑 Chủ cái: <b>${currentCai.value.name}</b>` : `❌ Không Có Ai Làm Cái [Bot Tự Làm Cái]`);
     sendMessageToRoom(`${bankerStatus}\n💰 Hũ Hiện Tại: ${pot.toLocaleString("vi-VN")} xu 💰`, {
       reply_markup: {
         inline_keyboard: [[{ text: "⚡ Nạp Tiền Ngay", url: `https://t.me/${botUsernames[0]}?start=deposit` }]],
@@ -3217,7 +3217,7 @@ ${recentClStats}
     // Khôi phục tin nhắn mời đặt cược
     setTimeout(() => {
       sendMessageToRoom(
-        `📝 <b>Xin mời đặt cược phiên #${state.phien}</b>
+        `${getRandom3DEmoji()} 📝 <b>Xin mời đặt cược phiên #${state.phien}</b>
 ` +
           `💰 Tiền cược tối thiểu <b>1.000</b> và tối đa <b>5.000.000</b>
 
