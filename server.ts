@@ -2020,7 +2020,7 @@ export function formatVipGuideMessage(user: any): string {
     .map((item) => `VIP ${item.level}: 1 điểm = ${item.exchangeRate.toLocaleString("vi-VN")}`)
     .join("\n");
 
-  return `👑 Cấp VIP hiện tại: ${info.level} ${info.badge} (${info.name})\n` +
+  return `👑 Cấp VIP hiện tại: ${info.badge} (${info.name})\n` +
     `🚀 Điểm VIP: <b>${nextLevelText}</b>\n` +
     `🖐 Số điểm VIP có thể đổi: <b>${redeemablePoints.toLocaleString("vi-VN")}</b>\n\n` +
     `Với mỗi <b>300K</b> tiền cược, bạn nhận <b>1</b> điểm VIP.\n` +
