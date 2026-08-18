@@ -192,6 +192,18 @@ function sendSafeMessage(bot, chatId, text, options = {}) {
   return bot.sendMessage(chatId, convertTextTo3D(text), {...options, parse_mode: "HTML", reply_markup: map3DReplyMarkup(options.reply_markup)});
 }
 
+const transientCommandReplies = new Map();
+async function sendTransientCommandReply(bot, chatId, commandType, text, options = {}) {
+  const key = `${chatId}:${commandType}`;
+  const oldMessageId = transientCommandReplies.get(key);
+  if (oldMessageId) {
+    await bot.deleteMessage(chatId, oldMessageId).catch(() => {});
+  }
+  const sent = await sendSafeMessage(bot, chatId, text, options);
+  if (sent?.message_id) transientCommandReplies.set(key, sent.message_id);
+  return sent;
+}
+
 const handledCommandKeys = new Set();
 let botUsername = "Dragon_CheckTT_Bot";
 
@@ -323,7 +335,7 @@ ${milestoneIntro}
 📊 <b>CÁC LỆNH NÂNG CAO:</b>
 • <code>/top</code> - Top 10 hôm nay`;
 
-      sendSafeMessage(bot, chatId, helpTemplate, { parse_mode: 'HTML' }).catch(err => {
+      sendTransientCommandReply(bot, chatId, "help", helpTemplate, { parse_mode: 'HTML' }).catch(err => {
         console.error("❌ Lỗi phản hồi /help:", err.message);
       });
       return;
@@ -478,7 +490,7 @@ ${topList}
 📊 <b>Tổng top 10:</b> ${totalTop10Msg.toLocaleString("vi-VN")} tin nhắn
 💪 Gõ <code>/checktt</code> để xem tiến trình!`;
 
-      sendSafeMessage(bot, chatId, topTemplate, { parse_mode: 'HTML' }).catch(err => {
+      sendTransientCommandReply(bot, chatId, "top", topTemplate, { parse_mode: 'HTML' }).catch(err => {
         console.error("❌ Lỗi gửi tin nhắn /top:", err.message);
       });
       return;
