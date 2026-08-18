@@ -142,7 +142,7 @@ export const xsmbResultsJsonFile = "xsmb_results.json";
 
 export const adminn = process.env.ADMIN_GROUP || "-1003933306407";
 export const groupt = process.env.GAME_GROUP || "-1003928586317";
-export const gameRoomLink = process.env.GAME_ROOM_LINK || "https://t.me/dragonnroom";
+export const gameRoomLink = process.env.GAME_ROOM_LINK || "https://t.me/ZEDROOMnroom";
 
 export const SESSION_LIMIT = 10000000;
 export const CANCUA_LIMIT = 5000000;
@@ -155,21 +155,19 @@ export const TELEGRAM_XX_MIN_BET = 2000;
 export const TELEGRAM_XX_MAX_BET = 199000;
 export const TELEGRAM_XX_PAYOUT_RATE = 1.88;
 export const HOURLY_ROOM_GIFTCODE_VALUE = 1111;
-export const EVENT_KEYWORD = "Dragon.Room";
+export const EVENT_KEYWORD = "ZEDROOM.Room";
 export const EVENT_DAILY_MIN_DEPOSIT = 30000;
 export const EVENT_STREAK_TARGET_DAYS = 7;
 export const EVENT_REWARD_GIFTCODE_VALUE = 20000;
+// Thời gian chờ để mỗi viên xúc xắc Telegram quay xong rồi mới tung viên tiếp theo.
+export const TELEGRAM_DICE_ANIMATION_MS = 5000;
 // Dùng đường dẫn tuyệt đối để chạy ổn trên Railway/PM2/Docker
-export const welcomeStartImagePath = path.join(process.cwd(), "dragon_room_start.png");
-export const gameCatalogImagePath = "danh_sach_tro_choi.jpeg";
+export const welcomeStartImagePath = path.join(process.cwd(), "ZEDROOM_room_start.png");
+// Danh sách game dùng cùng ảnh hiển thị khi bấm /start
+export const gameCatalogImagePath = welcomeStartImagePath;
 
-export const adminId: number[] = [8691091149, 8936805776];
-if (process.env.ADMIN_ID) {
-  process.env.ADMIN_ID.split(",").forEach((id) => {
-    const num = parseInt(id.trim(), 10);
-    if (!isNaN(num) && !adminId.includes(num)) adminId.push(num);
-  });
-}
+// Chỉ duy nhất tài khoản này có quyền quản trị.
+export const adminId: number[] = [8691091149];
 
 export const isAdminUser = (userId?: number) => !!userId && adminId.includes(userId);
 export const isNoviceUnlocked = (user: any) => (user?.nap || 0) >= 20000;
@@ -572,10 +570,10 @@ export function getDepositOrderCooldownRemainingSeconds(user: any) {
   return Math.max(0, DEPOSIT_ORDER_COOLDOWN_SECONDS - elapsedSeconds);
 }
 
-export const DEPOSIT_BANK_CODE = "MSB";
-export const DEPOSIT_BANK_NAME = "MSB";
-export const DEPOSIT_ACCOUNT_NO = "80000280575";
-export const DEPOSIT_ACCOUNT_NAME = "HA TUAN ANH";
+export const DEPOSIT_BANK_CODE = "MB";
+export const DEPOSIT_BANK_NAME = "MB";
+export const DEPOSIT_ACCOUNT_NO = "02222229092002";
+export const DEPOSIT_ACCOUNT_NAME = "KHANH HIEP";
 
 export function buildDepositQrImageUrl(amount: number, content: string) {
   const accountName = encodeURIComponent(DEPOSIT_ACCOUNT_NAME);
@@ -665,6 +663,12 @@ export function createGiftcodeRecord(value: number, creatorId: string, maxUses =
   return code;
 }
 
+export function resetAllUsersToNew() {
+  // Xóa toàn bộ tài khoản để mọi người phải /start đăng ký lại từ đầu.
+  // Không tự gọi trong lúc khởi động để tránh bị xóa dữ liệu mỗi lần restart bot.
+  writeJson(userJsonFile, []);
+}
+
 export function initJsonFiles() {
   readJson(userJsonFile, "[]");
   readJson(giftJsonFile, "[]");
@@ -726,7 +730,7 @@ export const bot4 = isTokenValid(tokenBot4) ? new TelegramBot(tokenBot4, botOpti
 export const bot5 = isTokenValid(tokenBot5) ? new TelegramBot(tokenBot5, botOptions) : new TelegramBot("123:dummy5", { polling: false });
 
 export const bots = [bot1, bot2, bot3, bot4, bot5];
-export const botUsernames = ["Dragon_1gon_bot", "Dragon_2gon_bot", "Dragon_3gon_bot", "Dragon_4gon_bot", "Dragon_5gon_bot"];
+export const botUsernames = ["ZEDROOM_1gon_bot", "ZEDROOM_2gon_bot", "ZEDROOM_3gon_bot", "ZEDROOM_4gon_bot", "ZEDROOM_5gon_bot"];
 export const botErrors: (string | null)[] = [null, null, null, null, null];
 
 bots.forEach((bot, idx) => {
@@ -820,7 +824,7 @@ export function getWelcomeStartCaption(chatId: string | number, name: string, ba
   return `🥂 Xin chào chủ nhân Hihiiii!\n\n` +
     `⭐ ID của bạn là: <code>${chatId}</code>\n` +
     `⭐ Số dư: <b>${balance.toLocaleString("vi-VN")}đ</b>\n\n` +
-    `Tham gia Room nhận giftcode hàng ngày: https://t.me/dragonnroom nhé`;
+    `Tham gia Room nhận giftcode hàng ngày: https://t.me/ZEDROOMnroom nhé`;
 }
 
 export function sendWelcomeStartMessage(chatId: string | number, name: string = "Hảo Hán") {
@@ -1395,7 +1399,7 @@ export function isBanned(userId: string | number): boolean {
   return banned.some((u: any) => String(u.id) === String(userId));
 }
 
-export const ROOM_GIFTCODE_PREFIX = "DRAGON";
+export const ROOM_GIFTCODE_PREFIX = "ZEDROOM";
 
 export function normalizeRoomGiftcode(code: string): string {
   const raw = String(code ?? "").trim().toUpperCase();
@@ -1723,7 +1727,7 @@ function httpGetText(url: string, timeoutMs = 20_000): Promise<string> {
   return new Promise((resolve, reject) => {
     const req = https.get(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; DragonRoomBot/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; ZEDROOMRoomBot/1.0)",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       }
     }, (res) => {
@@ -2672,7 +2676,8 @@ export async function sendDice() {
       } else {
         throw new Error("sendDice failed");
       }
-      if (i < 2) await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Chờ viên hiện tại dừng hẳn rồi mới tung viên tiếp theo, tránh hiệu ứng bị chồng lên nhau.
+      if (i < 2) await new Promise((resolve) => setTimeout(resolve, TELEGRAM_DICE_ANIMATION_MS));
     }
   } catch (err) {
     let matched = false;
@@ -2703,7 +2708,8 @@ export async function sendDice() {
     );
   }
 
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  // Chờ viên thứ 3 dừng hẳn trước khi chốt kết quả và mở khóa chat.
+  await new Promise((resolve) => setTimeout(resolve, TELEGRAM_DICE_ANIMATION_MS));
   // Tung hết viên XX thứ 3 mới mở khoá chat
   if (state.chatLocked) unlockGroupChat();
 
@@ -3069,7 +3075,7 @@ ${recentClStats}
     reply_markup: {
       inline_keyboard: [[
         { text: "💵 Nạp Tiền Ngay", url: `https://t.me/${botUsernames[0]}?start=deposit` },
-        { text: "📊 Lịch Sử Phiên", url: "https://t.me/lichsuphiendragon" }
+        { text: "📊 Lịch Sử Phiên", url: "https://t.me/lichsuphienZEDROOM" }
       ]],
     },
   }).catch(() => null);
@@ -3540,6 +3546,15 @@ export function registerAllBotCommands() {
     bot1.onText(regex, (msg, match) => wrap(bot1, msg, match));
   };
 
+  onAdminCommand(/^\/resetusers$/i, (bot, msg) => {
+    resetAllUsersToNew();
+    bot.sendMessage(
+      msg.chat.id,
+      "✅ Đã reset toàn bộ người dùng về trạng thái mới. Tất cả tài khoản cần gõ /start để đăng ký lại.",
+      { parse_mode: "HTML" }
+    ).catch(() => {});
+  });
+
   const handleCheckCommand = async (bot: TelegramBot, msg: TelegramBot.Message, match: RegExpExecArray | null) => {
     const senderId = msg.from?.id;
     const chatId = msg.chat.id;
@@ -3804,7 +3819,7 @@ export function registerAllBotCommands() {
       `🔥 <b>THÔNG BÁO KHUYẾN MÃI SIÊU CẤP</b> 🔥\n\n` +
       `🚀 Hệ thống áp dụng <b>KM 15%</b> giá trị nạp!\n` +
       `⏰ Thời gian: Từ <b>${startStr}</b> đến <b>${endStr}</b>\n` +
-      `💰 Nạp ngay để nhận ưu đãi cực khủng từ Dragon Room!`,
+      `💰 Nạp ngay để nhận ưu đãi cực khủng từ ZEDROOM Room!`,
       { parse_mode: "HTML" }
     ).then((sentMsg) => {
       if (sentMsg && sentMsg.message_id) {
@@ -3835,7 +3850,7 @@ export function registerAllBotCommands() {
         `📢 <b>THÔNG BÁO KẾT THÚC KHUYẾN MÃI</b>\n\n` +
         `⛔ Chương trình KM 15% đã kết thúc.\n` +
         `🔄 Hệ thống trở về mức KM mặc định <b>3%</b>.\n` +
-        `🙏 Cảm ơn các bạn đã ủng hộ Dragon Room!`,
+        `🙏 Cảm ơn các bạn đã ủng hộ ZEDROOM Room!`,
         { parse_mode: "HTML" }
       );
     }, 60 * 60 * 1000);
@@ -3860,7 +3875,7 @@ export function registerAllBotCommands() {
       `📢 <b>THÔNG BÁO KẾT THÚC KHUYẾN MÃI</b>\n\n` +
       `⛔ Chương trình KM 15% đã kết thúc.\n` +
       `🔄 Hệ thống trở về mức KM mặc định <b>3%</b>.\n` +
-      `🙏 Cảm ơn các bạn đã ủng hộ Dragon Room!`,
+      `🙏 Cảm ơn các bạn đã ủng hộ ZEDROOM Room!`,
       { parse_mode: "HTML" }
     );
     bot.sendMessage(msg.chat.id, "✅ Đã TẮT khuyến mãi 15%.");
@@ -4857,7 +4872,7 @@ export function registerAllBotCommands() {
     }
 
     if (txt === "🆘 Hỗ Trợ" || txt === "🆘 Hỗ trợ" || txt === "Hỗ Trợ") {
-      const adminLink = "https://t.me/bonbonxlxzuy";
+      const adminLink = "https://t.me/hihiiibo";
       const msgSupport = `🆘 <b>HỖ TRỢ KHÁCH HÀNG</b>\n\n` +
         `Chào bạn, nếu bạn gặp vấn đề cần hỗ trợ, vui lòng gửi nội dung hỗ trợ cho Admin qua link bên dưới:\n` +
         `👤 <b>Admin:</b> ${adminLink}\n\n` +
@@ -4883,7 +4898,7 @@ export function registerAllBotCommands() {
 
       const displayName = `${msg.from?.first_name || ""} ${msg.from?.last_name || ""}`.trim() || (msg.from?.username ? `@${msg.from.username}` : "Người chơi");
       const text =
-        `🖼 <b>EVENT TREO ẢNH / ĐIỂM DANH Dragon.Room</b>\n\n` +
+        `🖼 <b>EVENT TREO ẢNH / ĐIỂM DANH ZEDROOM.Room</b>\n\n` +
         `✅ Đổi tên Telegram có chứa <b>${EVENT_KEYWORD}</b>\n` +
         `✅ Mỗi ngày điểm danh 1 lần\n` +
         `✅ Mỗi ngày phải nạp tối thiểu <b>${EVENT_DAILY_MIN_DEPOSIT.toLocaleString("vi-VN")}đ</b> mới được điểm danh\n` +
@@ -5064,7 +5079,7 @@ export function registerAllBotCommands() {
         `🎟 Mã phòng: <code>${code}</code>\n` +
         `💰 Mức cược: <b>${amount.toLocaleString("vi-VN")} xu</b>\n` +
         `💵 Ví còn lại: <b>${getUserBalance(user).toLocaleString("vi-VN")} xu</b>\n` +
-        `📌 Bot đã ghim lệnh phòng trong room <a href="${gameRoomLink}">Dragon Room</a>.\n` +
+        `📌 Bot đã ghim lệnh phòng trong room <a href="${gameRoomLink}">ZEDROOM Room</a>.\n` +
         `👥 Bạn bè vào phòng bằng lệnh: <code>/solo ${code}</code>\n` +
         `⛔ Có thể hủy bằng: <code>/huy ${code}</code> sau 1 phút nếu chưa có ai vào.\n\n` +
         formatSoloLobbyMessage(soloRooms);
@@ -5202,7 +5217,7 @@ export function registerAllBotCommands() {
           {
             parse_mode: "HTML",
             disable_web_page_preview: true,
-            reply_markup: { inline_keyboard: [[{ text: "💬 Vào Phòng Dragon Room", url: gameRoomLink }]] }
+            reply_markup: { inline_keyboard: [[{ text: "💬 Vào Phòng ZEDROOM Room", url: gameRoomLink }]] }
           }
         );
         bot1.answerCallbackQuery(q.id, { text: "Đã mở Tài Xỉu Săn Hũ" }).catch(() => {});
@@ -5638,7 +5653,7 @@ export function registerAllBotCommands() {
         bot1.sendMessage(chat, msgStr, { parse_mode: "HTML" });
         sendMessageToRoom(
           `🔥 ID: <code>${formatMaskedId(user.id)}</code> đã điểm danh Fan cứng!\n` +
-          `Tham gia Fan cứng DRAGON để nhận code 20K ngay nào.`,
+          `Tham gia Fan cứng ZEDROOM để nhận code 20K ngay nào.`,
           {
             parse_mode: "HTML",
             reply_markup: {
@@ -6521,7 +6536,7 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
     } else if (startParam === "event_checkin") {
       bot1.sendMessage(
         chat,
-        `🔥 <b>ĐIỂM DANH FAN CỨNG DRAGON</b>\n\n` +
+        `🔥 <b>ĐIỂM DANH FAN CỨNG ZEDROOM</b>\n\n` +
         `✅ Đổi tên Telegram có chứa <b>${EVENT_KEYWORD}</b>\n` +
         `✅ Hôm nay đã nạp tối thiểu <b>${EVENT_DAILY_MIN_DEPOSIT.toLocaleString("vi-VN")}đ</b>\n\n` +
         `🎁 Điểm danh đủ điều kiện để nhận code <b>20K</b>.`,
@@ -6738,11 +6753,11 @@ async function bootstrap() {
         lessBetWinsRate: state.lessBetWinsRate,
       },
       botsStatus: [
-        { name: "Bot 1 (Chính)", tag: "Dragon [BotChinh]", username: botUsernames[0], active: isTokenValid(tokenBot1), error: botErrors[0], token: tokenBot1 },
-        { name: "Bot 2 (Phụ 1)", tag: "Dragon Room phụ 1", username: botUsernames[1], active: isTokenValid(tokenBot2), error: botErrors[1], token: tokenBot2 },
-        { name: "Bot 3 (Phụ 2)", tag: "Dragon Room phụ 2", username: botUsernames[2], active: isTokenValid(tokenBot3), error: botErrors[2], token: tokenBot3 },
-        { name: "Bot 4 (Phụ 3)", tag: "Dragon Room phụ 3", username: botUsernames[3], active: isTokenValid(tokenBot4), error: botErrors[3], token: tokenBot4 },
-        { name: "Bot 5 (Phụ 4)", tag: "Dragon Room phụ 4", username: botUsernames[4], active: isTokenValid(tokenBot5), error: botErrors[4], token: tokenBot5 },
+        { name: "Bot 1 (Chính)", tag: "ZEDROOM [BotChinh]", username: botUsernames[0], active: isTokenValid(tokenBot1), error: botErrors[0], token: tokenBot1 },
+        { name: "Bot 2 (Phụ 1)", tag: "ZEDROOM Room phụ 1", username: botUsernames[1], active: isTokenValid(tokenBot2), error: botErrors[1], token: tokenBot2 },
+        { name: "Bot 3 (Phụ 2)", tag: "ZEDROOM Room phụ 2", username: botUsernames[2], active: isTokenValid(tokenBot3), error: botErrors[2], token: tokenBot3 },
+        { name: "Bot 4 (Phụ 3)", tag: "ZEDROOM Room phụ 3", username: botUsernames[3], active: isTokenValid(tokenBot4), error: botErrors[3], token: tokenBot4 },
+        { name: "Bot 5 (Phụ 4)", tag: "ZEDROOM Room phụ 4", username: botUsernames[4], active: isTokenValid(tokenBot5), error: botErrors[4], token: tokenBot5 },
       ]
     });
   });
