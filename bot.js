@@ -68,7 +68,7 @@ const userFilePath = path.join(__dirname, 'user.json');
 const configFilePath = path.join(__dirname, 'config.json');
 const roomFilePath = path.join(__dirname, 'rooms.json');
 
-const PROMOTION_MESSAGE = ``${getRandom3DEmoji()} NHẬN CODE FREE ${getRandom3DEmoji()}`
+const PROMOTION_MESSAGE = `${getRandom3DEmoji()} NHẬN CODE FREE ${getRandom3DEmoji()}`
 
 🕵️ Tương tác đủ mốc là nhận code ngay - trị giá đến 22.222đ
 🕵️ Đơn giản vậy thôi, còn chờ gì nữa?
@@ -384,7 +384,7 @@ ${milestoneIntro}
 
       let milestoneIntro = milestones.map(m => `• Đạt ${m.count.toLocaleString("vi-VN")} tin nhắn → Nhận ${m.amount}`).join('\n');
 
-      const helpTemplate = ``${getRandom3DEmoji()} <b>HỆ THỐNG TẶNG CODE TỰ ĐỘNG:</b>`
+      const helpTemplate = `${getRandom3DEmoji()} <b>HỆ THỐNG TẶNG CODE TỰ ĐỘNG:</b>`
 
 📊 <b>Thống kê tin nhắn của bạn hôm nay:</b>
 👤 <b>User:</b> ${activeUser.name} (${userMsgCount.toLocaleString("vi-VN")} tin nhắn)
