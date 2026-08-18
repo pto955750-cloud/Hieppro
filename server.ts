@@ -431,6 +431,10 @@ export function saveEmoji(id: string) {
   return false;
 }
 
+export function custom3DEmoji(id: string, fallback: string): string {
+  return `<tg-emoji emoji-id="${id}">${fallback}</tg-emoji>`;
+}
+
 export function getRandom3DEmoji() {
   try {
     const emojis = readJson(emojiJsonFile, "[]");
@@ -2697,7 +2701,7 @@ export function handlePot(
     // }
   };
 
-  bot2.sendMessage(groupt, msg, potMessageOptions).then((s) => {
+  bot1.sendMessage(groupt, msg, potMessageOptions).then((s) => {
     pinGroupMessageWithResilience(groupt, s.message_id);
   }).catch(() => {});
 }
@@ -3106,10 +3110,10 @@ export async function sendDice() {
   const boldTotalLoss = toBoldDigits(totalLoss.toLocaleString("vi-VN"));
   const boldPotIncrease = toBoldDigits(potIncrease.toLocaleString("vi-VN"));
   const boldPotAmount = toBoldDigits(potAmount.toLocaleString("vi-VN"));
-  const lobbyMsg = `${getRandom3DEmoji()} <b>🎲 Kết quả XX phiên #${state.phien}</b>\n` +
+  const lobbyMsg = `${getRandom3DEmoji()} <b>${custom3DEmoji("5415655814079723871", "🎲")} Kết quả XX phiên #${state.phien}</b>\n` +
     `<pre>┏━━━━━━━━━━━━┓
-┃  ${boldDiceResults}  👉[${boldSumOfResults}] ${sumCat} ${clCat} ${taixiuEmoji}${chanleEmoji}
-┃ 🎡 Giải số cược vòng quay: ${boldQuayPrize} (1-9)
+┃  ${boldDiceResults}  ${custom3DEmoji("5447203607294265305", "👉")} [${boldSumOfResults}] ${sumCat} ${clCat} ${taixiuEmoji}${chanleEmoji}
+┃ ${custom3DEmoji("5447644880824181073", "🎡")} Giải số cược vòng quay: ${boldQuayPrize} (1-9)
 ┃
 ┃ Tổng thắng: ${boldTotalWin}
 ┃ Tổng thua: ${boldTotalLoss}
@@ -3118,11 +3122,11 @@ export async function sendDice() {
 ┗━━━━━━━━━━━━┛</pre>
 Thống kê kết quả gần đây:
 ${recentTxStats}
-      🔵  <b>Tài</b>             🔴   <b>XỈU</b>
+      ${custom3DEmoji("5449449325434266744", "🔵")}  <b>Tài</b>             ${custom3DEmoji("5453902265922376865", "🔴")}   <b>XỈU</b>
 ${recentClStats}
-      ⚪️  <b>Chẵn</b>        ⚫️   <b>Lẻ</b>`;
+      ${custom3DEmoji("5244837092042750681", "⚪️")}  <b>Chẵn</b>        ${custom3DEmoji("5206607081334906820", "⚫️")}   <b>Lẻ</b>`;
   // Gửi kết quả phiên trước, rồi mới gửi thông báo "làm cái" để đảm bảo thứ tự hiển thị
-  const lobbySent = await bot2.sendMessage(groupt, lobbyMsg, {
+  const lobbySent = await bot1.sendMessage(groupt, lobbyMsg, {
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [[
@@ -3180,21 +3184,21 @@ ${recentClStats}
 
   // Khôi phục các thông báo theo yêu cầu (không reply)
   const luckyWheelText =
-    `${getRandom3DEmoji()} 🎡 <b>Vòng quay may mắn</b> (số 1-9): đặt <code>MM [số] [tiền]</code>\n` +
+    `${getRandom3DEmoji()} ${custom3DEmoji("5447644880824181073", "🎡")} <b>Vòng quay may mắn</b> (số 1-9): đặt <code>MM [số] [tiền]</code>\n` +
     `VD: <code>MM 5 20000</code>\n` +
     `- Tỉ lệ trả thưởng: <b>x10</b>`;
 
   const luckyNumberText =
-    `${getRandom3DEmoji()} 🎯 <b>Con số may mắn của phiên này:</b> <code>${state.luckyNumber}</code>\n` +
-    `🎁 <b>Tiền thưởng:</b> <code>5.000</code>\n` +
+    `${getRandom3DEmoji()} ${custom3DEmoji("5314504236132747481", "🎯")} <b>Con số may mắn của phiên này:</b> <code>${state.luckyNumber}</code>\n` +
+    `${custom3DEmoji("5424972470023104089", "🎁")} <b>Tiền thưởng:</b> <code>5.000</code>\n` +
     `<i>Nếu 2 số cuối ID của bạn trùng số may mắn thì chat lệnh <code>/nhanthuong</code> để nhận.</i>`;
 
-  const lamCaiText = `${getRandom3DEmoji()} ⏰ Còn 20s để LÀM CÁI phiên #${state.phien + 1}\n\n✅ /lamcai [số tiền] (1.000.000 - 5.000.000)\n⚠️ Khi làm CÁI hệ thống sẽ tạm giữ số tiền tương ứng (2× số tiền làm cái làm giới hạn trả thưởng phiên).`;
+  const lamCaiText = `${getRandom3DEmoji()} ${custom3DEmoji("5246762912428603768", "⏰")} Còn 20s để LÀM CÁI phiên #${state.phien + 1}\n\n✅ /lamcai [số tiền] (1.000.000 - 5.000.000)\n⚠️ Khi làm CÁI hệ thống sẽ tạm giữ số tiền tương ứng (2× số tiền làm cái làm giới hạn trả thưởng phiên).`;
 
   if (lobbySent) {
-    await bot2.sendMessage(groupt, luckyWheelText, { parse_mode: "HTML" }).catch(() => {});
-    await bot2.sendMessage(groupt, luckyNumberText, { parse_mode: "HTML" }).catch(() => {});
-    await bot2.sendMessage(groupt, lamCaiText, { parse_mode: "HTML" }).catch(() => {});
+    await bot1.sendMessage(groupt, luckyWheelText, { parse_mode: "HTML" }).catch(() => {});
+    await bot1.sendMessage(groupt, luckyNumberText, { parse_mode: "HTML" }).catch(() => {});
+    await bot1.sendMessage(groupt, lamCaiText, { parse_mode: "HTML" }).catch(() => {});
   } else {
     sendMessageToRoom(luckyWheelText, { parse_mode: "HTML" });
     sendMessageToRoom(luckyNumberText, { parse_mode: "HTML" });
@@ -3208,7 +3212,7 @@ ${recentClStats}
     let pot = 10000;
     try { pot = readJson("hu.json").pot || 10000; } catch {}
     state.phienAnnounced = true;
-    const bankerStatus = `${getRandom3DEmoji()} ` + (currentCai.value ? `👑 Chủ cái: <b>${currentCai.value.name}</b>` : `❌ Không Có Ai Làm Cái [Bot Tự Làm Cái]`);
+    const bankerStatus = `${getRandom3DEmoji()} ` + (currentCai.value ? `${custom3DEmoji("5467538555158943525", "👑")} Chủ cái: <b>${currentCai.value.name}</b>` : `${custom3DEmoji("5276032951342088188", "❌")} Không Có Ai Làm Cái [Bot Tự Làm Cái]`);
     sendMessageToRoom(`${bankerStatus}\n💰 Hũ Hiện Tại: ${pot.toLocaleString("vi-VN")} xu 💰`, {
       reply_markup: {
         inline_keyboard: [[{ text: "⚡ Nạp Tiền Ngay", url: `https://t.me/${botUsernames[0]}?start=deposit` }]],
@@ -3217,7 +3221,7 @@ ${recentClStats}
     // Khôi phục tin nhắn mời đặt cược
     setTimeout(() => {
       sendMessageToRoom(
-        `${getRandom3DEmoji()} 📝 <b>Xin mời đặt cược phiên #${state.phien}</b>
+        `${getRandom3DEmoji()} ${custom3DEmoji("5456140674028019486", "📝")} <b>Xin mời đặt cược phiên #${state.phien}</b>
 ` +
           `💰 Tiền cược tối thiểu <b>1.000</b> và tối đa <b>5.000.000</b>
 
@@ -5467,8 +5471,8 @@ export function registerAllBotCommands() {
             parse_mode: "HTML",
             reply_markup: {
               inline_keyboard: [
-                [{ text: "🏦 Bank", callback_data: "deposit_bank" }],
-                [{ text: "🎫 Thẻ cào (bảo trì)", callback_data: "deposit_card_maintenance" }]
+                [{ text: "Bank", icon_custom_emoji_id: "5242195906199035850", callback_data: "deposit_bank" }],
+                [{ text: "Thẻ cào (bảo trì)", icon_custom_emoji_id: "5197371802136892976", callback_data: "deposit_card_maintenance" }]
               ]
             }
           }
@@ -5482,18 +5486,18 @@ export function registerAllBotCommands() {
             reply_markup: {
               inline_keyboard: [
                 [
-                  { text: "💵 10.000", callback_data: "deposit_quick_10000" },
-                  { text: "💵 20.000", callback_data: "deposit_quick_20000" },
-                  { text: "💵 50.000", callback_data: "deposit_quick_50000" }
+                  { text: "10.000", icon_custom_emoji_id: "5449683594425410231", callback_data: "deposit_quick_10000" },
+                  { text: "20.000", icon_custom_emoji_id: "5447183459602669338", callback_data: "deposit_quick_20000" },
+                  { text: "50.000", icon_custom_emoji_id: "5217822164362739968", callback_data: "deposit_quick_50000" }
                 ],
                 [
-                  { text: "💰 100.000", callback_data: "deposit_quick_100000" },
-                  { text: "💰 200.000", callback_data: "deposit_quick_200000" },
-                  { text: "💰 300.000", callback_data: "deposit_quick_300000" }
+                  { text: "100.000", icon_custom_emoji_id: "5416117059207572332", callback_data: "deposit_quick_100000" },
+                  { text: "200.000", icon_custom_emoji_id: "5411225014148014586", callback_data: "deposit_quick_200000" },
+                  { text: "300.000", icon_custom_emoji_id: "5406745015365943482", callback_data: "deposit_quick_300000" }
                 ],
                 [
-                  { text: "💎 500.000", callback_data: "deposit_quick_500000" },
-                  { text: "💎 1.000.000", callback_data: "deposit_quick_1000000" },
+                  { text: "500.000", icon_custom_emoji_id: "5244837092042750681", callback_data: "deposit_quick_500000" },
+                  { text: "1.000.000", icon_custom_emoji_id: "5246762912428603768", callback_data: "deposit_quick_1000000" },
                   { text: "👑 2.000.000", callback_data: "deposit_quick_2000000" }
                 ],
                 [
@@ -5530,7 +5534,7 @@ export function registerAllBotCommands() {
           caption: formatDepositOrderCaption(amount, req.content),
           parse_mode: "HTML",
           reply_markup: {
-            inline_keyboard: [[{ text: "✅ Đã Chuyển Khoản", callback_data: `deposit_sent_${req.requestId}` }]]
+            inline_keyboard: [[{ text: "Đã Chuyển Khoản", icon_custom_emoji_id: "5240066289614987080", callback_data: `deposit_sent_${req.requestId}` }]]
           }
         }).then((sentMessage) => {
           saveDepositQrMessage(user, req.requestId, chat, sentMessage.message_id);
@@ -5622,8 +5626,8 @@ export function registerAllBotCommands() {
           parse_mode: "HTML",
           reply_markup: {
             inline_keyboard: [
-              [{ text: "🎟️ Gói 10K xu", callback_data: "buy_quick_10000" }, { text: "🎟️ Gói 50K xu", callback_data: "buy_quick_50000" }],
-              [{ text: "🎟️ Gói 100K xu", callback_data: "buy_quick_100000" }]
+              [{ text: "Gói 10K xu", icon_custom_emoji_id: "5361741454685256344", callback_data: "buy_quick_10000" }, { text: "Gói 50K xu", icon_custom_emoji_id: "5406683434124859552", callback_data: "buy_quick_50000" }],
+              [{ text: "Gói 100K xu", icon_custom_emoji_id: "5386367538735104399", callback_data: "buy_quick_100000" }]
             ]
           }
         });
@@ -5727,7 +5731,7 @@ export function registerAllBotCommands() {
           {
             parse_mode: "HTML",
             reply_markup: {
-              inline_keyboard: [[{ text: "🔥 Điểm danh ngay", url: `https://t.me/${botUsernames[0]}?start=event_checkin` }]]
+              inline_keyboard: [[{ text: "Điểm danh ngay", icon_custom_emoji_id: "5397782960512444700", url: `https://t.me/${botUsernames[0]}?start=event_checkin` }]]
             }
           }
         );
@@ -6607,7 +6611,7 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
         `🎁 Điểm danh đủ điều kiện để nhận code <b>20K</b>.`,
         {
           parse_mode: "HTML",
-          reply_markup: { inline_keyboard: [[{ text: "✅ Điểm danh ngay", callback_data: "event_checkin" }]] }
+          reply_markup: { inline_keyboard: [[{ text: "Điểm danh ngay", icon_custom_emoji_id: "5363938656874673963", callback_data: "event_checkin" }]] }
         }
       );
     } else if (startParam === "games") {
