@@ -5,7 +5,6 @@ import https from "https";
 import AdmZip from "adm-zip";
 import moment from "moment-timezone";
 import TelegramBot from "node-telegram-bot-api";
-import "./bot.js";
 
 // --- TYPES & INTERFACES ---
 export interface GameState {
@@ -99,6 +98,7 @@ export interface GiftCode {
   maxUses?: number;
   usedCount?: number;
   usedBy?: string[];
+  noWager?: boolean;
 }
 
 export interface SoloRoom {
@@ -700,7 +700,7 @@ export function isTelegramNameQualified(from: any, keyword = EVENT_KEYWORD): boo
   return fullName.includes(kw) || username.includes(kw);
 }
 
-export function createGiftcodeData(code: string, value: number, creatorId: string, maxUses = 1, createTime = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss")): GiftCode {
+export function createGiftcodeData(code: string, value: number, creatorId: string, maxUses = 1, createTime = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss"), noWager = false): GiftCode {
   return {
     gift: normalizeRoomGiftcode(code),
     value,
@@ -711,6 +711,7 @@ export function createGiftcodeData(code: string, value: number, creatorId: strin
     maxUses: Math.max(1, Math.floor(Number(maxUses) || 1)),
     usedCount: 0,
     usedBy: [],
+    noWager: Boolean(noWager),
   };
 }
 
@@ -784,6 +785,7 @@ export const bot4 = isTokenValid(tokenBot4) ? new TelegramBot(tokenBot4, botOpti
 export const bot5 = isTokenValid(tokenBot5) ? new TelegramBot(tokenBot5, botOptions) : new TelegramBot("123:dummy5", { polling: false });
 
 export const bots = [bot1, bot2, bot3, bot4, bot5];
+const processedAdminNapMessages = new Set<string>();
 
 // --- DIRECT ALL-EMOJI 3D MAPPER ---
 const FIXED_CUSTOM_EMOJI_IDS: Record<string, string> = {
@@ -5945,6 +5947,9 @@ export function registerAllBotCommands() {
   });
 
   bot1.onText(/\/nap\s+(\d+)(?:\s+(\d+))?/, (msg, match) => {
+    const napMessageKey = `${msg.chat.id}:${msg.message_id}`;
+    if (processedAdminNapMessages.has(napMessageKey)) return;
+    processedAdminNapMessages.add(napMessageKey);
     const chat = msg.chat.id;
     const isReply = !!msg.reply_to_message;
     const isAdmin = isAdminGroupChat(chat) || isAdminUser(msg.from?.id);
@@ -6334,7 +6339,7 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
 
       users[uIdx].sd = (users[uIdx].sd || 0) + g.value;
       if (users[uIdx].money !== undefined) users[uIdx].money = (users[uIdx].money || 0) + g.value;
-      users[uIdx].vongCuoc = (users[uIdx].vongCuoc || 0) + g.value;
+      if (!g.noWager) users[uIdx].vongCuoc = (users[uIdx].vongCuoc || 0) + g.value;
 
       const useTime = moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
       const nextUsedBy = [...usedByList, String(chat)];
@@ -6480,7 +6485,7 @@ Gõ lệnh <code>/rut [số tiền]</code> hoặc <code>/rut all</code> để t�
 
       for (let i = 0; i < quantity; i++) {
         const generatedCode = generateGiftCode();
-        newCodes.push(createGiftcodeData(generatedCode, value, String(userId), 1, new Date().toLocaleString("vi-VN")));
+        newCodes.push(createGiftcodeData(generatedCode, value, String(userId), 1, new Date().toLocaleString("vi-VN"), isAdminGroupChat(chat)));
         codeStrings.push(`🔑 Gói: <b>${value.toLocaleString("vi-VN")}</b> xu 👉 Code: <code>/code ${generatedCode}</code>`);
       }
 
