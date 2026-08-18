@@ -403,6 +403,44 @@ export let waitingCai = { value: false };
 export let currentCai: { value: { id: string; name: string; amount: number; pool: number; time: number } | null } = { value: null };
 export let caiTimeout: { value: NodeJS.Timeout | null } = { value: null };
 
+
+export const emojiJsonFile = "emojis.json";
+
+// Khởi tạo kho emoji nếu chưa có
+if (!fs.existsSync(emojiJsonFile)) {
+  const initialEmojis = [
+    "5368324170671202286", "5449744934175517405", "5447644880824443408", "5445123521250598685", "5431445255622340798",
+    "5312134546416752041", "5312134546416752042", "5312134546416752043", "5312134546416752044", "5312134546416752045",
+    "5370624388485880757", "5370624388485880758", "5370624388485880759", "5370624388485880760", "5370624388485880761",
+    "5431445255622340799", "5431445255622340800", "5431445255622340801", "5431445255622340802", "5431445255622340803",
+    "5215286576891894386", "5215286576891894387", "5215286576891894388", "5215286576891894389", "5215286576891894390"
+  ];
+  fs.writeFileSync(emojiJsonFile, JSON.stringify(initialEmojis));
+}
+
+export function saveEmoji(id: string) {
+  try {
+    const emojis = readJson(emojiJsonFile, "[]");
+    if (!emojis.includes(id)) {
+      emojis.push(id);
+      writeJson(emojiJsonFile, emojis);
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+export function getRandom3DEmoji() {
+  try {
+    const emojis = readJson(emojiJsonFile, "[]");
+    if (emojis.length > 0) {
+      const id = emojis[Math.floor(Math.random() * emojis.length)];
+      return `<tg-emoji emoji-id="${id}">✨</tg-emoji>`;
+    }
+  } catch (e) {}
+  return "✨";
+}
+
 export const state: GameState = {
   phien: 1000,
   secondsLeft: 60,
@@ -1917,7 +1955,7 @@ export async function settleLoDeForDate(dateKey: string) {
       // Nếu thắng thì gửi thêm thông báo lên room theo định dạng THẮNG LỚN
       if (isWin) {
         const maskedId = bet.userId.length > 5 ? `*****${bet.userId.slice(-5)}` : bet.userId;
-        const bigWinMsg = `🎉 <b>THẮNG LỚN</b> 🎉\n` +
+        const bigWinMsg = `${getRandom3DEmoji()} <b>THẮNG LỚN</b> ${getRandom3DEmoji()}\n` +
                           `👤 <b>Người chơi:</b> <code>${maskedId}</code>\n` +
                           `🎮 <b>Game:</b> <b>Lô Đề ${typeLabel}</b>\n` +
                           `💵 <b>Tiền cược:</b> <b>${(bet.stake || 0).toLocaleString("vi-VN")}</b>\n` +
@@ -2644,7 +2682,7 @@ export function handlePot(
     : `<i>Chưa có người nhận hũ</i>`;
 
   const totalPaid = payouts.reduce((sum, item) => sum + (Number(item.winAmount) || 0), 0);
-  const msg = `🔥 <b>Nổ hũ ${huTitle} ${diceText}</b> 🔥\n${listWinnersText}\n💰 <b>Quỹ trả hũ:</b> <b>${potAmount.toLocaleString("vi-VN")} xu</b>\n🏆 <b>Đã trả:</b> <b>${totalPaid.toLocaleString("vi-VN")} xu</b>\n💎 <b>Số tiền trong hũ còn lại:</b> <b>${remainingPot.toLocaleString("vi-VN")} xu</b>`;
+  const msg = `${getRandom3DEmoji()} <b>Nổ hũ ${huTitle} ${diceText}</b> 🔥\n${listWinnersText}\n💰 <b>Quỹ trả hũ:</b> <b>${potAmount.toLocaleString("vi-VN")} xu</b>\n🏆 <b>Đã trả:</b> <b>${totalPaid.toLocaleString("vi-VN")} xu</b>\n💎 <b>Số tiền trong hũ còn lại:</b> <b>${remainingPot.toLocaleString("vi-VN")} xu</b>`;
 
   const potMessageOptions = {
     parse_mode: "HTML" as const,
@@ -3717,7 +3755,7 @@ export function registerAllBotCommands() {
     const maskedId = String(targetId).length > 5 ? "*****" + String(targetId).slice(-5) : targetId;
     sendMessageToRoom(
       `😂🔴 <b>Người chơi ID:</b> <code>${maskedId}</code>\n` +
-      `- Nạp bank thành công: <b>${money.toLocaleString("vi-VN")} xu</b>\n` +
+      `${getRandom3DEmoji()} - Nạp bank thành công: <b>${money.toLocaleString("vi-VN")} xu</b>\n` +
       `🎉 Khuyến mãi thêm ${result.promoRate}%: <b>${result.promoAmount.toLocaleString("vi-VN")} xu</b>`,
       { parse_mode: "HTML" }
     );
@@ -4432,6 +4470,25 @@ export function registerAllBotCommands() {
   };
 
   bots.forEach((b) => b.on("message", (msg) => {
+    // Tự động săn ID Icon 3D Premium
+    if (msg.entities && b === bot1) {
+      const customEmojis = msg.entities.filter((e: any) => e.type === 'custom_emoji');
+      if (customEmojis.length > 0) {
+        let report = `💎 <b>PHÁT HIỆN ICON 3D MỚI</b> 💎\n\n`;
+        const uniqueIds = new Set();
+        customEmojis.forEach((e: any) => {
+          if (e.custom_emoji_id && !uniqueIds.has(e.custom_emoji_id)) {
+            uniqueIds.add(e.custom_emoji_id);
+            const isNew = saveEmoji(e.custom_emoji_id);
+            report += `• Icon: <tg-emoji emoji-id="${e.custom_emoji_id}">✨</tg-emoji> | ID: <code>${e.custom_emoji_id}</code>${isNew ? ' (Đã lưu vào kho)' : ''}\n`;
+          }
+        });
+        if (uniqueIds.size > 0) {
+          sendMessageToAdminGroup(report, { parse_mode: "HTML" });
+        }
+      }
+    }
+
     const text = msg.text?.trim();
     if (!text) return;
 
@@ -4575,7 +4632,7 @@ export function registerAllBotCommands() {
         // Thông báo THẮNG LỚN lên room nếu cược >= 50k
         if (amount >= 50000) {
           const maskedId = userId.length > 5 ? `*****${userId.slice(-5)}` : userId;
-          const bigWinMsg = `🎉 <b>THẮNG LỚN</b> 🎉\n` +
+          const bigWinMsg = `${getRandom3DEmoji()} <b>THẮNG LỚN</b> ${getRandom3DEmoji()}\n` +
                             `👤 <b>Người chơi:</b> <code>${maskedId}</code>\n` +
                             `🎮 <b>Game:</b> <b>Xúc Xắc ${getTelegramXXLabel(betType)}</b>\n` +
                             `💵 <b>Tiền cược:</b> <b>${amount.toLocaleString("vi-VN")}</b>\n` +
@@ -5586,7 +5643,7 @@ export function registerAllBotCommands() {
 
         bot1.answerCallbackQuery(q.id, { text: `🎉 Đã mua thành công mã ${price.toLocaleString("vi-VN")} xu!` });
         bot1.sendMessage(chat, `🎟️ <b>MUA GIFTCODE THÀNH CÔNG!</b>\n💎 Mệnh giá: <b>${price.toLocaleString("vi-VN")} xu</b>\n🔑 Mã: <code>/code ${generatedCode}</code>`, { parse_mode: "HTML" });
-        sendMessageToRoom(`👥 <b>Người chơi ẩn danh</b> đã mua <b>1</b> giftcode mệnh giá <b>${price.toLocaleString("vi-VN")} xu</b>!`, { parse_mode: "HTML" });
+        sendMessageToRoom(`👥 <b>Người chơi ẩn danh</b> ${getRandom3DEmoji()} đã mua <b>1</b> giftcode mệnh giá <b>${price.toLocaleString("vi-VN")} xu</b>!`, { parse_mode: "HTML" });
       } else if (act === "event_checkin") {
         const todayKey = getVNDateKey();
         const yesterdayKey = getVNDateKey(moment().tz("Asia/Ho_Chi_Minh").subtract(1, "day"));
@@ -5648,7 +5705,7 @@ export function registerAllBotCommands() {
         writeJson(userJsonFile, users);
         bot1.sendMessage(chat, msgStr, { parse_mode: "HTML" });
         sendMessageToRoom(
-          `🔥 ID: ${formatMaskedId(user.id)} đã điểm danh Fan cứng!\n` +
+          `${getRandom3DEmoji()} ID: ${formatMaskedId(user.id)} đã điểm danh Fan cứng!\n` +
           `Tham gia Fan cứng DRAGON để nhận code 20K ngay nào.`,
           {
             parse_mode: "HTML",
@@ -5894,7 +5951,7 @@ export function registerAllBotCommands() {
         const maskedId = String(targetId).length > 5 ? "*****" + String(targetId).slice(-5) : targetId;
         sendMessageToRoom(
           `😂🔴 <b>Người chơi ID:</b> <code>${maskedId}</code>\n` +
-          `- Nạp bank thành công: <b>${amount.toLocaleString("vi-VN")} xu</b>\n` +
+          `${getRandom3DEmoji()} - Nạp bank thành công: <b>${amount.toLocaleString("vi-VN")} xu</b>\n` +
           `🎉 Khuyến mãi thêm ${result.promoRate}%: <b>${result.promoAmount.toLocaleString("vi-VN")} xu</b>`,
           { parse_mode: "HTML" }
         );
@@ -6664,7 +6721,7 @@ async function bootstrap() {
       // Thông báo vào nhóm Game
       sendMessageToRoom(
         `😂🔴 <b>Người chơi ID:</b> <code>${formatMaskedId(telegramId)}</code>\n` +
-        `- Nạp bank thành công: <b>${amount.toLocaleString("vi-VN")} xu</b>\n` +
+        `${getRandom3DEmoji()} - Nạp bank thành công: <b>${amount.toLocaleString("vi-VN")} xu</b>\n` +
         `🎉 Khuyến mãi thêm ${result.promoRate}%: <b>${result.promoAmount.toLocaleString("vi-VN")} xu</b>`,
         { parse_mode: "HTML" }
       );
@@ -6817,7 +6874,7 @@ async function bootstrap() {
         const maskedId = String(id).length > 5 ? "*****" + String(id).slice(-5) : id;
         sendMessageToRoom(
           `😂🔴 <b>Người chơi ID:</b> <code>${maskedId}</code>\n` +
-          `- Nạp bank thành công: <b>${value.toLocaleString("vi-VN")} xu</b>\n` +
+          `${getRandom3DEmoji()} - Nạp bank thành công: <b>${value.toLocaleString("vi-VN")} xu</b>\n` +
           `🎉 Khuyến mãi thêm ${result.promoRate}%: <b>${result.promoAmount.toLocaleString("vi-VN")} xu</b>`,
           { parse_mode: "HTML" }
         );
