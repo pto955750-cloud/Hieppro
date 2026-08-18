@@ -14,101 +14,9 @@ import fs from 'fs';
 import path from 'path';
 
 const __dirname = process.cwd();
-const emojiJsonFile = path.join(__dirname, 'emojis.json');
-
-// Khởi tạo kho emoji nếu chưa có
-if (!fs.existsSync(emojiJsonFile)) {
-  const initialEmojis = [
-    "5368324170671202286", "5449744934175517405", "5447644880824443408", "5445123521250598685", "5431445255622340798",
-    "5312134546416752041", "5312134546416752042", "5312134546416752043", "5312134546416752044", "5312134546416752045",
-    "5370624388485880757", "5370624388485880758", "5370624388485880759", "5370624388485880760", "5370624388485880761",
-    "5431445255622340799", "5431445255622340800", "5431445255622340801", "5431445255622340802", "5431445255622340803",
-    "5215286576891894386", "5215286576891894387", "5215286576891894388", "5215286576891894389", "5215286576891894390"
-  ];
-  fs.writeFileSync(emojiJsonFile, JSON.stringify(initialEmojis));
-}
-
-function saveEmoji(id) {
-  try {
-    let emojis = [];
-    if (fs.existsSync(emojiJsonFile)) {
-      emojis = JSON.parse(fs.readFileSync(emojiJsonFile, 'utf8'));
-    }
-    if (!emojis.includes(id)) {
-      emojis.push(id);
-      fs.writeFileSync(emojiJsonFile, JSON.stringify(emojis, null, 2), 'utf8');
-      return true;
-    }
-  } catch (e) {
-    console.error("Lỗi lưu emoji:", e);
-  }
-  return false;
-}
-
-function getRandom3DEmoji() {
-  try {
-    if (fs.existsSync(emojiJsonFile)) {
-      const emojis = JSON.parse(fs.readFileSync(emojiJsonFile, 'utf8'));
-      if (emojis.length > 0) {
-        const id = emojis[Math.floor(Math.random() * emojis.length)];
-        return `<tg-emoji emoji-id="${id}">✨</tg-emoji>`;
-      }
-    }
-  } catch (e) {}
-  return "✨";
-}
-
-const ADMIN_ID = "8691091149"; // Thay ID Admin của bạn vào đây
-function isAdminUser(id) {
-  return String(id) === ADMIN_ID || String(id) === "8936805776";
-}
-
 
 const userFilePath = path.join(__dirname, 'user.json');
 const configFilePath = path.join(__dirname, 'config.json');
-const roomFilePath = path.join(__dirname, 'rooms.json');
-
-const PROMOTION_MESSAGE = `${getRandom3DEmoji()} NHẬN CODE FREE ${getRandom3DEmoji()}
-
-🕵️ Tương tác đủ mốc là nhận code ngay - trị giá đến 22.222đ
-🕵️ Đơn giản vậy thôi, còn chờ gì nữa?
-
-🛩 /help - Xem chi tiết chương trình
-🛩 /checktt - Kiểm tra tương tác của bạn`;
-
-function readRoomIds() {
-  try {
-    if (!fs.existsSync(roomFilePath)) {
-      fs.writeFileSync(roomFilePath, '[]', 'utf8');
-      return [];
-    }
-    const raw = fs.readFileSync(roomFilePath, 'utf8');
-    const rooms = JSON.parse(raw);
-    return Array.isArray(rooms) ? rooms.map(String) : [];
-  } catch (error) {
-    console.error("❌ Lỗi đọc file rooms.json:", error.message);
-    return [];
-  }
-}
-
-function writeRoomIds(roomIds) {
-  try {
-    fs.writeFileSync(roomFilePath, JSON.stringify([...new Set(roomIds)], null, 2), 'utf8');
-  } catch (error) {
-    console.error("❌ Lỗi lưu file rooms.json:", error.message);
-  }
-}
-
-function rememberRoom(chat) {
-  if (!chat || !['group', 'supergroup'].includes(chat.type)) return;
-  const roomIds = readRoomIds();
-  const roomId = String(chat.id);
-  if (!roomIds.includes(roomId)) {
-    roomIds.push(roomId);
-    writeRoomIds(roomIds);
-    console.log(`✅ Đã ghi nhận room: ${chat.title || roomId}`);
-  }
-}
 
 // --- HÀM TRỢ GIÚP ĐỌC / GHI DỮ LIỆU AN TOÀN ---
 
@@ -198,6 +106,87 @@ tokens.forEach((token, index) => {
 // Sử dụng các bots để lắng nghe hội thoại chung, và thông báo kết quả
 let botUsername = "Dragon_CheckTT_Bot";
 
+
+
+// --- GLOBAL CUSTOM EMOJI 3D MAPPER ---
+// Tất cả emoji trong tin nhắn, caption và nút bấm sẽ được đổi sang icon 3D cố định.
+const FIXED_CUSTOM_EMOJI_IDS: Record<string, string> = {
+  "🐉":"5456140674028019486", "⚙️":"5440539497383087970", "⚙":"5440539497383087970",
+  "⚠️":"5210956306952758910", "⚠":"5210956306952758910", "❌":"5276032951342088188",
+  "✅":"5440539497383087970", "👉":"5449683594425410231", "🎁":"5424972470023104089",
+  "🎉":"5456230168261566428", "🏆":"5454390891466726015", "💰":"5224257782013769471",
+  "🔑":"5244837092042750681", "💬":"5406683434124859552", "👋":"5453902265922376865",
+  "🌱":"5386367538735104399", "📊":"5397782960512444700", "1️⃣":"5240066289614987080",
+  "2️⃣":"5242195906199035850", "3️⃣":"5237759703198474072", "🕵️":"5449683594425410231",
+  "🛩️":"5386367538735104399", "🤖":"5456140674028019486", "📤":"5416117059207572332",
+  "🧧":"6332545917761098810", "🔥":"5447644880824181073", "💎":"5244837092042750681",
+  "📥":"5416117059207572332", "🎯":"6332246446871418518", "📌":"5240066289614987080",
+  "⛔":"5210952531676504517", "🔒":"5210952531676504517", "🔓":"5440539497383087970",
+  "✨":"5456140674028019486", "🍀":"6332545917761098810", "🎲":"5456337168781810982",
+  "💥":"5276032951342088188", "🏦":"5443127283898405358", "🎫":"5235640209852343235",
+  "🔢":"5237759703198474072", "🔗":"5238083517962793068", "📝":"5456140674028019486",
+  "👑":"5440539497383087970", "⚔️":"5456580414254619349", "⚔":"5456580414254619349",
+  "📅":"5246762912428603768", "🗓️":"5246762912428603768", "🗓":"5246762912428603768", "👥":"5453902265922372936", "💪":"5454390891466726015", "📋":"5240066289614987080", "🟦":"5397782960512444700", "🥇":"5454390891466726015", "🥈":"5447203607294265305", "🥉":"5440539497383087970",
+  "💵":"5456230168261566428", "💸":"5447183459602669338", "🚀":"5406683434124859552",
+  "⏰":"5242195906199035850", "💡":"5406683434124859552", "👤":"5453902265922372936"
+};
+
+function convertTextTo3D(value: unknown): string {
+  let text = String(value ?? "");
+  const existing: string[] = [];
+  text = text.replace(/<tg-emoji\b[^>]*>.*?<\/tg-emoji>/gs, (tag) => {
+    existing.push(tag);
+    return `__KEEP_CUSTOM_EMOJI_${existing.length - 1}__`;
+  });
+  for (const emoji of Object.keys(FIXED_CUSTOM_EMOJI_IDS).sort((a, b) => b.length - a.length)) {
+    const id = FIXED_CUSTOM_EMOJI_IDS[emoji];
+    text = text.split(emoji).join(`<tg-emoji emoji-id="${id}">${emoji}</tg-emoji>`);
+  }
+  return text.replace(/__KEEP_CUSTOM_EMOJI_(\d+)__/g, (_, i) => existing[Number(i)] || "");
+}
+
+function map3DReplyMarkup(markup: any): any {
+  if (!markup?.inline_keyboard) return markup;
+  return {
+    ...markup,
+    inline_keyboard: markup.inline_keyboard.map((row: any[]) => row.map((button: any) => {
+      if (!button?.text) return button;
+      const found = Object.keys(FIXED_CUSTOM_EMOJI_IDS).find((emoji) => String(button.text).includes(emoji));
+      if (!found) return button;
+      return {
+        ...button,
+        text: String(button.text).split(found).join("").trim(),
+        icon_custom_emoji_id: button.icon_custom_emoji_id || FIXED_CUSTOM_EMOJI_IDS[found]
+      };
+    }))
+  };
+}
+
+for (const bot of activeBots) {
+  const originalSendMessage = bot.sendMessage.bind(bot);
+  (bot as any).sendMessage = (chatId: any, text: any, options: any = {}) =>
+    originalSendMessage(chatId, convertTextTo3D(text), {
+      ...options,
+      parse_mode: "HTML",
+      reply_markup: map3DReplyMarkup(options.reply_markup)
+    });
+}
+
+// Nhóm nào đã tương tác với bot sẽ nhận thông báo FREE CODE định kỳ.
+const promoChatIds = new Set<string>();
+const FREE_CODE_PROMO_MESSAGE = `🎁 <b>NHẬN CODE FREE</b> 🎁\n\n🕵️ Tương tác đủ mốc là nhận code ngay - trị giá đến 20.000đ!\n🕵️ Đơn giản vậy thôi, còn chờ gì nữa?\n\n🛩️ <code>/help</code> - Xem chi tiết chương trình\n🛩️ <code>/checktt</code> - Kiểm tra tương tác của bạn`;
+
+setInterval(() => {
+  const sender = activeBots[0];
+  if (!sender) return;
+  for (const chatId of promoChatIds) {
+    sender.sendMessage(chatId, FREE_CODE_PROMO_MESSAGE, {
+      parse_mode: "HTML",
+      disable_web_page_preview: true
+    }).catch((error: any) => console.error("❌ Lỗi gửi FREE CODE:", error?.message || error));
+  }
+}, 240000);
+
 activeBots.forEach((bot, botIdx) => {
   bot.getMe().then(me => {
     console.log(`🤖 Đã đồng bộ bot #${botIdx + 1}: @${me.username}`);
@@ -244,26 +233,6 @@ function checkAndRunDailyReset() {
 // Chạy luồng kiểm tra reset định kỳ mỗi 10 giây
 setInterval(checkAndRunDailyReset, 10000);
 
-// Tự động gửi thông báo chương trình vào các room đã từng tương tác với bot mỗi 4 phút.
-// Chỉ bot đầu tiên trong cụm gửi để tránh gửi trùng khi chạy nhiều bot.
-const PROMOTION_INTERVAL_MS = 4 * 60 * 1000;
-setInterval(() => {
-  const senderBot = activeBots[0];
-  if (!senderBot) return;
-
-  const roomIds = readRoomIds();
-  roomIds.forEach(roomId => {
-    senderBot.sendMessage(roomId, PROMOTION_MESSAGE, { disable_web_page_preview: true })
-      .then(() => console.log(`📣 Đã gửi thông báo nhận code vào room ${roomId}`))
-      .catch(error => {
-        console.error(`❌ Không gửi được thông báo vào room ${roomId}:`, error.message);
-        if (/chat not found|bot was kicked|forbidden|not enough rights/i.test(error.message || '')) {
-          writeRoomIds(readRoomIds().filter(id => id !== String(roomId)));
-        }
-      });
-  });
-}, PROMOTION_INTERVAL_MS);
-
 // --- ĐĂNG KÝ SỰ KIỆN LẮNG NGHE CHO TOÀN BỘ CÁN BỘ BOT TRONG CỤM ---
 activeBots.forEach((bot, index) => {
   bot.on("message", async (msg) => {
@@ -271,58 +240,11 @@ activeBots.forEach((bot, index) => {
     if (!text) return;
 
     const chatId = msg.chat.id;
-    rememberRoom(msg.chat);
+    if (msg.chat.type !== 'private') promoChatIds.add(String(chatId));
     const userId = msg.from?.id ? msg.from.id.toString() : null;
     const senderName = msg.from?.username || msg.from?.first_name || 'Người chơi';
-    // Tự động săn ID Icon 3D Premium
-    if (msg.entities) {
-      const customEmojis = msg.entities.filter(e => e.type === 'custom_emoji');
-      if (customEmojis.length > 0) {
-        let report = `💎 <b>PHÁT HIỆN ICON 3D MỚI</b> 💎\n\n`;
-        let foundNew = false;
-        customEmojis.forEach(e => {
-          if (e.custom_emoji_id) {
-            const isNew = saveEmoji(e.custom_emoji_id);
-            if (isNew) foundNew = true;
-            report += `• Icon: <tg-emoji emoji-id="${e.custom_emoji_id}">✨</tg-emoji> | ID: <code>${e.custom_emoji_id}</code>${isNew ? ' (Đã lưu)' : ''}\n`;
-          }
-        });
-        if (foundNew && index === 0) {
-          activeBots[0].sendMessage(ADMIN_ID, report, { parse_mode: "HTML" }).catch(() => {});
-        }
-      }
-    }
-
-    // 3D Premium Icons Trigger (Admin only)
-    if (isAdminUser(userId) && text === "⚡") {
-      const premiumIconsMsg = `${getRandom3DEmoji()} <b>DANH SÁCH ICON 3D PREMIUM</b> ${getRandom3DEmoji()}\n\n` +
-        `<tg-emoji emoji-id="5368324170671202286">🏆</tg-emoji> ` +
-        `<tg-emoji emoji-id="5449744934175517405">🎲</tg-emoji> ` +
-        `<tg-emoji emoji-id="5447644880824443408">💰</tg-emoji> ` +
-        `<tg-emoji emoji-id="5445123521250598685">🔥</tg-emoji> ` +
-        `<tg-emoji emoji-id="5431445255622340798">🎁</tg-emoji>\n\n` +
-        `✨ <i>Bot đã sẵn sàng phục vụ!</i> ✨`;
-      
-      bot.sendMessage(chatId, premiumIconsMsg, { parse_mode: "HTML" }).catch(() => {});
-      return;
-    }
-
 
     if (!userId) return;
-
-    // Tự động xoá tin nhắn người chơi trong room nếu có link hoặc ký tự @.
-    // Các lệnh hệ thống như /help và /checktt được giữ lại để bot vẫn hoạt động bình thường.
-    const isRoom = ['group', 'supergroup'].includes(msg.chat.type);
-    const isSystemCommand = text.startsWith('/');
-    const containsLink = /(?:https?:\/\/|www\.|t\.me\/|telegram\.me\/|(?:^|\s)(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/\S*)?)/i.test(text);
-    const containsAtMention = /@[\p{L}\p{N}_]{1,}/u.test(text);
-
-    if (isRoom && !isSystemCommand && (containsLink || containsAtMention)) {
-      bot.deleteMessage(chatId, msg.message_id)
-        .then(() => console.log(`🧹 Đã xoá tin nhắn chứa link/@ của ${senderName} trong room ${chatId}`))
-        .catch(error => console.error(`❌ Không thể xoá tin nhắn trong room ${chatId}:`, error.message));
-      return;
-    }
 
     // Quét sự kiện sang mới trước khi tính tương tác hằng ngày
     checkAndRunDailyReset();
@@ -376,15 +298,12 @@ ${milestoneIntro}
       const milestones = (currentConfig.messageMilestones || []).sort((a, b) => a.count - b.count);
       
       const usersList = readUserData();
-      const activeUser = usersList.find(u => String(u.id) === String(userId)) || {
-        name: senderName,
-        msgCount: 0
-      };
+      const activeUser = usersList.find(u => String(u.id) === String(userId)) || user;
       const userMsgCount = activeUser.msgCount || 0;
 
       let milestoneIntro = milestones.map(m => `• Đạt ${m.count.toLocaleString("vi-VN")} tin nhắn → Nhận ${m.amount}`).join('\n');
 
-      const helpTemplate = `${getRandom3DEmoji()} <b>HỆ THỐNG TẶNG CODE TỰ ĐỘNG:</b>
+      const helpTemplate = `🎁 <b>HỆ THỐNG TẶNG CODE TỰ ĐỘNG:</b>
 
 📊 <b>Thống kê tin nhắn của bạn hôm nay:</b>
 👤 <b>User:</b> ${activeUser.name} (${userMsgCount.toLocaleString("vi-VN")} tin nhắn)
