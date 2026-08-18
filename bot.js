@@ -80,7 +80,7 @@ function writeConfig(config) {
 // --- HỆ THỐNG CẤU HÌNH BOT (Đơn hoặc Cụm các Bots) ---
 const config = readConfig();
 const BOT_TOKENS = (config.tokens && config.tokens.length > 0) ? config.tokens : [
-  "8812672402:AAHCrDOmem37MMn9x8o5MM_y0A49xksfjSU", // Thêm Bot token chính tại đây (hoặc cấu hình qua Web UI)
+  "8918298510:AAFSIO2Eo3qS92Bo31YhkuLzMv4kGe_JunE", // Thêm Bot token chính tại đây (hoặc cấu hình qua Web UI)
 ];
 
 const tokens = BOT_TOKENS.filter(Boolean);
@@ -104,77 +104,73 @@ tokens.forEach((token, index) => {
 });
 
 // Sử dụng các bots để lắng nghe hội thoại chung, và thông báo kết quả
-let botUsername = "Dragon_CheckTT_Bot";
 
 
-
-// --- GLOBAL CUSTOM EMOJI 3D MAPPER ---
-// Tất cả emoji trong tin nhắn, caption và nút bấm sẽ được đổi sang icon 3D cố định.
+// --- CHỈ THAY ICON: GIỮ NGUYÊN LOGIC FILE TƯƠNG TÁC ---
 const FIXED_CUSTOM_EMOJI_IDS = {
-  "🐉":"5456140674028019486",
-  "⚙️":"5415655814079723871",
-  "⚙":"5438496463044752972",
-  "⚠️":"5447644880824181073",
-  "⚠":"5467538555158943525",
-  "❌":"5424972470023104089",
-  "✅":"5449449325434266744",
-  "👉":"5453902265922376865",
-  "🎁":"5447203607294265305",
-  "🎉":"5237911156630232962",
-  "🏆":"5456140674028019486",
-  "💰":"5415655814079723871",
-  "🔑":"5438496463044752972",
-  "💬":"5447644880824181073",
-  "👋":"5467538555158943525",
-  "🌱":"5424972470023104089",
-  "📊":"5449449325434266744",
-  "1️⃣":"5453902265922376865",
-  "2️⃣":"5447203607294265305",
-  "3️⃣":"5237911156630232962",
-  "🕵️":"5456140674028019486",
-  "🛩️":"5415655814079723871",
-  "🤖":"5438496463044752972",
-  "📤":"5447644880824181073",
-  "🧧":"5467538555158943525",
-  "🔥":"5424972470023104089",
-  "💎":"5449449325434266744",
-  "📥":"5453902265922376865",
-  "🎯":"5447203607294265305",
-  "📌":"5237911156630232962",
-  "⛔":"5456140674028019486",
-  "🔒":"5415655814079723871",
-  "🔓":"5438496463044752972",
-  "✨":"5447644880824181073",
-  "🍀":"5467538555158943525",
-  "🎲":"5424972470023104089",
-  "💥":"5449449325434266744",
-  "🏦":"5453902265922376865",
-  "🎫":"5447203607294265305",
-  "🔢":"5237911156630232962",
-  "🔗":"5456140674028019486",
-  "📝":"5415655814079723871",
-  "👑":"5438496463044752972",
-  "⚔️":"5447644880824181073",
-  "⚔":"5467538555158943525",
-  "📅":"5424972470023104089",
-  "🗓️":"5449449325434266744",
+  "🐉":"5276032951342088188",
+  "⚙️":"5424972470023104089",
+  "⚙":"5447644880824181073",
+  "⚠️":"5440539497383087970",
+  "⚠":"5447203607294265305",
+  "❌":"5453902265922376865",
+  "✅":"5210956306952758910",
+  "👉":"5427168083074628963",
+  "🎁":"5449683594425410231",
+  "🎉":"5447183459602669338",
+  "🏆":"5217822164362739968",
+  "💰":"5416117059207572332",
+  "🔑":"5411225014148014586",
+  "💬":"5406745015365943482",
+  "👋":"5244837092042750681",
+  "🌱":"5246762912428603768",
+  "📊":"5361741454685256344",
+  "1️⃣":"5406683434124859552",
+  "2️⃣":"5386367538735104399",
+  "3️⃣":"5397782960512444700",
+  "🕵️":"5456230168261566428",
+  "🛩️":"5456337168781810982",
+  "🤖":"5456580414254619349",
+  "📤":"5454390891466726015",
+  "🧧":"5409048419211682843",
+  "🔥":"5445355530111437729",
+  "💎":"5443127283898405358",
+  "📥":"5235640209852343235",
+  "🎯":"5237759703198474072",
+  "📌":"5238083517962793068",
+  "⛔":"5461042021986737384",
+  "🔒":"5237911156630232962",
+  "🔓":"5240066289614987080",
+  "✨":"5242195906199035850",
+  "🍀":"5197371802136892976",
+  "🎲":"5363938656874673963",
+  "💥":"6332246446871418518",
+  "🏦":"6332545917761098810",
+  "🎫":"5224257782013769471",
+  "🔢":"5456140674028019486",
+  "🔗":"5210952531676504517",
+  "📝":"5382194935057372936",
+  "👑":"5276032951342088188",
+  "⚔️":"5424972470023104089",
+  "⚔":"5447644880824181073",
+  "📅":"5440539497383087970",
+  "🗓️":"5447203607294265305",
   "🗓":"5453902265922376865",
-  "⬜":"5447203607294265305",
-  "👥":"5237911156630232962",
-  "💪":"5456140674028019486",
-  "📋":"5415655814079723871",
-  "🟦":"5438496463044752972",
-  "🥇":"5447644880824181073",
-  "🥈":"5467538555158943525",
-  "🥉":"5424972470023104089",
-  "💵":"5449449325434266744",
-  "💸":"5453902265922376865",
-  "🚀":"5447203607294265305",
-  "⏰":"5237911156630232962",
-  "💡":"5456140674028019486",
-  "👤":"5415655814079723871"
+  "⬜":"5210956306952758910",
+  "👥":"5427168083074628963",
+  "💪":"5449683594425410231",
+  "📋":"5447183459602669338",
+  "🟦":"5217822164362739968",
+  "🥇":"5416117059207572332",
+  "🥈":"5411225014148014586",
+  "🥉":"5406745015365943482",
+  "💵":"5244837092042750681",
+  "💸":"5246762912428603768",
+  "🚀":"5361741454685256344",
+  "⏰":"5406683434124859552",
+  "💡":"5386367538735104399",
+  "👤":"5397782960512444700"
 };
-
 function convertTextTo3D(value) {
   let text = String(value ?? "");
   const existing = [];
@@ -183,53 +179,23 @@ function convertTextTo3D(value) {
     return `__KEEP_CUSTOM_EMOJI_${existing.length - 1}__`;
   });
   for (const emoji of Object.keys(FIXED_CUSTOM_EMOJI_IDS).sort((a, b) => b.length - a.length)) {
-    const id = FIXED_CUSTOM_EMOJI_IDS[emoji];
-    text = text.split(emoji).join(`<tg-emoji emoji-id="${id}">${emoji}</tg-emoji>`);
+    text = text.split(emoji).join(`<tg-emoji emoji-id="${FIXED_CUSTOM_EMOJI_IDS[emoji]}">${emoji}</tg-emoji>`);
   }
   return text.replace(/__KEEP_CUSTOM_EMOJI_(\d+)__/g, (_, i) => existing[Number(i)] || "");
 }
-
 function map3DReplyMarkup(markup) {
   if (!markup?.inline_keyboard) return markup;
-  return {
-    ...markup,
-    inline_keyboard: markup.inline_keyboard.map((row) => row.map((button) => {
-      if (!button?.text) return button;
-      const found = Object.keys(FIXED_CUSTOM_EMOJI_IDS).find((emoji) => String(button.text).includes(emoji));
-      if (!found) return button;
-      return {
-        ...button,
-        text: String(button.text).split(found).join("").trim(),
-        icon_custom_emoji_id: button.icon_custom_emoji_id || FIXED_CUSTOM_EMOJI_IDS[found]
-      };
-    }))
-  };
+  return {...markup, inline_keyboard: markup.inline_keyboard.map(row => row.map(button => {
+    if (!button?.text) return button;
+    const found = Object.keys(FIXED_CUSTOM_EMOJI_IDS).find(emoji => String(button.text).includes(emoji));
+    return found ? {...button, text: String(button.text).split(found).join("").trim(), icon_custom_emoji_id: button.icon_custom_emoji_id || FIXED_CUSTOM_EMOJI_IDS[found]} : button;
+  }))};
 }
-
 for (const bot of activeBots) {
   const originalSendMessage = bot.sendMessage.bind(bot);
-  bot.sendMessage = (chatId, text, options = {}) =>
-    originalSendMessage(chatId, convertTextTo3D(text), {
-      ...options,
-      parse_mode: "HTML",
-      reply_markup: map3DReplyMarkup(options.reply_markup)
-    });
+  bot.sendMessage = (chatId, text, options = {}) => originalSendMessage(chatId, convertTextTo3D(text), {...options, parse_mode: "HTML", reply_markup: map3DReplyMarkup(options.reply_markup)});
 }
-
-// Nhóm nào đã tương tác với bot sẽ nhận thông báo FREE CODE định kỳ.
-const promoChatIds = new Set();
-const FREE_CODE_PROMO_MESSAGE = `🎁 <b>NHẬN CODE FREE</b> 🎁\n\n🕵️ Tương tác đủ mốc là nhận code ngay - trị giá đến 20.000đ!\n🕵️ Đơn giản vậy thôi, còn chờ gì nữa?\n\n🛩️ <code>/help</code> - Xem chi tiết chương trình\n🛩️ <code>/checktt</code> - Kiểm tra tương tác của bạn`;
-
-setInterval(() => {
-  const sender = activeBots[0];
-  if (!sender) return;
-  for (const chatId of promoChatIds) {
-    sender.sendMessage(chatId, FREE_CODE_PROMO_MESSAGE, {
-      parse_mode: "HTML",
-      disable_web_page_preview: true
-    }).catch((error) => console.error("❌ Lỗi gửi FREE CODE:", error?.message || error));
-  }
-}, 240000);
+let botUsername = "Dragon_CheckTT_Bot";
 
 activeBots.forEach((bot, botIdx) => {
   bot.getMe().then(me => {
@@ -284,7 +250,6 @@ activeBots.forEach((bot, index) => {
     if (!text) return;
 
     const chatId = msg.chat.id;
-    if (msg.chat.type !== 'private') promoChatIds.add(String(chatId));
     const userId = msg.from?.id ? msg.from.id.toString() : null;
     const senderName = msg.from?.username || msg.from?.first_name || 'Người chơi';
 
