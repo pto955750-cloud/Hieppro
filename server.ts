@@ -404,7 +404,8 @@ export let currentCai: { value: { id: string; name: string; amount: number; pool
 export let caiTimeout: { value: NodeJS.Timeout | null } = { value: null };
 
 
-export const emojiJsonFile = "emojis.json";
+export const emojiJsonFile = path.join(process.cwd(), "emojis.json");
+export const DEFAULT_3D_EMOJI_ID = "5456140674028019486";
 
 // Khởi tạo kho emoji nếu chưa có
 if (!fs.existsSync(emojiJsonFile)) {
@@ -433,12 +434,16 @@ export function saveEmoji(id: string) {
 export function getRandom3DEmoji() {
   try {
     const emojis = readJson(emojiJsonFile, "[]");
-    if (emojis.length > 0) {
-      const id = emojis[Math.floor(Math.random() * emojis.length)];
-      return `<tg-emoji emoji-id="${id}">✨</tg-emoji>`;
-    }
-  } catch (e) {}
-  return "✨";
+    const validIds = Array.isArray(emojis)
+      ? emojis.map((id: any) => String(id).trim()).filter(Boolean)
+      : [];
+    const id = validIds.length > 0
+      ? validIds[Math.floor(Math.random() * validIds.length)]
+      : DEFAULT_3D_EMOJI_ID;
+    return `<tg-emoji emoji-id="${id}">✨</tg-emoji>`;
+  } catch (e) {
+    return `<tg-emoji emoji-id="${DEFAULT_3D_EMOJI_ID}">✨</tg-emoji>`;
+  }
 }
 
 export const state: GameState = {
@@ -4491,6 +4496,18 @@ export function registerAllBotCommands() {
 
     const text = msg.text?.trim();
     if (!text) return;
+
+    // Lệnh kiểm tra icon 3D thật trên Telegram. Chỉ admin được dùng.
+    if (/^\/test3d(?:@\w+)?$/i.test(text)) {
+      if (!isAdminUser(msg.from?.id)) return;
+      const testIcon = `<tg-emoji emoji-id="${DEFAULT_3D_EMOJI_ID}">✨</tg-emoji>`;
+      b.sendMessage(
+        msg.chat.id,
+        `${testIcon} <b>TEST ICON 3D</b>\nID: <code>${DEFAULT_3D_EMOJI_ID}</code>`,
+        { parse_mode: "HTML" }
+      ).catch((err: any) => console.error("3D emoji test failed:", err?.message || err));
+      return;
+    }
 
     // Chỉ xử lý tin nhắn trong room nếu là lệnh /sd hoặc lệnh cược hợp lệ
     const isRoom = String(msg.chat.id) === String(groupt);
